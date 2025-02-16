@@ -5,8 +5,6 @@ import 'package:zatca_flutter/service/util.dart';
 import '../model/error_model.dart';
 import '../model/info_model.dart';
 import '../service/fatoora_path_finder.dart';
-// ignore: depend_on_referenced_packages
-import 'package:path/path.dart';
 
 import '../enums.dart';
 import '../model/fatoora_cli_response.dart';
@@ -43,31 +41,28 @@ industryBusinessCategory=$industryBusinessCategory
 ''';
 
     await file.writeAsString(content);
-    debugPrint('✅ CSR config file created: $filePath');
   }
 
   /// Runs a Fatoora CLI command and returns the result
   static Future<FatooraCliResponse> _runCommand(List<String> args) async {
     try {
-      debugPrint("FATOORA PATH: $_fatooraPath");
       if (_fatooraPath != null) {
         String workingDirectory = await getStorageFolderPath();
         ProcessResult result =
             await Process.run(_fatooraPath!, args, workingDirectory: workingDirectory);
 
-        debugPrint("OUTPUT: ${result.stdout}; ERROR OUTPUT: ${result.stderr}");
         FatooraCliResponse response =
             FatooraCliResponseParser.extractResponses(result.stdout);
         debugPrint("RESPONSE STATUS: ${response.status.name.toUpperCase()}");
         if (response.status == ResponseStatus.failure) {
-          log("❌ \x1B[31m ZATCA/Fatoora Execution Failed (${response.errors?.length}):");
+          log("\x1B[31m ZATCA/Fatoora Execution Failed (${response.errors?.length}):");
           for (ErrorModel element in response.errors ?? []) {
-            log("❌ \x1B[31m ZATCA/Fatoora ${element.source}: ${element.message}");
+            log("\x1B[31m ZATCA/Fatoora ${element.source}: ${element.message}");
           }
           String? errors = response.errors?.map((d)=>"${d.source}: ${d.message}").join("\n");
           _writeLogToFile("ERRORS:\n$errors");
         } else {
-          log("✅\x1B[32m ZATCA/Fatoora (${args.first}) Execution Successful(${response.infos?.length??0}), Warning(${response.warnings?.length ?? 0}):");
+          log("\x1B[32m ZATCA/Fatoora (${args.first}) Execution Successful(${response.infos?.length??0}), Warning(${response.warnings?.length ?? 0}):");
           for (InfoModel element in response.infos ?? []) {
             log("\x1B[34mZATCA/Fatoora ${element.source}: ${element.message}");
           }
@@ -75,6 +70,7 @@ industryBusinessCategory=$industryBusinessCategory
 
         return response;
       } else {
+        _writeLogToFile("FATOORA PATH WASN'T FOUND. Set the path manually if you've already installed zatca/fatoora. Or install it and restart the application");
         throw Exception(
             "FATOORA PATH WASN'T FOUND. Set the path manually if you've already installed zatca/fatoora. Or install it and restart the application");
       }
@@ -125,7 +121,6 @@ industryBusinessCategory=$industryBusinessCategory
         newCsrFileName = fileName;
       }
     }
-    debugPrint("NEW FILES: CSR=$newCsrFileName; KEY=$newKeyFileName");
     return FatooraCliCsrResponse(
         csrOutputFileName: newCsrFileName ?? "",
         keyOutputFileName: newKeyFileName ?? "",
