@@ -101,7 +101,7 @@ class FatooraCli {
     String finalCsrFileName = outputCsrFile != null && newCsrFileName != null && await renameFile(oldName: newCsrFileName, newName: outputCsrFile) ? outputCsrFile : newCsrFileName??"";
 
     String finalKeyFileName = privateKeyFile != null && newKeyFileName != null && await renameFile(oldName: newKeyFileName, newName: privateKeyFile) ? privateKeyFile : newKeyFileName??"";
-    
+
     return FatooraCliCsrResponse(
         csrOutputFileName: finalCsrFileName,
         keyOutputFileName: finalKeyFileName,
@@ -110,12 +110,13 @@ class FatooraCli {
 
   /// Signs an invoice XML file using Fatoora CLI
   static Future<FatooraCliResponse> signInvoice({
-    required String invoiceFileName
+    required String invoiceFileName, String? outputSignedInvoiceFileName
   }) async {
     final result = await _runCommand([
       '-sign',
       '-invoice',
-      invoiceFileName
+      invoiceFileName,
+       if(outputSignedInvoiceFileName != null)'-signedInvoice', if(outputSignedInvoiceFileName != null)outputSignedInvoiceFileName
     ]);
 
     return result;
@@ -141,8 +142,8 @@ class FatooraCli {
   }
 
   /// Generate Invoice Request API
-  generateInvoiceRequestAPI(String invoiceFileName){
-    return _runCommand(['-invoice', invoiceFileName, '-invoiceRequest']);
+  generateInvoiceRequestAPI({required String invoiceFileName, String? outputJsonFileName}){
+    return _runCommand(['-invoice', invoiceFileName, '-invoiceRequest', if(outputJsonFileName != null)'-apiRequest', if(outputJsonFileName != null)outputJsonFileName]);
   }
 
   static Future<FatooraCliResponse> getHelp() async {
