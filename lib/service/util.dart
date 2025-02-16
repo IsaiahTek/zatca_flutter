@@ -1,8 +1,10 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:zatca_flutter/model/csr_config.dart';
+import 'package:zatca_flutter/model/invoice_request.dart';
 
 /// Needed for reading any user generated file content as string.
 Future<String> getFileContentAsString(String filePath) async {
@@ -12,7 +14,7 @@ Future<String> _getFileContentAsString(String filePath) async {
   String parentDir = await _getStorageFolderPath();
   String content = "";
   try {
-    File file = File("$parentDir/$filePath");
+    File file = File("$parentDir${Platform.pathSeparator}$filePath");
     content = await file.readAsString();
   } catch (e) {
     // 
@@ -27,7 +29,7 @@ Future<String> getStorageFolderPath()async{
 
 Future<String> _getStorageFolderPath()async{
   Directory appDocumentDirectory = await getApplicationDocumentsDirectory();
-  String path = "${appDocumentDirectory.path}/zatca_flutter";
+  String path = "${appDocumentDirectory.path}${Platform.pathSeparator}zatca_flutter";
   Directory dir = Directory(path);
   if (!(await dir.exists())) {
     await dir.create(recursive: true);
@@ -81,7 +83,7 @@ Future<String> _createCsrConfigFile({
 
   try {
     final String directory = await getStorageFolderPath();
-    final file = File("$directory/$filePath");
+    final file = File("$directory${Platform.pathSeparator}$filePath");
     await file.writeAsString(content);
     debugPrint('✅ CSR config file created: ${file.path}');
     return filePath;
@@ -97,7 +99,7 @@ Future<CsrConfig> loadCsrConfig({String fileName="csrConfig.csr", bool useAsAbso
 }
 Future<CsrConfig> _loadCsrConfig({String fileName="csrConfig.csr", bool useAsAbsolutePath = false}) async {
   String docPath = await getStorageFolderPath();
-  String computedPath = useAsAbsolutePath ? fileName : "$docPath/$fileName";
+  String computedPath = useAsAbsolutePath ? fileName : "$docPath${Platform.pathSeparator}$fileName";
   final file = File(computedPath);
   if (!await file.exists()) {
     throw Exception("File not found: $computedPath");
@@ -122,4 +124,38 @@ Future<CsrConfig> _loadCsrConfig({String fileName="csrConfig.csr", bool useAsAbs
   }
 
   return CsrConfig.fromMap(properties);
+}
+
+Future<InvoiceRequest> loadInvoiceRequest({required String fileName, bool useAsAbsolutePath = false})async{
+  return _loadInvoiceRequest(fileName: fileName, useAsAbsolutePath: useAsAbsolutePath);
+}
+
+Future<InvoiceRequest> _loadInvoiceRequest({required String fileName, bool useAsAbsolutePath = false})async{
+  String docPath = await getStorageFolderPath();
+  String computedPath = useAsAbsolutePath ? fileName : "$docPath${Platform.pathSeparator}$fileName";
+  final file = File(computedPath);
+  if (!await file.exists()) {
+    throw Exception("File not found: $computedPath");
+  }
+
+  String jsonString = await file.readAsString();
+
+  Map<String, dynamic> invoiceRequestJson = jsonDecode(jsonString);
+  return InvoiceRequest.fromMap(invoiceRequestJson);
+}
+
+/// Rename File if needed
+Future<bool> renameFile({required String oldName, required String newName})async{
+  return _renameFile(oldName: oldName, newName: newName);
+}
+
+Future<bool> _renameFile({required String oldName, required String newName})async{
+  try {
+    String oldPath = await getStorageFolderPath();
+    File file = File("$oldPath${Platform.pathSeparator}$oldName");
+    file.rename("$oldPath${Platform.pathSeparator}$newName");
+    return basename(file.path) == newName; 
+  } catch (e) {
+    return false;
+  }
 }

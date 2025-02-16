@@ -14,35 +14,6 @@ import 'package:flutter/material.dart';
 class FatooraCli {
   static final String? _fatooraPath = FatooraPathFinder.instance.path;
 
-  /// Generates a CSR configuration file
-  Future<void> generateCsrConfig({
-    required String filePath,
-    required String commonName,
-    required String serialNumber,
-    required String organizationIdentifier,
-    required String organizationUnitName,
-    required String organizationName,
-    required String countryName,
-    required String invoiceType,
-    required String locationAddress,
-    required String industryBusinessCategory,
-  }) async {
-    final file = File(filePath);
-    final content = '''
-commonName=$commonName
-serialNumber=$serialNumber
-organizationIdentifier=$organizationIdentifier
-organizationUnitName=$organizationUnitName
-organizationName=$organizationName
-countryName=$countryName
-invoiceType=$invoiceType
-locationAddress=$locationAddress
-industryBusinessCategory=$industryBusinessCategory
-''';
-
-    await file.writeAsString(content);
-  }
-
   /// Runs a Fatoora CLI command and returns the result
   static Future<FatooraCliResponse> _runCommand(List<String> args) async {
     try {
@@ -82,28 +53,34 @@ industryBusinessCategory=$industryBusinessCategory
 
   static _writeLogToFile(String message)async{
     String? storagePath = await getStorageFolderPath();
-      File logFile = File("$storagePath/fatoora-error-${DateTime.now()}.log");
+      File logFile = File("$storagePath${Platform.pathSeparator}fatoora-error-${DateTime.now()}.log");
       logFile.writeAsStringSync(message);
   }
 
 
   /// Generates a CSR file using Fatoora CLI
+  /// Note: Because providing file name for generated private key and csr file makes the result not accurate, we have disabled it and used a work-aroud for providing the name of the generated csr and key files accordingly in a way that is more reliable. That means you can provide what you want the generated csr and key file to be named and it will be renamed to those you provide.
   static Future<FatooraCliCsrResponse> generateCsr({
     required String csrConfigFile,
-    required String privateKeyFile,
-    required String outputCsrFile,
+    String? privateKeyFile,
+    String? outputCsrFile,
+    bool isForSimulation = false,
+    bool isForNoneProduction = false
   }) async {
     String csrFolder = await getStorageFolderPath();
     List<String> allPreviouslyExistingCsrFiles = await getAllFileNamesByExtension("csr");
     List<String> allPreviouslyExistingKeyFiles = await getAllFileNamesByExtension("key");
 
-    final result = await _runCommand([
+    List<String> args = [
       '-csr',
-      '-csrConfig', "$csrFolder/$csrConfigFile",
+      '-csrConfig', "$csrFolder${Platform.pathSeparator}$csrConfigFile",
       // '-privateKey', privateKeyFile,
       // '-generatedCsr', outputCsrFile,
       // '-pem'
-    ]);
+      if(isForSimulation)'-sim',
+      if(isForNoneProduction)'-nonprod'
+    ];
+    final result = await _runCommand(args);
 
     List<String> allNewlyExistingCsrFiles = await getAllFileNamesByExtension("csr");
     List<String> allNewlyExistingKeyFiles = await getAllFileNamesByExtension("key");
@@ -121,26 +98,24 @@ industryBusinessCategory=$industryBusinessCategory
         newCsrFileName = fileName;
       }
     }
+    String finalCsrFileName = outputCsrFile != null && newCsrFileName != null && await renameFile(oldName: newCsrFileName, newName: outputCsrFile) ? outputCsrFile : newCsrFileName??"";
+
+    String finalKeyFileName = privateKeyFile != null && newKeyFileName != null && await renameFile(oldName: newKeyFileName, newName: privateKeyFile) ? privateKeyFile : newKeyFileName??"";
+    
     return FatooraCliCsrResponse(
-        csrOutputFileName: newCsrFileName ?? "",
-        keyOutputFileName: newKeyFileName ?? "",
+        csrOutputFileName: finalCsrFileName,
+        keyOutputFileName: finalKeyFileName,
         response: result);
   }
 
   /// Signs an invoice XML file using Fatoora CLI
   static Future<FatooraCliResponse> signInvoice({
-    required String invoiceXml,
-    required String privateKeyFile,
-    required String outputSignedXml,
+    required String invoiceFileName
   }) async {
     final result = await _runCommand([
       '-sign',
       '-invoice',
-      invoiceXml,
-      '-privateKey',
-      privateKeyFile,
-      '-output',
-      outputSignedXml
+      invoiceFileName
     ]);
 
     return result;
@@ -148,11 +123,26 @@ industryBusinessCategory=$industryBusinessCategory
 
   /// Validates an invoice XML file using Fatoora CLI
   static Future<FatooraCliResponse> validateInvoice({
-    required String invoiceXml,
+    required String invoiceFileName,
   }) async {
-    final result = await _runCommand(['-validate', '-invoice', invoiceXml]);
+    final result = await _runCommand(['-validate', '-invoice', invoiceFileName]);
 
     return result;
+  }
+
+  /// Generate Invoice Hash
+  generateInvoiceHash(String invoiceFileName){
+    return _runCommand(['-generateHash', '-invoice', invoiceFileName]);
+  }
+
+  /// Generate QR Code
+  generateQRInvoiceCode(String invoiceFileName){
+    return _runCommand(['-qr', '-invoice', invoiceFileName]);
+  }
+
+  /// Generate Invoice Request API
+  generateInvoiceRequestAPI(String invoiceFileName){
+    return _runCommand(['-invoice', invoiceFileName, '-invoiceRequest']);
   }
 
   static Future<FatooraCliResponse> getHelp() async {
