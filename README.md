@@ -13,8 +13,10 @@
 ## Installation
 Add `zatca_flutter` to your `pubspec.yaml`:
 
+Run the command below
+
 ```yaml
-$ flutter pub add zatca_flutter
+flutter pub add zatca_flutter
 ```
 
 
