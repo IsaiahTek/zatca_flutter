@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'dart:io';
+import 'package:zatca_flutter/model/invoice_request.dart';
 import 'package:zatca_flutter/service/util.dart';
 
 import '../model/error_model.dart';
@@ -100,6 +101,7 @@ class FatooraCli {
     }
     String finalCsrFileName = outputCsrFile != null && newCsrFileName != null && await renameFile(oldName: newCsrFileName, newName: outputCsrFile) ? outputCsrFile : newCsrFileName??"";
 
+
     String finalKeyFileName = privateKeyFile != null && newKeyFileName != null && await renameFile(oldName: newKeyFileName, newName: privateKeyFile) ? privateKeyFile : newKeyFileName??"";
 
     return FatooraCliCsrResponse(
@@ -132,18 +134,20 @@ class FatooraCli {
   }
 
   /// Generate Invoice Hash
-  generateInvoiceHash(String invoiceFileName){
+  static generateInvoiceHash(String invoiceFileName){
     return _runCommand(['-generateHash', '-invoice', invoiceFileName]);
   }
 
   /// Generate QR Code
-  generateQRInvoiceCode(String invoiceFileName){
+  static Future<void> generateQRInvoiceCode(String invoiceFileName){
     return _runCommand(['-qr', '-invoice', invoiceFileName]);
   }
 
   /// Generate Invoice Request API
-  generateInvoiceRequestAPI({required String invoiceFileName, String? outputJsonFileName}){
-    return _runCommand(['-invoice', invoiceFileName, '-invoiceRequest', if(outputJsonFileName != null)'-apiRequest', if(outputJsonFileName != null)outputJsonFileName]);
+  static Future<InvoiceRequest?> generateInvoiceRequestAPI({required String invoiceFileName, String? outputJsonFileName})async{
+    FatooraCliResponse response = await _runCommand(['-invoice', invoiceFileName, '-invoiceRequest', if(outputJsonFileName != null)'-apiRequest', if(outputJsonFileName != null)outputJsonFileName]);
+    // response.infos.first.
+    // return;
   }
 
   static Future<FatooraCliResponse> getHelp() async {

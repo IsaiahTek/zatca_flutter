@@ -35,12 +35,12 @@ abstract class RequestBase {
 
   /// CSR value should be base64 encoded and not a PEM value.
   Future<ComplianceCSIDResponse> requestComplianceCSID(
-      {required CSRRequest request}) async {
+      {required CCSIDRequestProp request}) async {
     return _requestComplianceCSID(request: request);
   }
 
   Future<ComplianceCSIDResponse> _requestComplianceCSID(
-      {required CSRRequest request}) async {
+      {required CCSIDRequestProp request}) async {
     final Map<String, String> headers = {
       'Accept-Version': 'V2', // Ensure correct API version
       'Content-Type': 'application/json',

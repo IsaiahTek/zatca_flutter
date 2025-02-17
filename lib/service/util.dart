@@ -5,6 +5,7 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:zatca_flutter/model/csr_config.dart';
 import 'package:zatca_flutter/model/invoice_request.dart';
+import 'package:zatca_flutter/service/fatoora_path_finder.dart';
 
 /// Needed for reading any user generated file content as string.
 Future<String> getFileContentAsString(String filePath) async {
@@ -60,15 +61,14 @@ Future<List<String>> _getAllFileNamesByExtension(String extension) async {
 
 /// Generates a CSR configuration file
 Future<String> createCsrConfigFile({
-  required String filePath,
   required CsrConfig csrConfig,
 }) async {
-  return _createCsrConfigFile(filePath: filePath, csrConfig: csrConfig);
+  return _createCsrConfigFile(csrConfig: csrConfig);
 }
 Future<String> _createCsrConfigFile({
-  required String filePath,
   required CsrConfig csrConfig,
 }) async {
+  String fileName = FatooraPathFinder.instance.csrFileName;
   final content = '''
       csr.common.name=${csrConfig.commonName}
       csr.serial.number=${csrConfig.serialNumber}
@@ -83,10 +83,10 @@ Future<String> _createCsrConfigFile({
 
   try {
     final String directory = await getStorageFolderPath();
-    final file = File("$directory${Platform.pathSeparator}$filePath");
+    final file = File("$directory${Platform.pathSeparator}$fileName");
     await file.writeAsString(content);
     debugPrint('✅ CSR config file created: ${file.path}');
-    return filePath;
+    return fileName;
   } catch (e) {
     throw Exception("Error Creating the config .properties file: $e");
   }
@@ -94,10 +94,11 @@ Future<String> _createCsrConfigFile({
 
 /// loadCsr file as Future of .
 /// If you make useFullPath true then the package assumes you're providing absolute path and won't prepend any directory.
-Future<CsrConfig> loadCsrConfig({String fileName="csrConfig.csr", bool useAsAbsolutePath = false}) async {
-  return _loadCsrConfig(fileName: fileName, useAsAbsolutePath: useAsAbsolutePath);
+Future<CsrConfig> loadCsrConfig({bool useAsAbsolutePath = false}) async {
+  return _loadCsrConfig(useAsAbsolutePath: useAsAbsolutePath);
 }
-Future<CsrConfig> _loadCsrConfig({String fileName="csrConfig.csr", bool useAsAbsolutePath = false}) async {
+Future<CsrConfig> _loadCsrConfig({bool useAsAbsolutePath = false}) async {
+  String fileName = FatooraPathFinder.instance.csrFileName;
   String docPath = await getStorageFolderPath();
   String computedPath = useAsAbsolutePath ? fileName : "$docPath${Platform.pathSeparator}$fileName";
   final file = File(computedPath);
@@ -153,9 +154,10 @@ Future<bool> _renameFile({required String oldName, required String newName})asyn
   try {
     String oldPath = await getStorageFolderPath();
     File file = File("$oldPath${Platform.pathSeparator}$oldName");
-    file.rename("$oldPath${Platform.pathSeparator}$newName");
+    file = await file.rename("$oldPath${Platform.pathSeparator}$newName");
     return basename(file.path) == newName; 
   } catch (e) {
+    debugPrint("ERROR RENAMING FILE: $e");
     return false;
   }
 }

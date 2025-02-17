@@ -1,10 +1,10 @@
 import 'dart:io';
 
-import 'package:flutter/material.dart';
-
 class FatooraPathFinder {
 
   static FatooraPathFinder? _instance;
+
+  String csrFileName = "csrFileName";
 
   String? _path;
 
@@ -33,15 +33,11 @@ class FatooraPathFinder {
   }
 
   Future<void> _init()async{
-    debugPrint("SEARCH COMMAND: $_searchCommand");
     if(path == null){
-      debugPrint("...FINDING PATH: Current Value ($_path)");
       Process.run(_searchCommand, ["fatoora"]).then((data){
         _path = data.stdout.toString().trim();
-        debugPrint("FOUND PATH: $_path");
       });
     }else{
-      debugPrint("PATH IS NOT NULL $path");
     }
   }
 

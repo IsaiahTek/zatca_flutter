@@ -9,7 +9,6 @@ import '../model/warning_model.dart';
 class FatooraCliResponseParser {
   /// Extracts all error, warning, and info messages from Fatoora CLI output
   static FatooraCliResponse extractResponses(String output) {
-    debugPrint("CLI OUTPUT: $output");
     List<ErrorModel> errors = [];
     List<WarningModel> warnings = [];
     List<InfoModel> infos = [];

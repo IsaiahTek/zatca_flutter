@@ -1,8 +1,8 @@
-class CSRRequest{
+class CCSIDRequestProp{
   final String csr;
   final String otp;
 
-  const CSRRequest({
+  const CCSIDRequestProp({
     required this.csr,
     required this.otp
   });
