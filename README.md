@@ -16,8 +16,10 @@ Add `zatca_flutter` to your `pubspec.yaml`:
 ```yaml
 dependencies:
   zatca_flutter: ^1.0.0
+```
 
 
+## Contributing
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
