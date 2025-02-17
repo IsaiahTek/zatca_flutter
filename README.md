@@ -14,8 +14,7 @@
 Add `zatca_flutter` to your `pubspec.yaml`:
 
 ```yaml
-dependencies:
-  zatca_flutter: ^1.0.0
+$ flutter pub add zatca_flutter
 ```
 
 
