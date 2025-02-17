@@ -1,9 +1,11 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:zatca_flutter/model/api/compliance_invoice_response.dart';
 import 'package:zatca_flutter/model/api/compliance_response.dart';
-import 'package:zatca_flutter/model/csr_config.dart';
 import 'package:http/http.dart' as http;
+import 'package:zatca_flutter/model/csr_request.dart';
+import 'package:zatca_flutter/model/invoice_request.dart';
 
 enum Mode { simulation, developerPortal, production }
 
@@ -33,21 +35,21 @@ abstract class RequestBase {
 
   /// CSR value should be base64 encoded and not a PEM value.
   Future<ComplianceCSIDResponse> requestComplianceCSID(
-      {required String csr, required String otp}) async {
-    return _requestComplianceCSID(csr: csr, otp: otp);
+      {required CSRRequest request}) async {
+    return _requestComplianceCSID(request: request);
   }
 
   Future<ComplianceCSIDResponse> _requestComplianceCSID(
-      {required String csr, required String otp}) async {
+      {required CSRRequest request}) async {
     final Map<String, String> headers = {
       'Accept-Version': 'V2', // Ensure correct API version
       'Content-Type': 'application/json',
       'Accept': 'application/json',
-      'OTP': otp, // OTP is required in headers
+      'OTP': request.otp, // OTP is required in headers
     };
 
     final Map<String, dynamic> body = {
-      "csr": csr // Only CSR is sent in the request body
+      "csr": request.csr // Only CSR is sent in the request body
     };
 
     try {
@@ -73,23 +75,17 @@ abstract class RequestBase {
   Future<ComplianceInvoiceCheckResponse?> requestComplianceCheck(
       {required String username,
       required String password,
-      required String invoiceHash,
-      required String uuid,
-      required String invoice}) async {
+      required InvoiceRequest prop}) async {
     return _requestComplianceCheck(
         username: username,
         password: password,
-        invoiceHash: invoiceHash,
-        uuid: uuid,
-        invoice: invoice);
+        prop: prop);
   }
 
   Future<ComplianceInvoiceCheckResponse?> _requestComplianceCheck(
       {required String username,
       required String password,
-      required String invoiceHash,
-      required String uuid,
-      required String invoice}) async {
+      required InvoiceRequest prop}) async {
     final url = Uri.parse(_complianceCheckUrl);
 
     // Encode username:password to Base64 for Basic Authentication
@@ -104,9 +100,9 @@ abstract class RequestBase {
     };
 
     final body = jsonEncode({
-      'invoiceHash': invoiceHash,
-      'uuid': uuid,
-      'invoice': invoice,
+      'invoiceHash': prop.invoiceHash,
+      'uuid': prop.uuid,
+      'invoice': prop.invoice,
     });
 
     try {
@@ -117,34 +113,52 @@ abstract class RequestBase {
       return ComplianceInvoiceCheckResponse.fromJson(
           jsonResponse, response.statusCode);
     } catch (e) {
-      print('Error submitting invoice: $e');
+      log('Error submitting invoice: $e');
       return null;
     }
   }
 
-  Future<void> requestProductionCSIDOnboarding() async {}
-  Future<void> requestProductionCSIDRenewal() async {}
-  Future<void> requestReporting() async {}
-  Future<void> requestClearance() async {}
+  Future<void> requestProductionCSIDOnboarding() async {
+    final url = Uri.parse(_productionCSIDUrl);
+    http.post(url);
+  }
+  Future<void> requestProductionCSIDRenewal() async {
+    final url = Uri.parse(_productionCSIDRenewalUrl);
+    http.patch(url);
+  }
+  Future<void> requestReporting() async {
+    final url = Uri.parse(_reportingUrl);
+    http.post(url);
+  }
+  Future<void> requestClearance() async {
+    final url = Uri.parse(_clearanceUrl);
+    http.post(url);
+  }
 }
 
-class SimulationRequest extends RequestBase {
-  SimulationRequest({required super.mode});
+abstract class SimulationRequestBase extends RequestBase {
+  SimulationRequestBase({super.mode = Mode.simulation});
 }
 
-class DeveloperPortalRequest extends RequestBase {
-  DeveloperPortalRequest({required super.mode});
+class SimulationRequest extends SimulationRequestBase{}
+
+class DeveloperPortalRequestBase extends RequestBase {
+  DeveloperPortalRequestBase({super.mode = Mode.developerPortal});
 }
 
-class ProductionRequest extends RequestBase {
-  ProductionRequest({required super.mode});
+class DeveloperPortalRequest extends DeveloperPortalRequestBase{}
+
+class ProductionRequestBase extends RequestBase {
+  ProductionRequestBase({super.mode = Mode.production});
 }
+
+class ProductionRequest extends ProductionRequestBase{}
 
 class RequestTypes {
-  SimulationRequest simulation = SimulationRequest(mode: Mode.simulation);
+  SimulationRequest simulation = SimulationRequest();
 
   DeveloperPortalRequest developerPortal =
-      DeveloperPortalRequest(mode: Mode.developerPortal);
+      DeveloperPortalRequest();
 
-  ProductionRequest production = ProductionRequest(mode: Mode.production);
+  ProductionRequest production = ProductionRequest();
 }
