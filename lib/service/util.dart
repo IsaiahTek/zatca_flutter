@@ -1,11 +1,17 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:zatca_flutter/model/csr_config.dart';
 import 'package:zatca_flutter/model/invoice_request.dart';
-import 'package:zatca_flutter/service/fatoora_path_finder.dart';
+import 'package:zatca_flutter/service/fatoora_service_finder.dart';
+
+String _getBaseName(String fullPath){
+  String separator = Platform.pathSeparator;
+  List<String> paths = fullPath.split(separator);
+  return paths.isNotEmpty?paths.last:fullPath;
+}
 
 /// Needed for reading any user generated file content as string.
 Future<String> getFileContentAsString(String filePath) async {
@@ -54,7 +60,7 @@ Future<List<String>> _getAllFileNamesByExtension(String extension) async {
     final files = await directory.list().toList();
     final keyFiles = files
         .where((file) => file.path.endsWith('.$extension'))
-        .map((file) => basename(file.path))
+        .map((file) => _getBaseName(file.path))
         .toList();
     return keyFiles;
   }
@@ -68,7 +74,7 @@ Future<String> createCsrConfigFile({
 Future<String> _createCsrConfigFile({
   required CsrConfig csrConfig,
 }) async {
-  String fileName = FatooraPathFinder.instance.csrFileName;
+  String fileName = FatooraServiceFinder.instance.csrFileName;
   final content = '''
       csr.common.name=${csrConfig.commonName}
       csr.serial.number=${csrConfig.serialNumber}
@@ -82,28 +88,29 @@ Future<String> _createCsrConfigFile({
       ''';
 
   try {
-    final String directory = await getStorageFolderPath();
-    final file = File("$directory${Platform.pathSeparator}$fileName");
-    await file.writeAsString(content);
-    debugPrint('✅ CSR config file created: ${file.path}');
+    String filePath = await saveToFile(content, fileName);
+    debugPrint('✅ CSR config file created: $filePath');
     return fileName;
   } catch (e) {
+    logError("Error Creating the config .properties file: $e");
     throw Exception("Error Creating the config .properties file: $e");
   }
 }
 
 /// loadCsr file as Future of .
 /// If you make useFullPath true then the package assumes you're providing absolute path and won't prepend any directory.
-Future<CsrConfig> loadCsrConfig({bool useAsAbsolutePath = false}) async {
-  return _loadCsrConfig(useAsAbsolutePath: useAsAbsolutePath);
+Future<CsrConfig?> loadCsrConfig() async {
+  return _loadCsrConfig();
 }
-Future<CsrConfig> _loadCsrConfig({bool useAsAbsolutePath = false}) async {
-  String fileName = FatooraPathFinder.instance.csrFileName;
+
+Future<CsrConfig?> _loadCsrConfig() async {
+  String fileName = FatooraServiceFinder.instance.csrFileName;
   String docPath = await getStorageFolderPath();
-  String computedPath = useAsAbsolutePath ? fileName : "$docPath${Platform.pathSeparator}$fileName";
+  String computedPath = "$docPath${Platform.pathSeparator}$fileName";
   final file = File(computedPath);
   if (!await file.exists()) {
-    throw Exception("File not found: $computedPath");
+    logError("File not found: $computedPath");
+    return null;
   }
 
   final lines = await file.readAsLines();
@@ -127,16 +134,17 @@ Future<CsrConfig> _loadCsrConfig({bool useAsAbsolutePath = false}) async {
   return CsrConfig.fromMap(properties);
 }
 
-Future<InvoiceRequest> loadInvoiceRequest({required String fileName, bool useAsAbsolutePath = false})async{
+Future<InvoiceRequest?> loadInvoiceRequest({required String fileName, bool useAsAbsolutePath = false})async{
   return _loadInvoiceRequest(fileName: fileName, useAsAbsolutePath: useAsAbsolutePath);
 }
 
-Future<InvoiceRequest> _loadInvoiceRequest({required String fileName, bool useAsAbsolutePath = false})async{
+Future<InvoiceRequest?> _loadInvoiceRequest({required String fileName, bool useAsAbsolutePath = false})async{
   String docPath = await getStorageFolderPath();
   String computedPath = useAsAbsolutePath ? fileName : "$docPath${Platform.pathSeparator}$fileName";
   final file = File(computedPath);
   if (!await file.exists()) {
-    throw Exception("File not found: $computedPath");
+    logError("File not found: $computedPath");
+    return null;
   }
 
   String jsonString = await file.readAsString();
@@ -155,9 +163,21 @@ Future<bool> _renameFile({required String oldName, required String newName})asyn
     String oldPath = await getStorageFolderPath();
     File file = File("$oldPath${Platform.pathSeparator}$oldName");
     file = await file.rename("$oldPath${Platform.pathSeparator}$newName");
-    return basename(file.path) == newName; 
+    return _getBaseName(file.path) == newName; 
   } catch (e) {
-    debugPrint("ERROR RENAMING FILE: $e");
+    logError("ERROR RENAMING FILE: $e");
     return false;
   }
+}
+
+void logError(String message){
+  log("'$message'");
+}
+
+/// Create a file and write the string as the content to the file.
+Future<String> saveToFile(String content, String fileName) async {
+  final String directory = await getStorageFolderPath();
+  final file = File("$directory${Platform.pathSeparator}$fileName");
+  await file.writeAsString(content);
+  return file.path;
 }

@@ -1,11 +1,20 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:asn1lib/asn1lib.dart';
 
+import 'package:zatca_flutter/enums.dart';
 import 'package:zatca_flutter/model/api/compliance_invoice_response.dart';
-import 'package:zatca_flutter/model/api/compliance_response.dart';
+import 'package:zatca_flutter/model/api/compliance_csid_response.dart';
 import 'package:http/http.dart' as http;
+import 'package:zatca_flutter/model/api/production_csid_response.dart';
+import 'package:zatca_flutter/model/cert_and_key.dart';
 import 'package:zatca_flutter/model/csr_request.dart';
 import 'package:zatca_flutter/model/invoice_request.dart';
+import 'package:zatca_flutter/model/pcsid_request_prop.dart';
+import 'package:zatca_flutter/service/fatoora_service_finder.dart';
+import 'package:zatca_flutter/service/util.dart';
 
 enum Mode { simulation, developerPortal, production }
 
@@ -64,7 +73,7 @@ abstract class RequestBase {
     } catch (e) {
       return ComplianceCSIDResponse(
         statusCode: 500,
-        status: CCSIDResponseStatus.serverError,
+        status: CSIDResponseStatus.serverError,
         failureData: ComplianceFailureData(
             code: "Network-Error", message: "Failed to connect: $e"),
       );
@@ -77,9 +86,7 @@ abstract class RequestBase {
       required String password,
       required InvoiceRequest prop}) async {
     return _requestComplianceCheck(
-        username: username,
-        password: password,
-        prop: prop);
+        username: username, password: password, prop: prop);
   }
 
   Future<ComplianceInvoiceCheckResponse?> _requestComplianceCheck(
@@ -95,7 +102,7 @@ abstract class RequestBase {
     final headers = {
       'Authorization': basicAuth,
       'Accept-Language': 'en',
-      'Accept-Version': '1.0',
+      'Accept-Version': 'V2',
       'Content-Type': 'application/json',
     };
 
@@ -106,7 +113,8 @@ abstract class RequestBase {
     });
 
     try {
-      final response = await http.post(url, headers: headers, body: body);
+      final response =
+          await http.post(url, headers: headers, body: jsonEncode(body));
 
       final jsonResponse = jsonDecode(response.body);
 
@@ -118,18 +126,105 @@ abstract class RequestBase {
     }
   }
 
-  Future<void> requestProductionCSIDOnboarding() async {
-    final url = Uri.parse(_productionCSIDUrl);
-    http.post(url);
+  Future<ProductionCSIDResponse> requestProductionCSIDOnboarding(
+      {required PCSIDRequestProp prop}) async {
+    String basicAuth =
+        'Basic ${base64Encode(utf8.encode('${prop.binarySecurityToken}:${prop.secret}'))}';
+
+    final headers = {
+      'Authorization': basicAuth,
+      'Accept-Language': 'en',
+      'Accept-Version': 'V2',
+      'Content-Type': 'application/json',
+    };
+
+    final Map<String, dynamic> body = {
+      "compliance_request_id":
+          prop.requestId // Only CSR is sent in the request body
+    };
+
+    try {
+      final url = Uri.parse(_productionCSIDUrl);
+      final response = await http.post(
+        url,
+        headers: headers,
+        body: jsonEncode(body),
+      );
+
+      return ProductionCSIDResponse.fromJson(
+          response.statusCode, jsonDecode(response.body));
+    } catch (e) {
+      logError("Error requesting Production CSID $e");
+      return ProductionCSIDResponse(
+        statusCode: 500,
+        status: CSIDResponseStatus.serverError,
+        failureData: ProductionCSIDFailureData(
+            code: "Network-Error", message: "Failed to connect: $e"),
+      );
+    }
   }
+
+  Future<void> convertTokenAndKeyToPemAndSaveToSDKForSigning(
+      {required CertAndKey certAndKey}) async {
+    try {
+      String cert = certAndKey.cert;
+      String key = certAndKey.key;
+      String certInPemFormat = utf8.decode(base64.decode(cert));
+
+      String pkcs8Base64 = key;
+
+      // Decode Base64 input to DER bytes
+      Uint8List pkcs8DerBytes = base64Decode(pkcs8Base64);
+      ASN1Parser asn1Parser = ASN1Parser(pkcs8DerBytes);
+
+      // Parse PKCS#8 top-level sequence
+      ASN1Sequence pkcs8Sequence = asn1Parser.nextObject() as ASN1Sequence;
+      if (pkcs8Sequence.elements.length < 3) {
+        throw Exception("Invalid PKCS#8 structure.");
+      }
+
+      // Extract the private key from the third element (ASN1OctetString)
+      ASN1OctetString privateKeyOctet =
+          pkcs8Sequence.elements[2] as ASN1OctetString;
+      Uint8List privateKeyBytes = privateKeyOctet.valueBytes();
+
+      // logError("RAW TOKEN: $cert");
+      // logError("DECODED CERT: $certInPemFormat");
+      String keyInPerFormat = base64Encode(privateKeyBytes);
+
+      saveToAbsolutePath(String content, String path) {
+        File file = File(path);
+        file.writeAsString(content);
+      }
+
+      Future<void> updateCertInSDK() async {
+        Directory? certDir = FatooraServiceFinder.instance.defaultCertDirectory;
+        bool? canUpdate = await certDir?.exists();
+        if (canUpdate != null && canUpdate && certDir != null) {
+          saveToAbsolutePath(keyInPerFormat,
+              "${certDir.path}${Platform.pathSeparator}ec-secp256k1-priv-key.pem");
+          saveToAbsolutePath(certInPemFormat,
+              "${certDir.path}${Platform.pathSeparator}cert.pem");
+        }
+      }
+
+      updateCertInSDK();
+    } catch (e) {
+      logError(
+          "Couldn't convert cert/key to pem without header/footer and line-breaks $e");
+    }
+  }
+
   Future<void> requestProductionCSIDRenewal() async {
     final url = Uri.parse(_productionCSIDRenewalUrl);
     http.patch(url);
   }
+
   Future<void> requestReporting() async {
     final url = Uri.parse(_reportingUrl);
     http.post(url);
   }
+
   Future<void> requestClearance() async {
     final url = Uri.parse(_clearanceUrl);
     http.post(url);
@@ -140,25 +235,24 @@ abstract class SimulationRequestBase extends RequestBase {
   SimulationRequestBase({super.mode = Mode.simulation});
 }
 
-class SimulationRequest extends SimulationRequestBase{}
+class SimulationRequest extends SimulationRequestBase {}
 
 class DeveloperPortalRequestBase extends RequestBase {
   DeveloperPortalRequestBase({super.mode = Mode.developerPortal});
 }
 
-class DeveloperPortalRequest extends DeveloperPortalRequestBase{}
+class DeveloperPortalRequest extends DeveloperPortalRequestBase {}
 
 class ProductionRequestBase extends RequestBase {
   ProductionRequestBase({super.mode = Mode.production});
 }
 
-class ProductionRequest extends ProductionRequestBase{}
+class ProductionRequest extends ProductionRequestBase {}
 
 class RequestTypes {
   SimulationRequest simulation = SimulationRequest();
 
-  DeveloperPortalRequest developerPortal =
-      DeveloperPortalRequest();
+  DeveloperPortalRequest developerPortal = DeveloperPortalRequest();
 
   ProductionRequest production = ProductionRequest();
 }

@@ -1,12 +1,11 @@
 import 'dart:convert';
 
-/// Enum representing different response statuses
-enum CCSIDResponseStatus { success, clientError, serverError, unknown }
+import 'package:zatca_flutter/enums.dart';
 
 /// Main response model for Compliance CSID API
 class ComplianceCSIDResponse {
   final int statusCode;
-  final CCSIDResponseStatus status;
+  final CSIDResponseStatus status;
   final ComplianceSuccessData? successData;
   final ComplianceErrorData? errorData;
   final ComplianceFailureData? failureData;
@@ -21,28 +20,28 @@ class ComplianceCSIDResponse {
 
   /// Parses JSON into the appropriate response type (Success, Error, or Failure).
   factory ComplianceCSIDResponse.fromJson(int statusCode, Map<String, dynamic> json) {
-    CCSIDResponseStatus status = _getStatus(statusCode);
+    CSIDResponseStatus status = _getStatus(statusCode);
 
-    if (status == CCSIDResponseStatus.success && json.containsKey('requestID')) {
+    if (status == CSIDResponseStatus.success && json.containsKey('requestID')) {
       return ComplianceCSIDResponse(
         statusCode: statusCode,
         status: status,
         successData: ComplianceSuccessData.fromJson(json),
       );
-    } else if (status == CCSIDResponseStatus.clientError && json.containsKey('errors')) {
+    } else if (status == CSIDResponseStatus.clientError && json.containsKey('errors')) {
       return ComplianceCSIDResponse(
         statusCode: statusCode,
         status: status,
         errorData: ComplianceErrorData.fromJson(json),
       );
-    } else if (status == CCSIDResponseStatus.serverError && json.containsKey('code') && json.containsKey('message')) {
+    } else if (status == CSIDResponseStatus.serverError && json.containsKey('code') && json.containsKey('message')) {
       return ComplianceCSIDResponse(
         statusCode: statusCode,
         status: status,
         failureData: ComplianceFailureData.fromJson(json),
       );
     } else {
-      return ComplianceCSIDResponse(statusCode: statusCode, status: CCSIDResponseStatus.unknown);
+      return ComplianceCSIDResponse(statusCode: statusCode, status: CSIDResponseStatus.unknown);
     }
   }
 
@@ -56,11 +55,11 @@ class ComplianceCSIDResponse {
   }
 
   /// Determines the response status based on the status code.
-  static CCSIDResponseStatus _getStatus(int statusCode) {
-    if (statusCode == 200) return CCSIDResponseStatus.success;
-    if (statusCode == 400) return CCSIDResponseStatus.clientError;
-    if (statusCode == 406 || statusCode == 500) return CCSIDResponseStatus.serverError;
-    return CCSIDResponseStatus.unknown;
+  static CSIDResponseStatus _getStatus(int statusCode) {
+    if (statusCode == 200) return CSIDResponseStatus.success;
+    if (statusCode == 400) return CSIDResponseStatus.clientError;
+    if (statusCode == 406 || statusCode == 500) return CSIDResponseStatus.serverError;
+    return CSIDResponseStatus.unknown;
   }
 }
 

@@ -3,7 +3,7 @@ import 'package:xml/xml.dart' as xml;
 
 import '../model/standard_invoice.dart';
 
-class InvoiceToXmlConverter {
+class StandardInvoiceToXmlConverter {
   static String generateXml(StandardInvoice invoice) {
     final builder = xml.XmlBuilder();
 

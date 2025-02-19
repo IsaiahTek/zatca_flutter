@@ -20,4 +20,9 @@ class InvoiceRequest {
       "uuid": uuid,
     };
   }
+
+  @override
+  String toString() {
+    return 'InvoiceRequest => "invoiceHash": $invoiceHash, "invoice": $invoice, "uuid": $uuid';
+  }
 }

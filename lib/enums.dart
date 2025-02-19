@@ -13,3 +13,7 @@ enum ResponseStatus{
   failure,
   success
 }
+
+
+/// Enum representing different response statuses
+enum CSIDResponseStatus { success, clientError, serverError, unknown }

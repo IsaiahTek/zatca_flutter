@@ -1,14 +1,13 @@
-import 'package:flutter/material.dart';
 
 import '../enums.dart';
 import '../model/error_model.dart';
-import '../model/fatoora_cli_response.dart';
+import '../model/fatoora_service_response.dart';
 import '../model/info_model.dart';
 import '../model/warning_model.dart';
 
-class FatooraCliResponseParser {
+class FatooraServiceResponseParser {
   /// Extracts all error, warning, and info messages from Fatoora CLI output
-  static FatooraCliResponse extractResponses(String output) {
+  static FatooraServiceResponse extractResponses(String output) {
     List<ErrorModel> errors = [];
     List<WarningModel> warnings = [];
     List<InfoModel> infos = [];
@@ -57,7 +56,7 @@ class FatooraCliResponseParser {
         ? ResponseStatus.success
         : ResponseStatus.failure;
 
-    return FatooraCliResponse(
+    return FatooraServiceResponse(
       status: status,
       errors: errors.isEmpty ? null : errors,
       warnings: warnings.isEmpty ? null : warnings,

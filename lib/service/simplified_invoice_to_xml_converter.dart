@@ -1,5 +1,5 @@
-import 'dart:io';
 import 'package:xml/xml.dart' as xml;
+import 'package:zatca_flutter/service/util.dart';
 
 import '../model/simplified_invoice.dart';
 
@@ -59,7 +59,6 @@ class SimplifiedInvoiceToXmlConverter {
   }
 
   static Future<void> saveXmlToFile(String xmlString, String filePath) async {
-    File file = File(filePath);
-    await file.writeAsString(xmlString);
+    saveToFile(xmlString, filePath);
   }
 }
