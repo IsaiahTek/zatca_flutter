@@ -1,49 +1,111 @@
 import 'dart:convert';
 
-import '../model/invoice_total.dart';
+import 'package:xml/xml.dart';
+import 'package:zatca_flutter/model/invoice_line.dart';
+import 'package:zatca_flutter/model/legal_monetary_total.dart';
+import 'package:zatca_flutter/model/tax_details.dart';
 
-import 'invoice_item.dart';
-import 'seller.dart';
+import 'party.dart';
 
 class SimplifiedInvoice {
-  final String invoiceNumber;
-  final DateTime issueDateTime;
-  final Seller seller;
-  final List<InvoiceItem> items;
-  final InvoiceTotal invoiceTotal;
-  final String qrCode;
-  final String uuid;
-  final String electronicSignature;
-  final String hash;
-  final String cryptographicStamp;
+  String id;
+  int icv;
+  String uuid;
+  DateTime issueDate;
+  DateTime issueTime;
+  String typeCode;
+  String currency;
+  SupplierParty supplier;
+  Party customer;
+  List<InvoiceLine> lines;
+  TaxDetails tax;
+  LegalMonetaryTotal monetaryTotal;
+  String pih;
 
   SimplifiedInvoice({
-    required this.invoiceNumber,
-    required this.issueDateTime,
-    required this.seller,
-    required this.items,
-    required this.invoiceTotal,
-    required this.qrCode,
+    required this.icv,
+    required this.id,
     required this.uuid,
-    required this.electronicSignature,
-    required this.hash,
-    required this.cryptographicStamp,
+    required this.issueDate,
+    required this.issueTime,
+    required this.typeCode,
+    required this.currency,
+    required this.supplier,
+    required this.customer,
+    required this.lines,
+    required this.tax,
+    required this.monetaryTotal,
+    // this.isFirstInvoice = false,
+    required this.pih,
   });
 
   Map<String, dynamic> toJson() {
     return {
-      "invoiceNumber": invoiceNumber,
-      "issueDateTime": issueDateTime.toIso8601String(),
-      "seller": seller.toJson(),
-      "items": items.map((item) => item.toJson()).toList(),
-      "invoiceTotal": invoiceTotal.toJson(),
-      "qrCode": qrCode,
+      "id": id,
       "uuid": uuid,
-      "electronicSignature": electronicSignature,
-      "hash": hash,
-      "cryptographicStamp": cryptographicStamp,
+      "issueDate": issueDate.toIso8601String().split('T')[0],
+      "issuedTime": issueTime.toIso8601String().split('T')[1].split('.')[0],
+      "typeCode": typeCode,
+      "currency": currency,
+      "supplier": supplier,
+      "customer": customer,
+      "lines": lines.map((item) => item.toJson()).toList(),
+      "tax": tax.toJson(),
     };
   }
 
   String toJsonString() => jsonEncode(toJson());
+
+  String toXml(XmlBuilder builder) {
+    builder.element('Invoice', namespaces: {
+      "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2": "",
+      "urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2":
+          "cac",
+      "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2":
+          "cbc",
+      "urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2":
+          "ext"
+    }, nest: () {
+      builder.element('cbc:ProfileID', nest: 'reporting:1.0');
+      builder.element('cbc:ID', nest: id);
+      builder.element('cbc:UUID', nest: uuid);
+      builder.element('cbc:IssueDate',
+          nest: issueDate.toIso8601String().split('T')[0]);
+      builder.element('cbc:IssueTime',
+          nest: issueTime.toIso8601String().split('T')[1].split('.')[0]);
+      builder.element('cbc:InvoiceTypeCode',
+          nest: '388', attributes: {'name': '0200000'});
+      builder.element('cbc:DocumentCurrencyCode', nest: currency);
+      // builder.element('cbc:Note', nest: 'en');
+      builder.element('cbc:TaxCurrencyCode', nest: currency);
+
+      builder.element('cac:AdditionalDocumentReference', nest: () {
+        builder.element('cbc:ID', nest: 'ICV');
+        builder.element('cbc:UUID', nest: icv);
+      });
+
+      builder.element('cac:AdditionalDocumentReference', nest: () {
+        builder.element('cbc:ID', nest: 'PIH');
+        builder.element('cac:Attachment', nest: () {
+          builder.element('cbc:EmbeddedDocumentBinaryObject',
+              attributes: {'mimeCode': 'text/plain'}, nest: pih);
+        });
+      });
+
+      builder.element('cac:AccountingSupplierParty',
+          nest: () => supplier.toXml(builder));
+      builder.element('cac:AccountingCustomerParty',
+          nest: () => customer.toXml(builder));
+
+      builder.element('cac:TaxTotal', nest: () => tax.toXml(builder));
+      builder.element('cac:LegalMonetaryTotal',
+          nest: () => monetaryTotal.toXml(builder));
+
+      for (int id = 0; id < lines.length; id++) {
+        InvoiceLine line = lines[id];
+        builder.element('cac:InvoiceLine', nest: () => line.toXml(builder, id));
+      }
+    });
+    return builder.buildDocument().toXmlString(pretty: true);
+  }
 }

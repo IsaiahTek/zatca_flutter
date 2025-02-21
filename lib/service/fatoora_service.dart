@@ -66,7 +66,8 @@ class FatooraService {
     logFile.writeAsStringSync(message);
   }
 
-  static String? _getNewFileName({required List<String> before, required List<String> after}){
+  static String? _getNewFileName(
+      {required List<String> before, required List<String> after}) {
     for (var fileName in after) {
       if (!before.contains(fileName)) {
         return fileName;
@@ -105,6 +106,22 @@ class FatooraService {
       bool getPem = false,
       bool isForSimulation = false,
       bool isForNoneProduction = false}) async {
+    return _generateCsr(
+        csrConfigFile: csrConfigFile,
+        privateKeyFile: privateKeyFile,
+        outputCsrFile: outputCsrFile,
+        getPem: getPem,
+        isForSimulation: isForSimulation,
+        isForNoneProduction: isForNoneProduction);
+  }
+
+  static Future<FatooraServiceCsrResponse> _generateCsr(
+      {required String csrConfigFile,
+      String? privateKeyFile,
+      String? outputCsrFile,
+      bool getPem = false,
+      bool isForSimulation = false,
+      bool isForNoneProduction = false}) async {
     String csrFolder = await getStorageFolderPath();
     List<String> allPreviouslyExistingCsrFiles =
         await getAllFileNamesByExtension("csr");
@@ -116,7 +133,7 @@ class FatooraService {
       '-csrConfig', "$csrFolder${Platform.pathSeparator}$csrConfigFile",
       // '-privateKey', privateKeyFile,
       // '-generatedCsr', outputCsrFile,
-      if(getPem)'-pem',
+      if (getPem) '-pem',
       if (isForSimulation) '-sim',
       if (isForNoneProduction) '-nonprod'
     ];
@@ -127,8 +144,10 @@ class FatooraService {
     List<String> allNewlyExistingKeyFiles =
         await getAllFileNamesByExtension("key");
 
-    String? newKeyFileName = _getNewFileName(before: allPreviouslyExistingKeyFiles, after: allNewlyExistingKeyFiles);
-    String? newCsrFileName = _getNewFileName(before: allPreviouslyExistingCsrFiles, after: allNewlyExistingCsrFiles);
+    String? newKeyFileName = _getNewFileName(
+        before: allPreviouslyExistingKeyFiles, after: allNewlyExistingKeyFiles);
+    String? newCsrFileName = _getNewFileName(
+        before: allPreviouslyExistingCsrFiles, after: allNewlyExistingCsrFiles);
 
     String finalCsrFileName = outputCsrFile != null &&
             newCsrFileName != null &&
@@ -207,7 +226,8 @@ class FatooraService {
   /// Generate Invoice Request API
   static Future<FatooraInvoiceRequestApiResponse> generateInvoiceRequestAPI(
       {required String invoiceFileName, String? outputJsonFileName}) async {
-        List<String> allJsonFilesBeforeExecution = await getAllFileNamesByExtension('json');
+    List<String> allJsonFilesBeforeExecution =
+        await getAllFileNamesByExtension('json');
     FatooraServiceResponse response = await _runCommand([
       '-invoice',
       invoiceFileName,
@@ -219,21 +239,29 @@ class FatooraService {
     InvoiceRequest? invoiceRequest;
     ResponseStatus status = ResponseStatus.failure;
 
-    if(response.status == ResponseStatus.success && response.infos != null && response.infos!.isNotEmpty){
+    if (response.status == ResponseStatus.success &&
+        response.infos != null &&
+        response.infos!.isNotEmpty) {
       status = ResponseStatus.success;
-      List<String> allJsonFilesAfterExecution = await getAllFileNamesByExtension('json');
-      String? newGeneratedFile = _getNewFileName(before: allJsonFilesBeforeExecution, after: allJsonFilesAfterExecution);
+      List<String> allJsonFilesAfterExecution =
+          await getAllFileNamesByExtension('json');
+      String? newGeneratedFile = _getNewFileName(
+          before: allJsonFilesBeforeExecution,
+          after: allJsonFilesAfterExecution);
 
       String finalOutputFileName = outputJsonFileName != null &&
-            newGeneratedFile != null &&
-            await renameFile(oldName: newGeneratedFile, newName: outputJsonFileName)
-        ? outputJsonFileName
-        : newGeneratedFile ?? "";
-      
-      invoiceRequest = InvoiceRequest.fromMap(jsonDecode(await getFileContentAsString(finalOutputFileName)));
+              newGeneratedFile != null &&
+              await renameFile(
+                  oldName: newGeneratedFile, newName: outputJsonFileName)
+          ? outputJsonFileName
+          : newGeneratedFile ?? "";
+
+      invoiceRequest = InvoiceRequest.fromMap(
+          jsonDecode(await getFileContentAsString(finalOutputFileName)));
     }
     // response.infos.first.
-    return FatooraInvoiceRequestApiResponse(status: status, invoiceRequest: invoiceRequest, response: response);
+    return FatooraInvoiceRequestApiResponse(
+        status: status, invoiceRequest: invoiceRequest, response: response);
   }
 
   static Future<FatooraServiceResponse> getHelp() async {
