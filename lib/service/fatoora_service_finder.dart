@@ -47,9 +47,8 @@ class FatooraServiceFinder {
     _init();
   }
 
-  Future<void> init() async {
-    _init();
-  }
+  /// Initializing Fatoora Service
+  Future<void> init() => _init();
 
   String get _searchCommand {
     if (Platform.isLinux) {

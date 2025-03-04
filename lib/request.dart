@@ -36,6 +36,7 @@ class LocalStore{
     _init();
   }
 
+  /// Initialazing local store.
   Future<void> init() => _init();
 
   Future<void> _init()async{
