@@ -27,7 +27,7 @@ class FatooraServiceResponseParser {
 
     // Extract [WARNING] messages
     final warningRegex = RegExp(
-      r'\[\s*WARNING\s*\]\s*(.*?)\s*-\s*(.+)',
+      r'\[\s*WARN\s*\]\s*(.*?)\s*-\s*(.+)',
       multiLine: true,
     );
 

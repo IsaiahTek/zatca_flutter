@@ -11,7 +11,7 @@ abstract class PartyBase{
     required this.address,
   });
 
-  toXml(XmlBuilder xml);
+  toXml(XmlBuilder builder);
 }
 
 class Party extends PartyBase {
@@ -58,6 +58,7 @@ class SupplierParty extends PartyBase{
   String city;
   String postalZone;
   String countryCode;
+  int crn;
 
   SupplierParty({
     required super.address,
@@ -68,13 +69,14 @@ class SupplierParty extends PartyBase{
     required this.city,
     required this.postalZone,
     required this.countryCode,
+    required this.crn,
   });
 
   @override
   void toXml(XmlBuilder builder) {
     builder.element('cac:Party', nest: () {
       builder.element('cac:PartyIdentification', nest: () {
-        builder.element('cbc:ID', nest: taxId, attributes: {'schemeID': 'CRN'});
+        builder.element('cbc:ID', nest: crn, attributes: {'schemeID': 'CRN'});
       });
       builder.element('cac:PostalAddress', nest: () {
         builder.element('cbc:StreetName', nest: address);

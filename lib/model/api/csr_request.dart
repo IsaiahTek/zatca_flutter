@@ -7,3 +7,7 @@ class CCSIDRequestProp{
     required this.otp
   });
 }
+
+class PCSIDRenewalRequestProp extends CCSIDRequestProp{
+  PCSIDRenewalRequestProp({required super.csr, required super.otp});
+}

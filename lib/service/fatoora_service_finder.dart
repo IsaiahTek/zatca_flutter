@@ -1,16 +1,27 @@
 import 'dart:io';
 
+import 'package:zatca_flutter/service/util.dart';
+
 class FatooraServiceFinder {
   static FatooraServiceFinder? _instance;
 
   String csrFileName = "csrConfig.properties";
 
   String? _fatooraHome;
+  String? _sdkConfig;
 
   String? _path;
 
   String? get path {
     return _path;
+  }
+
+  String? get sdkConfig {
+    return _sdkConfig;
+  }
+
+  String? get fatooraHome {
+    return _fatooraHome;
   }
 
   Directory? get defaultCertDirectory {
@@ -24,8 +35,12 @@ class FatooraServiceFinder {
     }
   }
 
-  set setFatooraPath(String s) {
-    _path = s;
+  set setFatooraPath(String path) {
+    _path = path;
+  }
+
+  set setSdkHome(String path){
+    _sdkConfig = path;
   }
 
   FatooraServiceFinder._() {
@@ -49,22 +64,43 @@ class FatooraServiceFinder {
   Future<void> _init() async {
     if (path == null) {
       Process.run(_searchCommand, ["fatoora"]).then((data) {
-        _path = data.stdout.toString().trim();
+        if (Platform.isWindows) {
+          List<String> list =
+              data.stdout.toString().split(RegExp(r'\s+')).toList();
+          if (list.length > 1) {
+            _path = list[0];
+          } else {
+            _path = data.stdout.toString().trim();
+          }
+        } else {
+          _path = data.stdout.toString().trim();
+        }
+        logInfo("FATOORA PATH FOUND: $_path");
       });
+
       String command;
-      List<String> args;
+      List<String> fatooraHomeSearchArgs;
+      List<String> sdkConfigSearchArgs;
 
       if (Platform.isWindows) {
         command = 'cmd';
-        args = ['/C', 'echo %FATOORA_HOME%']; // Windows uses %VAR_NAME%
+        fatooraHomeSearchArgs = ['/C', 'echo %FATOORA_HOME%'];
+        sdkConfigSearchArgs = ['/C', 'echo %SDK_CONFIG%'];
       } else {
         command = 'bash';
-        args = ['-c', 'echo \$FATOORA_HOME']; // Linux/macOS uses $VAR_NAME
+        fatooraHomeSearchArgs = ['-c', 'echo \$FATOORA_HOME'];
+        sdkConfigSearchArgs = ['-c', 'echo \$SDK_CONFIG'];
       }
-
-      Process.run(command, args, runInShell: true).then((data) {
+      
+      Process.run(command, fatooraHomeSearchArgs, runInShell: true)
+          .then((data) {
         String fHome = data.stdout.toString().trim();
         _fatooraHome = fHome;
+        logInfo("FATOORA HOME $fHome");
+      });
+      Process.run(command, sdkConfigSearchArgs, runInShell: true).then((data) {
+        _sdkConfig = data.stdout.toString().trim();
+        logInfo("FATOORA SDK CONFIG: $_sdkConfig");
       });
     } else {}
   }

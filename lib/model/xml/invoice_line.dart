@@ -1,5 +1,5 @@
 import 'package:xml/xml.dart';
-import 'package:zatca_flutter/model/tax_details.dart';
+import 'package:zatca_flutter/model/xml/tax_details.dart';
 
 class InvoiceLine {
   String? id;
@@ -21,7 +21,10 @@ class InvoiceLine {
     builder.element('cbc:ID', nest: id);
     builder.element('cbc:InvoicedQuantity', attributes: {'unitCode': 'PCE'}, nest: quantity);
     builder.element('cbc:LineExtensionAmount', attributes: {'currencyID': 'SAR'}, nest: total);
-    builder.element('cac:TaxTotal', nest: ()=> tax.toXml(builder));
+    builder.element('cac:TaxTotal', nest: (){
+      builder.element('cbc:TaxAmount', attributes: {'currencyID': 'SAR'}, nest: tax.amount);
+      builder.element('cbc:RoundingAmount', attributes: {'currencyID': 'SAR'}, nest: num.parse(tax.taxableAmount) + num.parse(tax.amount));
+    });
     builder.element('cac:Item', nest: (){
       builder.element('cbc:Name', nest: name);
       builder.element('cac:ClassifiedTaxCategory', nest: (){

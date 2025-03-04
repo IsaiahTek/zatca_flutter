@@ -21,8 +21,8 @@ class LegalMonetaryTotal {
     builder.element('cbc:LineExtensionAmount', nest: lineExtensionAmount, attributes: {'currencyID':'SAR'});
     builder.element('cbc:TaxExclusiveAmount', nest: taxExclusiveAmount, attributes: {'currencyID':'SAR'});
     builder.element('cbc:TaxInclusiveAmount', nest: taxInclusiveAmount, attributes: {'currencyID':'SAR'});
-    builder.element('cbc:PayableAmount', nest: payableAmount, attributes: {'currencyID':'SAR'});
     builder.element('cbc:AllowanceTotalAmount', nest: allowanceTotalAmount, attributes: {'currencyID':'SAR'});
     builder.element('cbc:PrepaidAmount', nest: prepaidAmount, attributes: {'currencyID':'SAR'});
+    builder.element('cbc:PayableAmount', nest: payableAmount, attributes: {'currencyID':'SAR'});
   }
 }

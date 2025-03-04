@@ -13,22 +13,35 @@ import 'fatoora_service_finder.dart';
 import '../enums.dart';
 import '../model/fatoora_service_response.dart';
 import 'fatoora_service_response_parser.dart';
-import 'package:flutter/material.dart';
 
 class FatooraService {
-  static final String? _fatooraPath = FatooraServiceFinder.instance.path;
+  static final FatooraServiceFinder _finder = FatooraServiceFinder.instance;
+  static final String? _fatooraPath = _finder.path;
 
   /// Runs a Fatoora CLI command and returns the result
   static Future<FatooraServiceResponse> _runCommand(List<String> args) async {
     try {
       if (_fatooraPath != null) {
+        
         String workingDirectory = await getStorageFolderPath();
-        ProcessResult result = await Process.run(_fatooraPath!, args,
-            workingDirectory: workingDirectory);
+        
+        String command = Platform.isWindows ? 'cmd' : _fatooraPath!;
+        List<String> compositeArgs = Platform.isWindows ? ['/C', _fatooraPath!, ...args] : args;
+        
+        ProcessResult result = await Process.run(
+            command, compositeArgs,
+            runInShell : true,
+            workingDirectory : workingDirectory,
+            environment : {
+              'SDK_CONFIG' : _finder.sdkConfig ?? "",
+              'FATOORA_HOME' : _finder.fatooraHome ?? ""
+            });
 
         FatooraServiceResponse response =
             FatooraServiceResponseParser.extractResponses(result.stdout);
-        debugPrint("RESPONSE STATUS: ${response.status.name.toUpperCase()}");
+        logInfo("RAW OUTPUT ${result.stdout}");
+        logInfo("RAW ERROR ${result.stderr}");
+        logInfo("RESPONSE STATUS: ${response.status.name.toUpperCase()}");
         if (response.status == ResponseStatus.failure) {
           logError(
               "ZATCA/Fatoora Execution Failed (${response.errors?.length}):");
@@ -42,7 +55,7 @@ class FatooraService {
         } else {
           log("\x1B[32m ZATCA/Fatoora (${args.first}) Execution Successful(${response.infos?.length ?? 0}), Warning(${response.warnings?.length ?? 0}):");
           for (InfoModel element in response.infos ?? []) {
-            log("\x1B[34mZATCA/Fatoora ${element.source}: ${element.message}");
+            log("\x1B[34m ZATCA/Fatoora ${element.source}: ${element.message}");
           }
         }
 
@@ -60,10 +73,7 @@ class FatooraService {
   }
 
   static _writeLogToFile(String message) async {
-    String? storagePath = await getStorageFolderPath();
-    File logFile = File(
-        "$storagePath${Platform.pathSeparator}fatoora-error-${DateTime.now()}.log");
-    logFile.writeAsStringSync(message);
+    await saveToFile(message, "fatoora-error-${DateTime.now()}.log", folder: 'logs');
   }
 
   static String? _getNewFileName(
@@ -182,13 +192,21 @@ class FatooraService {
     return result;
   }
 
-  /// Validates an invoice XML file using Fatoora CLI
+  /// Validates an invoice XML file using Fatoora CLI.
+  /// 
+  /// If `ignoreWarningForResponseStatus` is set to true the response status will return the global validation result instead.
+  /// That means, if the GLOBAL VALIDATION RESULT IS PASSED then the response status will be SUCCESS regardles of any warning that might be available.
+  /// This ignoreWarningForResponseStatus flag is added because the service could return GLOBAL VALIDATION RESULT = PASSED if there isn't a critical error.
   static Future<FatooraServiceResponse> validateInvoice({
     required String invoiceFileName,
+    bool ignoreWarningForResponseStatus = false
   }) async {
     final result =
         await _runCommand(['-validate', '-invoice', invoiceFileName]);
 
+    if(result.infos != null && result.infos!.isNotEmpty && result.infos!.last.message.contains('GLOBAL VALIDATION RESULT = PASSED') && ignoreWarningForResponseStatus){
+      result.status = ResponseStatus.success;
+    }
     return result;
   }
 

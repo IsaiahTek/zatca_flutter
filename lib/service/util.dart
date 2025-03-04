@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:zatca_flutter/model/csr_config.dart';
@@ -14,14 +15,18 @@ String _getBaseName(String fullPath){
 }
 
 /// Needed for reading any user generated file content as string.
-Future<String> getFileContentAsString(String filePath) async {
-  return _getFileContentAsString(filePath);
+Future<String> getFileContentAsString(String fileName, {String? folder}) async {
+  return _getFileContentAsString(fileName, folder: folder);
 }
-Future<String> _getFileContentAsString(String filePath) async {
-  String parentDir = await _getStorageFolderPath();
+Future<String> _getFileContentAsString(String fileName, {String? folder}) async {
+  String directory = await _getStorageFolderPath();
+  final dir = Directory("$directory${folder != null ?'${Platform.pathSeparator}$folder':''}");
+  if(!(await dir.exists())){
+    await dir.create();
+  }
   String content = "";
   try {
-    File file = File("$parentDir${Platform.pathSeparator}$filePath");
+    final File file = File("${dir.path}${Platform.pathSeparator}$fileName");
     content = await file.readAsString();
   } catch (e) {
     // 
@@ -171,13 +176,34 @@ Future<bool> _renameFile({required String oldName, required String newName})asyn
 }
 
 void logError(String message){
-  log("'$message'");
+  log("\x1B[31m $message");
+}
+void logInfo(String message){
+  log("\x1b[38;5;32m $message");
 }
 
 /// Create a file and write the string as the content to the file.
-Future<String> saveToFile(String content, String fileName) async {
+Future<String> saveToFile(String content, String fileName, {String? folder}) async {
   final String directory = await getStorageFolderPath();
-  final file = File("$directory${Platform.pathSeparator}$fileName");
+  final dir = Directory("$directory${folder != null ?'${Platform.pathSeparator}$folder':''}");
+  if(!(await dir.exists())){
+    await dir.create();
+  }
+  final file = File("${dir.path}${Platform.pathSeparator}$fileName");
   await file.writeAsString(content);
   return file.path;
+}
+
+String getPIHForFirstInvoice(){
+  return 'NWZlY2ViNjZmZmM4NmYzOGQ5NTI3ODZjNmQ2OTZjNzljMmRiYzIzOWRkNGU5MWI0NjcyOWQ3M2EyN2ZiNTdlOQ==';
+}
+
+String generateUuid(){
+  math.Random random = math.Random();
+  return '${_generateHex(random, 8)}-${_generateHex(random, 4)}-${_generateHex(random, 4)}-${_generateHex(random, 4)}-${_generateHex(random, 12)}';
+}
+
+String _generateHex(math.Random random, int length){
+  final hexDigits = '0123456789abcdef';
+  return List.generate(length, (_) => hexDigits[random.nextInt(hexDigits.length)]).join();
 }

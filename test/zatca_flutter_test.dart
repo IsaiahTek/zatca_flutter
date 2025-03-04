@@ -1,14 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:zatca_flutter/model/invoice_item.dart';
-import 'package:zatca_flutter/model/invoice_line.dart';
-import 'package:zatca_flutter/model/invoice_total.dart';
-import 'package:zatca_flutter/model/legal_monetary_total.dart';
-import 'package:zatca_flutter/model/party.dart';
-import 'package:zatca_flutter/model/seller.dart';
-import 'package:zatca_flutter/model/simplified_invoice.dart';
-import 'package:zatca_flutter/model/tax_details.dart';
-import 'package:zatca_flutter/service/simplified_invoice_to_xml_converter.dart';
-import 'package:zatca_flutter/zatca_flutter.dart';
+import 'package:zatca_flutter/service/util.dart';
 
 
 void main() {
@@ -30,7 +21,10 @@ void main() {
     String formatTimeForZatca(DateTime dateTime) {
       return dateTime.toUtc().toIso8601String().split('T')[1].split('.')[0]; // HH:mm:ss
     }
-    print("DATE: ${formatDateTimeForZatca(DateTime.now())} <=> TIME: ${formatTimeForZatca(DateTime.now())}");
+    logInfo("DATE: ${formatDateTimeForZatca(DateTime.now())} <=> TIME: ${formatTimeForZatca(DateTime.now())}");
+    
+    logInfo("UUID: ${generateUuid()}");
+
     expect(true, true);
   });
 }

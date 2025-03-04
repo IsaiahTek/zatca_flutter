@@ -2,9 +2,9 @@ import 'invoice_clearance_response.dart';
 import 'server_error_response.dart';
 import 'unauthorized_response.dart';
 
-enum CCSIDCheckResponseStatus { pass, error, unauthorized, invalidRequest, unknown }
+enum ReportingResponseStatus { reported, notReported, unauthorized, invalidRequest, unknown }
 
-class ComplianceInvoiceCheckResponse {
+class InvoiceReportingResponse {
   final ValidationResults? validationResults;
   final String? reportingStatus;
   final String? clearanceStatus;
@@ -12,10 +12,10 @@ class ComplianceInvoiceCheckResponse {
   final String? qrBuyertStatus;
   final ServerErrorResponse? serverErrorResponse;
   final UnauthorizedResponse? unauthorizedResponse;
-  final CCSIDCheckResponseStatus status;
+  final ReportingResponseStatus status;
   final int statusCode;
 
-  ComplianceInvoiceCheckResponse({
+  InvoiceReportingResponse({
     this.validationResults,
     this.reportingStatus,
     this.clearanceStatus,
@@ -27,8 +27,8 @@ class ComplianceInvoiceCheckResponse {
     required this.statusCode,
   });
 
-  factory ComplianceInvoiceCheckResponse.fromJson(Map<String, dynamic> json, int statusCode) {
-    return ComplianceInvoiceCheckResponse(
+  factory InvoiceReportingResponse.fromJson(Map<String, dynamic> json, int statusCode) {
+    return InvoiceReportingResponse(
       validationResults: json['validationResults'] != null
           ? ValidationResults.fromJson(json['validationResults'])
           : null,
@@ -53,14 +53,14 @@ class ComplianceInvoiceCheckResponse {
         'statusCode': statusCode,
       };
 
-  static CCSIDCheckResponseStatus _parseStatus(String? status) {
+  static ReportingResponseStatus _parseStatus(String? status) {
     switch (status?.toUpperCase()) {
-      case 'PASS':
-        return CCSIDCheckResponseStatus.pass;
-      case 'ERROR':
-        return CCSIDCheckResponseStatus.error;
+      case 'REPORTED':
+        return ReportingResponseStatus.reported;
+      case 'NOT_REPORTED':
+        return ReportingResponseStatus.notReported;
       default:
-        return CCSIDCheckResponseStatus.unknown;
+        return ReportingResponseStatus.unknown;
     }
   }
 }
