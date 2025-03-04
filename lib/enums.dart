@@ -1,3 +1,4 @@
+/// Invoice Report Response
 enum InvoiceResultStatus{
   reported,
   notReported,
