@@ -33,6 +33,12 @@ enum Mode {
 /// Local Storage that holds most data for communication within the app
 class LocalStore{
   LocalStore._(){
+    _init();
+  }
+
+  Future<void> init() => _init();
+
+  Future<void> _init()async{
     Tokeys._readLocalValues(isForCompliance: false).then((tokeys){
       _pcsid = tokeys;
     });
