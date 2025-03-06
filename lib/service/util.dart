@@ -15,16 +15,16 @@ String _getBaseName(String fullPath){
 }
 
 /// Needed for reading any user generated file content as string.
-Future<String> getFileContentAsString(String fileName, {String? folder}) async {
+Future<String?> getFileContentAsString(String fileName, {String? folder}) async {
   return _getFileContentAsString(fileName, folder: folder);
 }
-Future<String> _getFileContentAsString(String fileName, {String? folder}) async {
+Future<String?> _getFileContentAsString(String fileName, {String? folder}) async {
   String directory = await _getStorageFolderPath();
   final dir = Directory("$directory${folder != null ?'${Platform.pathSeparator}$folder':''}");
   if(!(await dir.exists())){
     await dir.create();
   }
-  String content = "";
+  String? content;
   try {
     final File file = File("${dir.path}${Platform.pathSeparator}$fileName");
     content = await file.readAsString();
@@ -190,6 +190,9 @@ Future<String> saveToFile(String content, String fileName, {String? folder}) asy
     await dir.create();
   }
   final file = File("${dir.path}${Platform.pathSeparator}$fileName");
+  if(!(await file.exists())){
+    await file.create();
+  }
   await file.writeAsString(content);
   return file.path;
 }

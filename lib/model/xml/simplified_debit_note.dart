@@ -1,9 +1,12 @@
 // Simplified Debit Note Model to hold the necessary data
 import 'package:xml/xml.dart';
+import 'package:zatca_flutter/model/xml/allowance_charge.dart';
 import 'package:zatca_flutter/model/xml/billing_reference.dart';
+import 'package:zatca_flutter/model/xml/delivery.dart';
 import 'package:zatca_flutter/model/xml/invoice_line.dart';
 import 'package:zatca_flutter/model/xml/legal_monetary_total.dart';
 import 'package:zatca_flutter/model/xml/party.dart';
+import 'package:zatca_flutter/model/xml/payment_means.dart';
 import 'package:zatca_flutter/model/xml/tax_details.dart';
 import 'package:zatca_flutter/service/util.dart';
 
@@ -22,6 +25,9 @@ class SimplifiedDebitNote {
   LegalMonetaryTotal monetaryTotal;
   String pih;
   BillingReference billingReference;
+  Delivery? delivery;
+  PaymentMeans paymentMeans;
+  AllowanceCharge? allowanceCharge;
 
   SimplifiedDebitNote({
     required this.icv,
@@ -38,7 +44,10 @@ class SimplifiedDebitNote {
     required this.monetaryTotal,
     // this.isFirstInvoice = false,
     required this.pih,
-    required this.billingReference
+    required this.billingReference,
+    required this.paymentMeans,
+    this.delivery,
+    this.allowanceCharge,
   });
 
   String toXml(){
@@ -87,18 +96,14 @@ class SimplifiedDebitNote {
       builder.element('cac:AccountingCustomerParty',
           nest: () => customer.toXml(builder));
 
-      builder.element('cac:AllowanceCharge', nest: (){
-        builder.element('cbc:ChargeIndicator', nest: false);
-        builder.element('cbc:AllowanceChargeReason', nest: 'discount');
-        builder.element('cbc:Amount', attributes: {'currencyID': 'SAR'}, nest:0.00);
-        builder.element('cac:TaxCategory', nest: (){
-          builder.element('cbc:ID', attributes: {'schemeID': 'UN/ECE 5305', 'schemeAgencyID': '6'}, nest: 'S');
-          builder.element('cbc:Percent', nest: tax.percent);
-          builder.element('cac:TaxScheme', nest: (){
-            builder.element('cbc:ID', attributes: {'schemeID': 'UN/ECE 5153', 'schemeAgencyID': '6'}, nest: 'VAT');
-          });
-        });
-      });
+      // Delivery builder
+      delivery?.toXml(builder);
+
+      // PaymentMeans Builder
+      paymentMeans.toXml(builder);
+
+      // AllowanceCharge builder
+      allowanceCharge?.toXml(builder);
 
       builder.element('cac:TaxTotal', nest:(){
         builder.element('cbc:TaxAmount', attributes: {'currencyID': 'SAR'}, nest: tax.amount);

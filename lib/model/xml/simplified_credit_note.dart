@@ -1,5 +1,7 @@
 // Simplified Debit Note Model to hold the necessary data
 import 'package:xml/xml.dart';
+import 'package:zatca_flutter/enums.dart';
+import 'package:zatca_flutter/model/xml/allowance_charge.dart';
 import 'package:zatca_flutter/model/xml/billing_reference.dart';
 import 'package:zatca_flutter/model/xml/delivery.dart';
 import 'package:zatca_flutter/model/xml/invoice_line.dart';
@@ -26,6 +28,7 @@ class SimplifiedCreditNote {
   BillingReference billingReference;
   Delivery? delivery;
   PaymentMeans paymentMeans;
+  AllowanceCharge? allowanceCharge;
 
   SimplifiedCreditNote({
     required this.icv,
@@ -45,6 +48,7 @@ class SimplifiedCreditNote {
     required this.billingReference,
     required this.paymentMeans,
     this.delivery,
+    this.allowanceCharge,
   });
 
   String toXml(){
@@ -96,25 +100,16 @@ class SimplifiedCreditNote {
       // Delivery builder
       delivery?.toXml(builder);
 
-      // Payment Means Builder
+      // PaymentMeans Builder
       paymentMeans.toXml(builder);
 
-      builder.element('cac:AllowanceCharge', nest: (){
-        builder.element('cbc:ChargeIndicator', nest: false);
-        builder.element('cbc:AllowanceChargeReason', nest: 'discount');
-        builder.element('cbc:Amount', attributes: {'currencyID': 'SAR'}, nest:0.00);
-        builder.element('cac:TaxCategory', nest: (){
-          builder.element('cbc:ID', attributes: {'schemeID': 'UN/ECE 5305', 'schemeAgencyID': '6'}, nest: 'S');
-          builder.element('cbc:Percent', nest: tax.percent);
-          builder.element('cac:TaxScheme', nest: (){
-            builder.element('cbc:ID', attributes: {'schemeID': 'UN/ECE 5153', 'schemeAgencyID': '6'}, nest: 'VAT');
-          });
-        });
-      });
+      // AllowanceCharge builder
+      allowanceCharge?.toXml(builder);
 
       builder.element('cac:TaxTotal', nest:(){
         builder.element('cbc:TaxAmount', attributes: {'currencyID': 'SAR'}, nest: tax.amount);
       });
+      
       builder.element('cac:TaxTotal', nest: () => tax.toXml(builder));
       builder.element('cac:LegalMonetaryTotal',
           nest: () => monetaryTotal.toXml(builder));

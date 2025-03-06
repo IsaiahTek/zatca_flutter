@@ -21,29 +21,34 @@ import 'package:zatca_flutter/service/util.dart';
 enum Mode {
   /// To be used when testing the application through the developer portal
   developerPortal,
-  
+
   /// To be used when testing the application through the simulation portal
   simulation,
 
   /// To be used when in production mode. This what you use for live application
   production,
-  
+}
+
+
+_saveToAbsolutePath(String content, String path) {
+  File file = File(path);
+  file.writeAsString(content);
 }
 
 /// Local Storage that holds most data for communication within the app
-class LocalStore{
-  LocalStore._(){
+class LocalStore {
+  LocalStore._() {
     _init();
   }
 
   /// Initialazing local store.
   Future<void> init() => _init();
 
-  Future<void> _init()async{
-    Tokeys._readLocalValues(isForCompliance: false).then((tokeys){
+  Future<void> _init() async {
+    Tokeys._readLocalValues(isForCompliance: false).then((tokeys) {
       _pcsid = tokeys;
     });
-    Tokeys._readLocalValues(isForCompliance: true).then((tokeys){
+    Tokeys._readLocalValues(isForCompliance: true).then((tokeys) {
       _ccsid = tokeys;
     });
   }
@@ -51,7 +56,7 @@ class LocalStore{
   static LocalStore? _instance;
 
   /// The single LocalStore instance accross usage.
-  static LocalStore get instance => _instance??=LocalStore._();
+  static LocalStore get instance => _instance ??= LocalStore._();
 
   Tokeys? _ccsid;
   Tokeys? _pcsid;
@@ -63,22 +68,45 @@ class LocalStore{
   Tokeys? get pcsid => _pcsid;
 
   /// Called to updated ccsid with the passed in object
-  static updateCcsid(Tokeys tokeys){
+  static updateCcsid(Tokeys tokeys) {
     tokeys._saveToLocal(isForCompliance: true);
     LocalStore.instance._ccsid = tokeys;
   }
 
   /// Called to updated pcsid with the passed in object
-  static updatePcsid(Tokeys tokeys){
+  static updatePcsid(Tokeys tokeys) {
     tokeys._saveToLocal(isForCompliance: false);
     LocalStore.instance._pcsid = tokeys;
   }
 
+  Future<void> _convertCertAndSaveToStorage(
+      {required String cert}) async {
+    try {
+      String certInPemFormat = utf8.decode(base64.decode(cert));
+
+      Future<void> updateCertInSDK() async {
+        Directory? certDir = FatooraServiceFinder.instance.defaultCertDirectory;
+        bool? canUpdate = await certDir?.exists();
+        if (canUpdate != null && canUpdate && certDir != null) {
+          _saveToAbsolutePath(certInPemFormat,
+              "${certDir.path}${Platform.pathSeparator}cert.pem");
+        }
+      }
+
+      updateCertInSDK();
+    } catch (e) {
+      logError(
+          "Couldn't convert cert/key to pem without header/footer and line-breaks $e");
+    }
+  }
+
+  Future<void> switchCertInSDK({bool usePCSID = true})async{
+    return _convertCertAndSaveToStorage(cert: usePCSID ? pcsid!.token : ccsid!.token );
+  }
 }
 
 /// The model used by CSIDs
-class Tokeys{
-
+class Tokeys {
   /// String value of the binary token
   String token;
 
@@ -96,39 +124,42 @@ class Tokeys{
   });
 
   /// Returns a json equivalent of the CSID object
-  Map<String, dynamic> toJson(){
-    return {
-      "token": token,
-      "secret": secret,
-      "requestID": requestID
-    };
+  Map<String, dynamic> toJson() {
+    return {"token": token, "secret": secret, "requestID": requestID};
   }
 
   /// Returns a String equivalent of the CSID object
-  String toJsonString(){
+  String toJsonString() {
     return jsonEncode(toJson());
   }
 
   /// Constructs and returns CSID object from a CSID json object
-  static Tokeys fromJson(json){
-    return Tokeys(token: json['token'], secret: json['secret'], requestID: json['requestID']);
+  static Tokeys fromJson(json) {
+    return Tokeys(
+        token: json['token'],
+        secret: json['secret'],
+        requestID: json['requestID']);
   }
 
-  static Future<Tokeys> _readLocalValues({required bool isForCompliance}) async {
-    String raw = await getFileContentAsString(isForCompliance?'ccsid.json':'pcsid.json', folder: '.tokens');
-    return Tokeys.fromJson(jsonDecode(raw));
+  static Future<Tokeys?> _readLocalValues(
+      {required bool isForCompliance}) async {
+    String? raw = await getFileContentAsString(
+        isForCompliance ? 'ccsid.json' : 'pcsid.json',
+        folder: '.tokens');
+    return raw != null ? Tokeys.fromJson(jsonDecode(raw)) : null;
   }
 
   /// Save Production/Compliance CSID value to storage.
   Future<void> _saveToLocal({required bool isForCompliance}) async {
-    await saveToFile(toJsonString(), isForCompliance?'ccsid.json':'pcsid.json', folder: '.tokens');
+    await saveToFile(
+        toJsonString(), isForCompliance ? 'ccsid.json' : 'pcsid.json',
+        folder: '.tokens');
   }
 
 }
 
 /// Abstract class for handling core communication with zatca/fatoora server.
 abstract class RequestBase {
-
   /// Set the mode of operation.
   final Mode mode;
   String get _complianceCSIDUrl => "$_base/compliance";
@@ -138,7 +169,6 @@ abstract class RequestBase {
   String get _reportingUrl => "$_base/invoices/reporting/single";
   String get _clearanceUrl => "$_base/invoices/clearance/single";
 
-  
   late LocalStore _store;
 
   /// Production CSID values
@@ -147,7 +177,7 @@ abstract class RequestBase {
   /// Compliance CSID values
   Tokeys? get ccsidTokeys => _store.ccsid;
 
-  RequestBase({required this.mode}){
+  RequestBase({required this.mode}) {
     _store = LocalStore.instance;
   }
 
@@ -194,10 +224,11 @@ abstract class RequestBase {
           response.statusCode, jsonDecode(response.body));
       if (res.successData != null &&
           res.successData!.binarySecurityToken.isNotEmpty) {
-            String token = res.successData!.binarySecurityToken;
-            String secret = res.successData!.secret;
-            int requestID = res.successData!.requestID;
-            LocalStore.updateCcsid(Tokeys(token: token, secret: secret, requestID: requestID));
+        String token = res.successData!.binarySecurityToken;
+        String secret = res.successData!.secret;
+        int requestID = res.successData!.requestID;
+        LocalStore.updateCcsid(
+            Tokeys(token: token, secret: secret, requestID: requestID));
         // saveToFile(token, 'ccsid_binary_token',
         //     folder: '.tokens');
       }
@@ -233,13 +264,11 @@ abstract class RequestBase {
       'Content-Type': 'application/json',
     };
 
-
     try {
       final body = jsonEncode(prop.toMap());
       logInfo("Compliance check body: $body AND URL $url");
-      final response =
-          await http.post(url, headers: headers, body: body);
-          
+      final response = await http.post(url, headers: headers, body: body);
+
       if (response.statusCode >= 200 && response.statusCode < 300) {
         final jsonResponse = jsonDecode(response.body);
         logInfo("RESPONSE json $jsonResponse");
@@ -268,8 +297,7 @@ abstract class RequestBase {
     };
 
     final Map<String, dynamic> body = {
-      "compliance_request_id":
-          ccsidTokeys?.requestID
+      "compliance_request_id": ccsidTokeys?.requestID
     };
 
     try {
@@ -284,10 +312,11 @@ abstract class RequestBase {
           response.statusCode, jsonDecode(response.body));
       if (res.successData != null &&
           res.successData!.binarySecurityToken.isNotEmpty) {
-            String token = res.successData!.binarySecurityToken;
-            String secret = res.successData!.secret;
-            int requestID = res.successData!.requestID;
-            LocalStore.updatePcsid(Tokeys(token: token, secret: secret, requestID: requestID));
+        String token = res.successData!.binarySecurityToken;
+        String secret = res.successData!.secret;
+        int requestID = res.successData!.requestID;
+        LocalStore.updatePcsid(
+            Tokeys(token: token, secret: secret, requestID: requestID));
         // saveToFile(token, 'pcsid_binary_token',
         //     folder: '.tokens');
       }
@@ -306,12 +335,8 @@ abstract class RequestBase {
   Future<void> convertTokenAndKeyToPemAndSaveToSDKForSigning(
       {required CertAndKey certAndKey}) async {
     try {
-      String cert = certAndKey.cert;
       String key = certAndKey.key;
-      String certInPemFormat = utf8.decode(base64.decode(cert));
-
       String pkcs8Base64 = key;
-
       Uint8List pkcs8DerBytes = base64Decode(pkcs8Base64);
       ASN1Parser asn1Parser = ASN1Parser(pkcs8DerBytes);
 
@@ -329,30 +354,20 @@ abstract class RequestBase {
       // logError("DECODED CERT: $certInPemFormat");
       String keyInPerFormat = base64Encode(privateKeyBytes);
 
-      saveToAbsolutePath(String content, String path) {
-        File file = File(path);
-        file.writeAsString(content);
+      Directory? certDir = FatooraServiceFinder.instance.defaultCertDirectory;
+      bool? canUpdate = await certDir?.exists();
+      if (canUpdate != null && canUpdate && certDir != null) {
+        _saveToAbsolutePath(keyInPerFormat,
+            "${certDir.path}${Platform.pathSeparator}ec-secp256k1-priv-key.pem");
       }
-
-      Future<void> updateCertInSDK() async {
-        Directory? certDir = FatooraServiceFinder.instance.defaultCertDirectory;
-        bool? canUpdate = await certDir?.exists();
-        if (canUpdate != null && canUpdate && certDir != null) {
-          saveToAbsolutePath(keyInPerFormat,
-              "${certDir.path}${Platform.pathSeparator}ec-secp256k1-priv-key.pem");
-          saveToAbsolutePath(certInPemFormat,
-              "${certDir.path}${Platform.pathSeparator}cert.pem");
-        }
-      }
-
-      updateCertInSDK();
     } catch (e) {
       logError(
           "Couldn't convert cert/key to pem without header/footer and line-breaks $e");
     }
   }
 
-  Future<ProductionCSIDRenewalResponse> requestProductionCSIDRenewal({required PCSIDRenewalRequestProp prop}) async {
+  Future<ProductionCSIDRenewalResponse> requestProductionCSIDRenewal(
+      {required PCSIDRenewalRequestProp prop}) async {
     final Map<String, String> headers = {
       'Accept-Version': 'V2', // Ensure correct API version
       'Content-Type': 'application/json',
@@ -372,14 +387,16 @@ abstract class RequestBase {
         body: jsonEncode(body),
       );
 
-      ProductionCSIDRenewalResponse res = ProductionCSIDRenewalResponse.fromJson(
-          response.statusCode, jsonDecode(response.body));
+      ProductionCSIDRenewalResponse res =
+          ProductionCSIDRenewalResponse.fromJson(
+              response.statusCode, jsonDecode(response.body));
       if (res.successData != null &&
           res.successData!.binarySecurityToken.isNotEmpty) {
-            String token = res.successData!.binarySecurityToken;
-            String secret = res.successData!.secret;
-            int requestID = res.successData!.requestID;
-            LocalStore.updatePcsid(Tokeys(token: token, secret: secret, requestID: requestID));
+        String token = res.successData!.binarySecurityToken;
+        String secret = res.successData!.secret;
+        int requestID = res.successData!.requestID;
+        LocalStore.updatePcsid(
+            Tokeys(token: token, secret: secret, requestID: requestID));
         // saveToFile(token, 'ccsid_binary_token',
         //     folder: '.tokens');
       }
@@ -394,40 +411,45 @@ abstract class RequestBase {
     }
   }
 
-  Future<InvoiceReportingResponse?> requestReporting(InvoiceRequest prop) async {
+  Future<InvoiceReportingResponse?> requestReporting(
+      InvoiceRequest prop) async {
     String basicAuth =
-        'Basic ${base64Encode(utf8.encode('${ccsidTokeys?.token}:${ccsidTokeys?.secret}'))}';
+        'Basic ${base64Encode(utf8.encode('${pcsidTokeys?.token}:${pcsidTokeys?.secret}'))}';
 
     final headers = {
       'Authorization': basicAuth,
       'Accept-Language': 'en',
       'Accept-Version': 'V2',
       'Content-Type': 'application/json',
-      // 'Clearance-Status': '0'
+      'Clearance-Status': '0'
     };
 
-    final Map<String, dynamic> body = prop.toMap();
-
     try {
-      final url = Uri.parse(_reportingUrl);
-      final response = await http.patch(
-        url,
-        headers: headers,
-        body: jsonEncode(body),
-      );
+      Uri url = Uri.parse(_reportingUrl);
+      final body = jsonEncode(prop.toMap());
+      logInfo("Compliance check body: $body AND URL $url");
+      final response = await http.post(url, headers: headers, body: body);
 
-      InvoiceReportingResponse res = InvoiceReportingResponse.fromJson(
-          jsonDecode(response.body), response.statusCode);
-    
-      return res;
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        final jsonResponse = jsonDecode(response.body);
+        logInfo("RESPONSE json $jsonResponse");
+
+        return InvoiceReportingResponse.fromJson(
+            jsonResponse, response.statusCode);
+      } else {
+        log('HTTP error: ${response.reasonPhrase}');
+        return null;
+      }
     } catch (e) {
+      log('Error reporting invoice: $e');
       return null;
     }
   }
 
-  Future<InvoiceClearanceResponse?> requestClearance(InvoiceRequest prop) async {
+  Future<InvoiceClearanceResponse?> requestClearance(
+      InvoiceRequest prop) async {
     String basicAuth =
-        'Basic ${base64Encode(utf8.encode('${ccsidTokeys?.token}:${ccsidTokeys?.secret}'))}';
+        'Basic ${base64Encode(utf8.encode('${pcsidTokeys?.token}:${pcsidTokeys?.secret}'))}';
 
     final headers = {
       'Authorization': basicAuth,
@@ -441,14 +463,15 @@ abstract class RequestBase {
 
     try {
       final url = Uri.parse(_clearanceUrl);
-      final response = await http.patch(
+      final response = await http.post(
         url,
         headers: headers,
         body: jsonEncode(body),
       );
 
-      InvoiceClearanceResponse res = InvoiceClearanceResponse.fromJson(jsonDecode(response.body), response.statusCode);
-      
+      InvoiceClearanceResponse res = InvoiceClearanceResponse.fromJson(
+          jsonDecode(response.body), response.statusCode);
+
       return res;
     } catch (e) {
       return null;
@@ -461,28 +484,36 @@ abstract class SimulationRequestBase extends RequestBase {
   ///
   SimulationRequestBase({super.mode = Mode.simulation});
 }
+
 ///
 class SimulationRequest extends SimulationRequestBase {}
+
 ///
 class DeveloperPortalRequestBase extends RequestBase {
   ///
   DeveloperPortalRequestBase({super.mode = Mode.developerPortal});
 }
+
 ///
 class DeveloperPortalRequest extends DeveloperPortalRequestBase {}
+
 ///
 class ProductionRequestBase extends RequestBase {
   ///
   ProductionRequestBase({super.mode = Mode.production});
 }
+
 ///
 class ProductionRequest extends ProductionRequestBase {}
+
 ///
 class RequestTypes {
   ///
   SimulationRequest simulation = SimulationRequest();
+
   ///
   DeveloperPortalRequest developerPortal = DeveloperPortalRequest();
+
   ///
   ProductionRequest production = ProductionRequest();
 }

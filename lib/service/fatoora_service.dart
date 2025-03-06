@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:zatca_flutter/model/fatoora_invoice_request_api_response.dart';
 import 'package:zatca_flutter/model/fatoora_qr_code_response.dart';
 import 'package:zatca_flutter/model/invoice_request.dart';
+import 'package:zatca_flutter/request.dart';
 import 'package:zatca_flutter/service/util.dart';
 
 import '../model/error_model.dart';
@@ -73,7 +74,8 @@ class FatooraService {
   }
 
   static _writeLogToFile(String message) async {
-    await saveToFile(message, "fatoora-error-${DateTime.now()}.log", folder: 'logs');
+    DateTime dT = DateTime.now();
+    await saveToFile(message, "fatoora-error-${dT.year}${dT.month}${dT.day}${dT.hour}${dT.minute}${dT.second} q.log", folder: 'logs');
   }
 
   static String? _getNewFileName(
@@ -180,7 +182,10 @@ class FatooraService {
   /// Signs an invoice XML file using Fatoora CLI
   static Future<FatooraServiceResponse> signInvoice(
       {required String invoiceFileName,
-      String? outputSignedInvoiceFileName}) async {
+      String? outputSignedInvoiceFileName, bool forChecks = false}) async {
+
+    await LocalStore.instance.switchCertInSDK(usePCSID: !forChecks);
+    
     final result = await _runCommand([
       '-sign',
       '-invoice',
@@ -273,9 +278,11 @@ class FatooraService {
                   oldName: newGeneratedFile, newName: outputJsonFileName)
           ? outputJsonFileName
           : newGeneratedFile ?? "";
-
-      invoiceRequest = InvoiceRequest.fromMap(
-          jsonDecode(await getFileContentAsString(finalOutputFileName)));
+      String? raw = await getFileContentAsString(finalOutputFileName);
+      if(raw != null){
+        invoiceRequest = InvoiceRequest.fromMap(
+            jsonDecode(raw));
+      }
     }
     // response.infos.first.
     return FatooraInvoiceRequestApiResponse(
