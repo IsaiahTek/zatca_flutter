@@ -1,6 +1,5 @@
 // Simplified Debit Note Model to hold the necessary data
 import 'package:xml/xml.dart';
-import 'package:zatca_flutter/enums.dart';
 import 'package:zatca_flutter/model/xml/allowance_charge.dart';
 import 'package:zatca_flutter/model/xml/billing_reference.dart';
 import 'package:zatca_flutter/model/xml/delivery.dart';
@@ -17,10 +16,9 @@ class SimplifiedCreditNote {
   String uuid;
   DateTime issueDate;
   DateTime issueTime;
-  String typeCode;
   String currency;
-  SupplierParty supplier;
-  Party customer;
+  BusinessParty supplier;
+  IndividualParty customer;
   List<InvoiceLine> lines;
   TaxDetails tax;
   LegalMonetaryTotal monetaryTotal;
@@ -36,7 +34,6 @@ class SimplifiedCreditNote {
     required this.uuid,
     required this.issueDate,
     required this.issueTime,
-    required this.typeCode,
     required this.currency,
     required this.supplier,
     required this.customer,
@@ -107,9 +104,9 @@ class SimplifiedCreditNote {
       allowanceCharge?.toXml(builder);
 
       builder.element('cac:TaxTotal', nest:(){
-        builder.element('cbc:TaxAmount', attributes: {'currencyID': 'SAR'}, nest: tax.amount);
+        builder.element('cbc:TaxAmount', attributes: {'currencyID': tax.currency}, nest: tax.amount);
       });
-      
+
       builder.element('cac:TaxTotal', nest: () => tax.toXml(builder));
       builder.element('cac:LegalMonetaryTotal',
           nest: () => monetaryTotal.toXml(builder));

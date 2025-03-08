@@ -1,15 +1,39 @@
+import 'package:zatca_flutter/service/util.dart';
+
 import 'message.dart';
 import 'server_error_response.dart';
 import 'unauthorized_response.dart';
+import 'util.dart';
 
 enum InvoiceClearanceResponseStatus { cleared, notCleared, unauthorized, invalidRequest, unknown }
 
+class ClearanceData{
+  String clearedInvoice;
+  String clearanceStatus;
+
+  ClearanceData({required this.clearanceStatus, required this.clearedInvoice});
+
+  static ClearanceData fromJson(Map<String, dynamic> json){
+    return ClearanceData(
+      clearanceStatus: json['clearanceStatus'],
+      clearedInvoice: json['clearedInvoice'],
+    );
+  }
+
+  Map<String, dynamic> toJson(){
+    return {
+      'clearanceStatus': clearanceStatus,
+      'clearedInvoice':clearedInvoice,
+    };
+  }
+}
+
 class InvoiceClearanceResponse {
   final ValidationResults? validationResults;
-  final String? reportingStatus;
+  final ClearanceData? clearanceData;
   final String? clearanceStatus;
-  final String? qrSellertStatus;
-  final String? qrBuyertStatus;
+  final String? invoiceHash;
+  final String? clearedInvoice;
   final ServerErrorResponse? serverErrorResponse;
   final UnauthorizedResponse? unauthorizedResponse;
   final InvoiceClearanceResponseStatus status;
@@ -17,47 +41,43 @@ class InvoiceClearanceResponse {
 
   InvoiceClearanceResponse({
     this.validationResults,
-    this.reportingStatus,
+    this.clearanceData,
     this.clearanceStatus,
-    this.qrSellertStatus,
-    this.qrBuyertStatus,
     this.serverErrorResponse,
     this.unauthorizedResponse,
+    this.clearedInvoice,
+    this.invoiceHash,
     required this.status,
     required this.statusCode,
   });
 
   factory InvoiceClearanceResponse.fromJson(Map<String, dynamic> json, int statusCode) {
     return InvoiceClearanceResponse(
-      validationResults: json['validationResults'] != null
-          ? ValidationResults.fromJson(json['validationResults'])
-          : null,
+      validationResults: ValidationResults.fromJson(json['validationResults']),
+      clearanceData: json['validationResults'] != null ? ClearanceData.fromJson(json) : null,
       serverErrorResponse: ServerErrorResponse.fromJson(json, statusCode),
       unauthorizedResponse: UnauthorizedResponse.fromJson(json, statusCode),
-      reportingStatus: json['reportingStatus'],
       clearanceStatus: json['clearanceStatus'],
-      qrSellertStatus: json['qrSellertStatus'],
-      qrBuyertStatus: json['qrBuyertStatus'],
-      status: _parseStatus(json['status']),
+      status: _parseStatus(json['clearanceStatus']),
       statusCode: statusCode,
+      invoiceHash: json['invoiceHash'],
+      clearedInvoice: json['clearedInvoice'],
     );
   }
 
   Map<String, dynamic> toJson() => {
         'validationResults': validationResults?.toJson(),
-        'reportingStatus': reportingStatus,
+        'clearanceData': clearanceData?.toJson(),
         'clearanceStatus': clearanceStatus,
-        'qrSellertStatus': qrSellertStatus,
-        'qrBuyertStatus': qrBuyertStatus,
         'status': status.name,
         'statusCode': statusCode,
       };
 
   static InvoiceClearanceResponseStatus _parseStatus(String? status) {
-    switch (status?.toUpperCase()) {
-      case 'PASS':
+    switch (status?.toLowerCase()) {
+      case 'cleared':
         return InvoiceClearanceResponseStatus.cleared;
-      case 'ERROR':
+      case 'not cleared':
         return InvoiceClearanceResponseStatus.notCleared;
       default:
         return InvoiceClearanceResponseStatus.unknown;
@@ -69,14 +89,16 @@ class ValidationResults {
   final List<MessageModel>? infoMessages;
   final List<MessageModel>? warningMessages;
   final List<MessageModel>? errorMessages;
+  final String? status;
 
-  ValidationResults({this.infoMessages, this.warningMessages, this.errorMessages});
+  ValidationResults({this.infoMessages, this.warningMessages, this.errorMessages, this.status});
 
   factory ValidationResults.fromJson(Map<String, dynamic> json) {
     return ValidationResults(
-      infoMessages: _parseMessages(json['infoMessages']),
-      warningMessages: _parseMessages(json['warningMessages']),
-      errorMessages: _parseMessages(json['errorMessages']),
+      infoMessages: parseMessages(json['infoMessages']),
+      warningMessages: parseMessages(json['warningMessages']),
+      errorMessages: parseMessages(json['errorMessages']),
+      status: json['status']
     );
   }
 
@@ -84,14 +106,6 @@ class ValidationResults {
         'infoMessages': infoMessages?.map((m) => m.toJson()).toList(),
         'warningMessages': warningMessages?.map((m) => m.toJson()).toList(),
         'errorMessages': errorMessages?.map((m) => m.toJson()).toList(),
+        'status': status
       };
-
-  static List<MessageModel>? _parseMessages(dynamic data) {
-    if (data == null) return null;
-    if (data is List) {
-      return data.map((e) => MessageModel.fromJson(e)).toList();
-    } else {
-      return [MessageModel.fromJson(data)];
-    }
-  }
 }

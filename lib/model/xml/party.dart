@@ -14,9 +14,9 @@ abstract class PartyBase{
   toXml(XmlBuilder builder);
 }
 
-class Party extends PartyBase {
+class IndividualParty extends PartyBase {
 
-  Party({
+  IndividualParty({
     required super.name,
     required super.taxId,
     required super.address,
@@ -25,18 +25,8 @@ class Party extends PartyBase {
   @override
   void toXml(XmlBuilder builder) {
     builder.element('cac:Party', nest: () {
-      builder.element('cac:PartyIdentification', nest: () {
-        builder.element('cbc:ID', nest: taxId, attributes: {'schemeID': 'CRN'});
-      });
       builder.element('cac:PostalAddress', nest: () {
         builder.element('cbc:StreetName', nest: address);
-        // builder.element('cbc:BuildingNumber', nest: buildingNumber);
-        // builder.element('cbc:CitySubdivisionName', nest: citySubdivision);
-        // builder.element('cbc:CityName', nest: city);
-        // builder.element('cbc:PostalZone', nest: postalZone);
-        // builder.element('cac:Country', nest: () {
-        //   builder.element('cbc:IdentificationCode', nest: countryCode);
-        // });
       });
       builder.element('cac:PartyTaxScheme', nest: () {
         builder.element('cbc:CompanyID', nest: taxId);
@@ -51,7 +41,7 @@ class Party extends PartyBase {
   }
 }
 
-class SupplierParty extends PartyBase{
+class BusinessParty extends PartyBase{
 
   String buildingNumber;
   String citySubdivision;
@@ -60,7 +50,7 @@ class SupplierParty extends PartyBase{
   String countryCode;
   int crn;
 
-  SupplierParty({
+  BusinessParty({
     required super.address,
     required super.name,
     required super.taxId,

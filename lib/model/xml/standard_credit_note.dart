@@ -1,15 +1,16 @@
-import 'dart:convert';
-
+// Simplified Debit Note Model to hold the necessary data
 import 'package:xml/xml.dart';
+import 'package:zatca_flutter/model/xml/allowance_charge.dart';
+import 'package:zatca_flutter/model/xml/billing_reference.dart';
 import 'package:zatca_flutter/model/xml/delivery.dart';
 import 'package:zatca_flutter/model/xml/invoice_line.dart';
 import 'package:zatca_flutter/model/xml/legal_monetary_total.dart';
+import 'package:zatca_flutter/model/xml/party.dart';
+import 'package:zatca_flutter/model/xml/payment_means.dart';
 import 'package:zatca_flutter/model/xml/tax_details.dart';
 import 'package:zatca_flutter/service/util.dart';
 
-import 'party.dart';
-
-class StandardInvoice {
+class SimplifiedCreditNote {
   String id;
   int icv;
   String uuid;
@@ -22,9 +23,12 @@ class StandardInvoice {
   TaxDetails tax;
   LegalMonetaryTotal monetaryTotal;
   String pih;
+  BillingReference billingReference;
   Delivery delivery;
+  PaymentMeans paymentMeans;
+  AllowanceCharge? allowanceCharge;
 
-  StandardInvoice({
+  SimplifiedCreditNote({
     required this.icv,
     required this.id,
     required this.uuid,
@@ -38,26 +42,13 @@ class StandardInvoice {
     required this.monetaryTotal,
     // this.isFirstInvoice = false,
     required this.pih,
-    required this.delivery
+    required this.billingReference,
+    required this.paymentMeans,
+    required this.delivery,
+    this.allowanceCharge,
   });
 
-  Map<String, dynamic> toJson() {
-    return {
-      "id": id,
-      "uuid": uuid,
-      "issueDate": issueDate.toIso8601String().split('T')[0],
-      "issuedTime": issueTime.toIso8601String().split('T')[1].split('.')[0],
-      "currency": currency,
-      "supplier": supplier,
-      "customer": customer,
-      "lines": lines.map((item) => item.toJson()).toList(),
-      "tax": tax.toJson(),
-    };
-  }
-
-  String toJsonString() => jsonEncode(toJson());
-
-  String toXml() {
+  String toXml(){
     final builder = XmlBuilder();
     builder.processing('xml', 'version="1.0" encoding="UTF-8"');
     builder.element('Invoice', namespaces: {
@@ -77,14 +68,13 @@ class StandardInvoice {
       builder.element('cbc:IssueTime',
           nest: issueTime.toIso8601String().split('T')[1].split('.')[0]);
       builder.element('cbc:InvoiceTypeCode',
-          nest: '388', attributes: {'name': '0100000'});
+          nest: '383', attributes: {'name': '0211010'});
       builder.element('cbc:DocumentCurrencyCode', nest: currency);
       // builder.element('cbc:Note', nest: 'en');
       builder.element('cbc:TaxCurrencyCode', nest: currency);
 
-      // if(pih.isEmpty){
-      //   builder.element('cbc:PreviousInvoiceHash', nest: 'urn:ietf:rfc:3986');
-      // }
+      // Build the BillingReference element.
+      billingReference.toXml(builder);
 
       builder.element('cac:AdditionalDocumentReference', nest: () {
         builder.element('cbc:ID', nest: 'ICV');
@@ -107,22 +97,16 @@ class StandardInvoice {
       // Delivery builder
       delivery.toXml(builder);
 
-      // builder.element('cac:AllowanceCharge', nest: (){
-      //   builder.element('cbc:ChargeIndicator', nest: false);
-      //   builder.element('cbc:AllowanceChargeReason', nest: 'discount');
-      //   builder.element('cbc:Amount', attributes: {'currencyID': 'SAR'}, nest:0.00);
-      //   builder.element('cac:TaxCategory', nest: (){
-      //     builder.element('cbc:ID', attributes: {'schemeID': 'UN/ECE 5305', 'schemeAgencyID': '6'}, nest: 'S');
-      //     builder.element('cbc:Percent', nest: tax.percent);
-      //     builder.element('cac:TaxScheme', nest: (){
-      //       builder.element('cbc:ID', attributes: {'schemeID': 'UN/ECE 5153', 'schemeAgencyID': '6'}, nest: 'VAT');
-      //     });
-      //   });
-      // });
+      // PaymentMeans Builder
+      paymentMeans.toXml(builder);
+
+      // AllowanceCharge builder
+      allowanceCharge?.toXml(builder);
 
       builder.element('cac:TaxTotal', nest:(){
         builder.element('cbc:TaxAmount', attributes: {'currencyID': tax.currency}, nest: tax.amount);
       });
+      
       builder.element('cac:TaxTotal', nest: () => tax.toXml(builder));
       builder.element('cac:LegalMonetaryTotal',
           nest: () => monetaryTotal.toXml(builder));
@@ -131,12 +115,14 @@ class StandardInvoice {
         InvoiceLine line = lines[id];
         builder.element('cac:InvoiceLine', nest: () => line.toXml(builder, id));
       }
+
+
     });
+
     return builder.buildDocument().toXmlString(pretty: true);
   }
 
   Future<void> generateAndSaveXml(String fileName)async{
-    await saveToFile(toXml(), fileName);
+    saveToFile(toXml(), fileName);
   }
-  
 }

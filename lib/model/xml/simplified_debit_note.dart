@@ -16,10 +16,9 @@ class SimplifiedDebitNote {
   String uuid;
   DateTime issueDate;
   DateTime issueTime;
-  String typeCode;
   String currency;
-  SupplierParty supplier;
-  Party customer;
+  BusinessParty supplier;
+  IndividualParty customer;
   List<InvoiceLine> lines;
   TaxDetails tax;
   LegalMonetaryTotal monetaryTotal;
@@ -35,7 +34,6 @@ class SimplifiedDebitNote {
     required this.uuid,
     required this.issueDate,
     required this.issueTime,
-    required this.typeCode,
     required this.currency,
     required this.supplier,
     required this.customer,
@@ -106,7 +104,7 @@ class SimplifiedDebitNote {
       allowanceCharge?.toXml(builder);
 
       builder.element('cac:TaxTotal', nest:(){
-        builder.element('cbc:TaxAmount', attributes: {'currencyID': 'SAR'}, nest: tax.amount);
+        builder.element('cbc:TaxAmount', attributes: {'currencyID': tax.currency}, nest: tax.amount);
       });
       builder.element('cac:TaxTotal', nest: () => tax.toXml(builder));
       builder.element('cac:LegalMonetaryTotal',

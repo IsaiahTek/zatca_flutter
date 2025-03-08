@@ -210,3 +210,16 @@ String _generateHex(math.Random random, int length){
   final hexDigits = '0123456789abcdef';
   return List.generate(length, (_) => hexDigits[random.nextInt(hexDigits.length)]).join();
 }
+
+String getNowDateTimeYyyyMmDdHhMmSs(){
+  final dT = DateTime.now();
+  return '${dT.year}${dT.month}${dT.day}${dT.hour}${dT.minute}${dT.second}';
+}
+
+String getZatcaCompliantDate(DateTime date){
+  return date.toIso8601String().split('T')[0];
+}
+
+String getZatcaCompliantTime(DateTime time){
+  return time.toIso8601String().split('T')[1].split('.')[0];
+}

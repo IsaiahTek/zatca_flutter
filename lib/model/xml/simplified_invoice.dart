@@ -14,10 +14,9 @@ class SimplifiedInvoice {
   String uuid;
   DateTime issueDate;
   DateTime issueTime;
-  String typeCode;
   String currency;
-  SupplierParty supplier;
-  Party customer;
+  BusinessParty supplier;
+  IndividualParty customer;
   List<InvoiceLine> lines;
   TaxDetails tax;
   LegalMonetaryTotal monetaryTotal;
@@ -29,7 +28,6 @@ class SimplifiedInvoice {
     required this.uuid,
     required this.issueDate,
     required this.issueTime,
-    required this.typeCode,
     required this.currency,
     required this.supplier,
     required this.customer,
@@ -46,7 +44,6 @@ class SimplifiedInvoice {
       "uuid": uuid,
       "issueDate": issueDate.toIso8601String().split('T')[0],
       "issuedTime": issueTime.toIso8601String().split('T')[1].split('.')[0],
-      "typeCode": typeCode,
       "currency": currency,
       "supplier": supplier,
       "customer": customer,
@@ -104,21 +101,21 @@ class SimplifiedInvoice {
       builder.element('cac:AccountingCustomerParty',
           nest: () => customer.toXml(builder));
 
-      builder.element('cac:AllowanceCharge', nest: (){
-        builder.element('cbc:ChargeIndicator', nest: false);
-        builder.element('cbc:AllowanceChargeReason', nest: 'discount');
-        builder.element('cbc:Amount', attributes: {'currencyID': 'SAR'}, nest:0.00);
-        builder.element('cac:TaxCategory', nest: (){
-          builder.element('cbc:ID', attributes: {'schemeID': 'UN/ECE 5305', 'schemeAgencyID': '6'}, nest: 'S');
-          builder.element('cbc:Percent', nest: tax.percent);
-          builder.element('cac:TaxScheme', nest: (){
-            builder.element('cbc:ID', attributes: {'schemeID': 'UN/ECE 5153', 'schemeAgencyID': '6'}, nest: 'VAT');
-          });
-        });
-      });
+      // builder.element('cac:AllowanceCharge', nest: (){
+      //   builder.element('cbc:ChargeIndicator', nest: false);
+      //   builder.element('cbc:AllowanceChargeReason', nest: 'discount');
+      //   builder.element('cbc:Amount', attributes: {'currencyID': 'SAR'}, nest:0.00);
+      //   builder.element('cac:TaxCategory', nest: (){
+      //     builder.element('cbc:ID', attributes: {'schemeID': 'UN/ECE 5305', 'schemeAgencyID': '6'}, nest: 'S');
+      //     builder.element('cbc:Percent', nest: tax.percent);
+      //     builder.element('cac:TaxScheme', nest: (){
+      //       builder.element('cbc:ID', attributes: {'schemeID': 'UN/ECE 5153', 'schemeAgencyID': '6'}, nest: 'VAT');
+      //     });
+      //   });
+      // });
 
       builder.element('cac:TaxTotal', nest:(){
-        builder.element('cbc:TaxAmount', attributes: {'currencyID': 'SAR'}, nest: tax.amount);
+        builder.element('cbc:TaxAmount', attributes: {'currencyID': tax.currency}, nest: tax.amount);
       });
       builder.element('cac:TaxTotal', nest: () => tax.toXml(builder));
       builder.element('cac:LegalMonetaryTotal',

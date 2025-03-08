@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'package:zatca_flutter/model/fatoora_invoice_hash_response.dart';
 import 'package:zatca_flutter/model/fatoora_invoice_request_api_response.dart';
 import 'package:zatca_flutter/model/fatoora_qr_code_response.dart';
 import 'package:zatca_flutter/model/invoice_request.dart';
@@ -74,8 +75,7 @@ class FatooraService {
   }
 
   static _writeLogToFile(String message) async {
-    DateTime dT = DateTime.now();
-    await saveToFile(message, "fatoora-error-${dT.year}${dT.month}${dT.day}${dT.hour}${dT.minute}${dT.second} q.log", folder: 'logs');
+    await saveToFile(message, "fatoora-error-${getNowDateTimeYyyyMmDdHhMmSs()}.log", folder: 'logs');
   }
 
   static String? _getNewFileName(
@@ -216,8 +216,27 @@ class FatooraService {
   }
 
   /// Generate Invoice Hash
-  static generateInvoiceHash(String invoiceFileName) {
-    return _runCommand(['-generateHash', '-invoice', invoiceFileName]);
+  static Future<FatooraInvoiceHashResponse> generateInvoiceHash(String invoiceFileName) async {
+    final res = await _runCommand(['-generateHash', '-invoice', invoiceFileName]);
+    String? extractHash(String raw) {
+      RegExp regex = RegExp(r'INVOICE HASH = (.+)');
+      Match? match = regex.firstMatch(raw);
+      return match?.group(1);
+    }
+    String? hashValue;
+    ResponseStatus status = ResponseStatus.failure;
+    if (res.infos != null) {
+      for (var element in res.infos!) {
+        hashValue = extractHash(element.message);
+        if (hashValue != null) {
+          status = ResponseStatus.success;
+          break;
+        }
+      }
+    }
+    logInfo("HASH VALUE AFTER GENERATION = $hashValue AND STATUS = ${status.name.toUpperCase()}");
+    return FatooraInvoiceHashResponse(
+        hashValue: hashValue, response: res, status: status);
   }
 
   /// Generate QR Code
@@ -248,7 +267,7 @@ class FatooraService {
 
   /// Generate Invoice Request API
   static Future<FatooraInvoiceRequestApiResponse> generateInvoiceRequestAPI(
-      {required String invoiceFileName, String? outputJsonFileName}) async {
+      {required String invoiceFileName, String? outputJsonFileName, bool forClearance = false}) async {
     List<String> allJsonFilesBeforeExecution =
         await getAllFileNamesByExtension('json');
     FatooraServiceResponse response = await _runCommand([
@@ -282,6 +301,14 @@ class FatooraService {
       if(raw != null){
         invoiceRequest = InvoiceRequest.fromMap(
             jsonDecode(raw));
+        if(forClearance){
+          final res = await generateInvoiceHash(invoiceFileName);
+          if(res.hashValue != null){
+            final newIR = InvoiceRequest(invoice: invoiceRequest.invoice, invoiceHash: res.hashValue!, uuid: invoiceRequest.uuid);
+            saveToFile(jsonEncode(newIR.toMap()), finalOutputFileName);
+            invoiceRequest = newIR;
+          }
+        }
       }
     }
     // response.infos.first.

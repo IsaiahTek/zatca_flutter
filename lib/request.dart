@@ -421,13 +421,12 @@ abstract class RequestBase {
       'Accept-Language': 'en',
       'Accept-Version': 'V2',
       'Content-Type': 'application/json',
-      'Clearance-Status': '0'
+      'Clearance-Status': '0' // Disabled
     };
 
     try {
       Uri url = Uri.parse(_reportingUrl);
       final body = jsonEncode(prop.toMap());
-      logInfo("Compliance check body: $body AND URL $url");
       final response = await http.post(url, headers: headers, body: body);
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
@@ -447,7 +446,7 @@ abstract class RequestBase {
   }
 
   Future<InvoiceClearanceResponse?> requestClearance(
-      InvoiceRequest prop) async {
+      InvoiceRequest prop, {String? clearedInvoiceName}) async {
     String basicAuth =
         'Basic ${base64Encode(utf8.encode('${pcsidTokeys?.token}:${pcsidTokeys?.secret}'))}';
 
@@ -456,24 +455,32 @@ abstract class RequestBase {
       'Accept-Language': 'en',
       'Accept-Version': 'V2',
       'Content-Type': 'application/json',
-      // 'Clearance-Status': '0'
+      'Clearance-Status': '1' // Enabled
     };
-
-    final Map<String, dynamic> body = prop.toMap();
 
     try {
       final url = Uri.parse(_clearanceUrl);
-      final response = await http.post(
-        url,
-        headers: headers,
-        body: jsonEncode(body),
-      );
+      final body = jsonEncode(prop.toMap());
+      final response = await http.post(url, headers: headers, body: body);
 
-      InvoiceClearanceResponse res = InvoiceClearanceResponse.fromJson(
-          jsonDecode(response.body), response.statusCode);
+      final jsonResponse = jsonDecode(response.body);
+      logInfo("RESPONSE json $jsonResponse");
 
-      return res;
+      InvoiceClearanceResponse clearanceResponse = InvoiceClearanceResponse.fromJson(
+          jsonResponse, response.statusCode);
+      
+      if(clearanceResponse.clearedInvoice != null){
+        String base64DecodedInvoice = utf8.decode(base64Decode(clearanceResponse.clearedInvoice!));
+        saveToFile(base64DecodedInvoice, clearedInvoiceName??'cleared_invoice${getNowDateTimeYyyyMmDdHhMmSs()}.xml', folder: 'standard');
+      }
+      // if (response.statusCode >= 200 && response.statusCode < 300) {
+      // } else {
+      //   log('HTTP error: ${response.reasonPhrase} AND ${response.body}');
+      //   return null;
+      // }
+      return clearanceResponse;
     } catch (e) {
+      logError("ERROR CLEARING INVOICE: $e");
       return null;
     }
   }
