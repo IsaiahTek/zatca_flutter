@@ -1,5 +1,7 @@
 // Simplified Debit Note Model to hold the necessary data
 import 'package:xml/xml.dart';
+import 'package:zatca_flutter/local_store.dart';
+import 'package:zatca_flutter/model/my_business_info.dart';
 import 'package:zatca_flutter/model/xml/allowance_charge.dart';
 import 'package:zatca_flutter/model/xml/billing_reference.dart';
 import 'package:zatca_flutter/model/xml/delivery.dart';
@@ -17,7 +19,6 @@ class SimplifiedCreditNote {
   DateTime issueDate;
   DateTime issueTime;
   String currency;
-  BusinessParty supplier;
   IndividualParty customer;
   List<InvoiceLine> lines;
   TaxDetails tax;
@@ -28,6 +29,8 @@ class SimplifiedCreditNote {
   PaymentMeans paymentMeans;
   AllowanceCharge? allowanceCharge;
 
+  MyBusinessInfo? get supplier => LocalStore.instance.myBusinessInfo;
+
   SimplifiedCreditNote({
     required this.icv,
     required this.id,
@@ -35,7 +38,6 @@ class SimplifiedCreditNote {
     required this.issueDate,
     required this.issueTime,
     required this.currency,
-    required this.supplier,
     required this.customer,
     required this.lines,
     required this.tax,
@@ -49,6 +51,9 @@ class SimplifiedCreditNote {
   });
 
   String toXml(){
+    if(supplier == null){
+      throw Exception("You need to first set your business info");
+    }
     final builder = XmlBuilder();
     builder.processing('xml', 'version="1.0" encoding="UTF-8"');
     builder.element('Invoice', namespaces: {
@@ -90,7 +95,7 @@ class SimplifiedCreditNote {
       });
 
       builder.element('cac:AccountingSupplierParty',
-          nest: () => supplier.toXml(builder));
+          nest: () => supplier?.toXml(builder));
       builder.element('cac:AccountingCustomerParty',
           nest: () => customer.toXml(builder));
 
@@ -122,7 +127,10 @@ class SimplifiedCreditNote {
     return builder.buildDocument().toXmlString(pretty: true);
   }
 
-  Future<void> generateAndSaveXml(String fileName)async{
-    saveToFile(toXml(), fileName);
+  Future<String?> generateAndSaveXml(String fileName)async{
+    if(supplier != null){
+      return null;
+    }
+    return await saveToFile(toXml(), fileName);
   }
 }

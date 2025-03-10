@@ -1,5 +1,6 @@
-import 'package:zatca_flutter/request.dart';
 import 'package:zatca_flutter/service/fatoora_service_finder.dart';
+
+import 'local_store.dart';
 
 /// Zatca Flutter Entry point.
 class ZatcaFlutter{

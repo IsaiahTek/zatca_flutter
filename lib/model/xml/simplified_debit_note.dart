@@ -1,5 +1,7 @@
 // Simplified Debit Note Model to hold the necessary data
 import 'package:xml/xml.dart';
+import 'package:zatca_flutter/local_store.dart';
+import 'package:zatca_flutter/model/my_business_info.dart';
 import 'package:zatca_flutter/model/xml/allowance_charge.dart';
 import 'package:zatca_flutter/model/xml/billing_reference.dart';
 import 'package:zatca_flutter/model/xml/delivery.dart';
@@ -17,7 +19,6 @@ class SimplifiedDebitNote {
   DateTime issueDate;
   DateTime issueTime;
   String currency;
-  BusinessParty supplier;
   IndividualParty customer;
   List<InvoiceLine> lines;
   TaxDetails tax;
@@ -28,6 +29,8 @@ class SimplifiedDebitNote {
   PaymentMeans paymentMeans;
   AllowanceCharge? allowanceCharge;
 
+  MyBusinessInfo? get supplier => LocalStore.instance.myBusinessInfo;
+
   SimplifiedDebitNote({
     required this.icv,
     required this.id,
@@ -35,7 +38,6 @@ class SimplifiedDebitNote {
     required this.issueDate,
     required this.issueTime,
     required this.currency,
-    required this.supplier,
     required this.customer,
     required this.lines,
     required this.tax,
@@ -90,7 +92,7 @@ class SimplifiedDebitNote {
       });
 
       builder.element('cac:AccountingSupplierParty',
-          nest: () => supplier.toXml(builder));
+          nest: () => supplier?.toXml(builder));
       builder.element('cac:AccountingCustomerParty',
           nest: () => customer.toXml(builder));
 

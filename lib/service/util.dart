@@ -197,6 +197,11 @@ Future<String> saveToFile(String content, String fileName, {String? folder}) asy
   return file.path;
 }
 
+saveToAbsolutePath(String content, String path) {
+  File file = File(path);
+  file.writeAsString(content);
+}
+
 String getPIHForFirstInvoice(){
   return 'NWZlY2ViNjZmZmM4NmYzOGQ5NTI3ODZjNmQ2OTZjNzljMmRiYzIzOWRkNGU5MWI0NjcyOWQ3M2EyN2ZiNTdlOQ==';
 }

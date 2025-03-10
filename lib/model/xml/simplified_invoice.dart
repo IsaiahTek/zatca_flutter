@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:xml/xml.dart';
+import 'package:zatca_flutter/local_store.dart';
+import 'package:zatca_flutter/model/my_business_info.dart';
 import 'package:zatca_flutter/model/xml/invoice_line.dart';
 import 'package:zatca_flutter/model/xml/legal_monetary_total.dart';
 import 'package:zatca_flutter/model/xml/tax_details.dart';
@@ -15,12 +17,13 @@ class SimplifiedInvoice {
   DateTime issueDate;
   DateTime issueTime;
   String currency;
-  BusinessParty supplier;
   IndividualParty customer;
   List<InvoiceLine> lines;
   TaxDetails tax;
   LegalMonetaryTotal monetaryTotal;
   String pih;
+
+  MyBusinessInfo? get supplier => LocalStore.instance.myBusinessInfo;
 
   SimplifiedInvoice({
     required this.icv,
@@ -29,7 +32,6 @@ class SimplifiedInvoice {
     required this.issueDate,
     required this.issueTime,
     required this.currency,
-    required this.supplier,
     required this.customer,
     required this.lines,
     required this.tax,
@@ -97,7 +99,7 @@ class SimplifiedInvoice {
       });
 
       builder.element('cac:AccountingSupplierParty',
-          nest: () => supplier.toXml(builder));
+          nest: () => supplier?.toXml(builder));
       builder.element('cac:AccountingCustomerParty',
           nest: () => customer.toXml(builder));
 

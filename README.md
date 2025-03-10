@@ -27,7 +27,7 @@ Signing an invoice requires using the necessary certificate. But you don't need 
 If you want to use the signed document for reporting (as required for Standard Invoice/Note reporting) then you might omit the `forChecks` or explicitly indicate it's for reporting by passing in `forChecks:false` to the `FatooraService.signInvoice()` method.
 
 ### Generating Invoice RequestAPI `FatooraService.generateInvoiceRequestAPI`
-Invoice/Note request API is the JSON data format that consist of `uuid`, `invoiceHash` and `invoice` data and is required for invoice/note clearance.
+Invoice/Note request API is the JSON data format that consist of `uuid`, `invoiceHash` and `invoice` data and is required for invoice/note compliance check, reporting, and clearance.
 If you want to generate the request API for clearance, you should pass in `forClearance:true` to the `FatooraService.generateInvoiceRequestAPI()` method. Otherwise, the plugin assumes you are generating the request API for reporting.
 
 
