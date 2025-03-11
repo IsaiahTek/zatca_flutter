@@ -8,20 +8,24 @@ import 'package:zatca_flutter/model/csr_config.dart';
 import 'package:zatca_flutter/model/invoice_request.dart';
 import 'package:zatca_flutter/service/fatoora_service_finder.dart';
 
-String _getBaseName(String fullPath){
+String _getBaseName(String fullPath) {
   String separator = Platform.pathSeparator;
   List<String> paths = fullPath.split(separator);
-  return paths.isNotEmpty?paths.last:fullPath;
+  return paths.isNotEmpty ? paths.last : fullPath;
 }
 
 /// Needed for reading any user generated file content as string.
-Future<String?> getFileContentAsString(String fileName, {String? folder}) async {
+Future<String?> getFileContentAsString(String fileName,
+    {String? folder}) async {
   return _getFileContentAsString(fileName, folder: folder);
 }
-Future<String?> _getFileContentAsString(String fileName, {String? folder}) async {
+
+Future<String?> _getFileContentAsString(String fileName,
+    {String? folder}) async {
   String directory = await _getStorageFolderPath();
-  final dir = Directory("$directory${folder != null ?'${Platform.pathSeparator}$folder':''}");
-  if(!(await dir.exists())){
+  final dir = Directory(
+      "$directory${folder != null ? '${Platform.pathSeparator}$folder' : ''}");
+  if (!(await dir.exists())) {
     await dir.create();
   }
   String? content;
@@ -29,19 +33,20 @@ Future<String?> _getFileContentAsString(String fileName, {String? folder}) async
     final File file = File("${dir.path}${Platform.pathSeparator}$fileName");
     content = await file.readAsString();
   } catch (e) {
-    // 
+    //
   }
   return content;
 }
 
 /// Needed for getting the package storage folder path on the user system.
-Future<String> getStorageFolderPath()async{
+Future<String> getStorageFolderPath() async {
   return _getStorageFolderPath();
 }
 
-Future<String> _getStorageFolderPath()async{
+Future<String> _getStorageFolderPath() async {
   Directory appDocumentDirectory = await getApplicationDocumentsDirectory();
-  String path = "${appDocumentDirectory.path}${Platform.pathSeparator}zatca_flutter";
+  String path =
+      "${appDocumentDirectory.path}${Platform.pathSeparator}zatca_flutter";
   Directory dir = Directory(path);
   if (!(await dir.exists())) {
     await dir.create(recursive: true);
@@ -53,22 +58,21 @@ Future<String> _getStorageFolderPath()async{
 /// ```
 /// getAllFileNamesByExtension('example')
 /// ```
-/// 
+///
 /// Notice it doesn't require the dot to be added`
-Future<List<String>> getAllFileNamesByExtension(String extension){
+Future<List<String>> getAllFileNamesByExtension(String extension) {
   return _getAllFileNamesByExtension(extension);
 }
 
- 
 Future<List<String>> _getAllFileNamesByExtension(String extension) async {
-    final directory = Directory(await getStorageFolderPath());
-    final files = await directory.list().toList();
-    final keyFiles = files
-        .where((file) => file.path.endsWith('.$extension'))
-        .map((file) => _getBaseName(file.path))
-        .toList();
-    return keyFiles;
-  }
+  final directory = Directory(await getStorageFolderPath());
+  final files = await directory.list().toList();
+  final keyFiles = files
+      .where((file) => file.path.endsWith('.$extension'))
+      .map((file) => _getBaseName(file.path))
+      .toList();
+  return keyFiles;
+}
 
 /// Generates a CSR configuration file
 Future<String> createCsrConfigFile({
@@ -76,6 +80,7 @@ Future<String> createCsrConfigFile({
 }) async {
   return _createCsrConfigFile(csrConfig: csrConfig);
 }
+
 Future<String> _createCsrConfigFile({
   required CsrConfig csrConfig,
 }) async {
@@ -139,13 +144,18 @@ Future<CsrConfig?> _loadCsrConfig() async {
   return CsrConfig.fromMap(properties);
 }
 
-Future<InvoiceRequest?> loadInvoiceRequest({required String fileName, bool useAsAbsolutePath = false})async{
-  return _loadInvoiceRequest(fileName: fileName, useAsAbsolutePath: useAsAbsolutePath);
+Future<InvoiceRequest?> loadInvoiceRequest(
+    {required String fileName, bool useAsAbsolutePath = false}) async {
+  return _loadInvoiceRequest(
+      fileName: fileName, useAsAbsolutePath: useAsAbsolutePath);
 }
 
-Future<InvoiceRequest?> _loadInvoiceRequest({required String fileName, bool useAsAbsolutePath = false})async{
+Future<InvoiceRequest?> _loadInvoiceRequest(
+    {required String fileName, bool useAsAbsolutePath = false}) async {
   String docPath = await getStorageFolderPath();
-  String computedPath = useAsAbsolutePath ? fileName : "$docPath${Platform.pathSeparator}$fileName";
+  String computedPath = useAsAbsolutePath
+      ? fileName
+      : "$docPath${Platform.pathSeparator}$fileName";
   final file = File(computedPath);
   if (!await file.exists()) {
     logError("File not found: $computedPath");
@@ -159,38 +169,43 @@ Future<InvoiceRequest?> _loadInvoiceRequest({required String fileName, bool useA
 }
 
 /// Rename File if needed
-Future<bool> renameFile({required String oldName, required String newName})async{
+Future<bool> renameFile(
+    {required String oldName, required String newName}) async {
   return _renameFile(oldName: oldName, newName: newName);
 }
 
-Future<bool> _renameFile({required String oldName, required String newName})async{
+Future<bool> _renameFile(
+    {required String oldName, required String newName}) async {
   try {
     String oldPath = await getStorageFolderPath();
     File file = File("$oldPath${Platform.pathSeparator}$oldName");
     file = await file.rename("$oldPath${Platform.pathSeparator}$newName");
-    return _getBaseName(file.path) == newName; 
+    return _getBaseName(file.path) == newName;
   } catch (e) {
     logError("ERROR RENAMING FILE: $e");
     return false;
   }
 }
 
-void logError(String message){
+void logError(String message) {
   log("\x1B[31m $message");
 }
-void logInfo(String message){
+
+void logInfo(String message) {
   log("\x1b[38;5;32m $message");
 }
 
 /// Create a file and write the string as the content to the file.
-Future<String> saveToFile(String content, String fileName, {String? folder}) async {
+Future<String> saveToFile(String content, String fileName,
+    {String? folder}) async {
   final String directory = await getStorageFolderPath();
-  final dir = Directory("$directory${folder != null ?'${Platform.pathSeparator}$folder':''}");
-  if(!(await dir.exists())){
+  final dir = Directory(
+      "$directory${folder != null ? '${Platform.pathSeparator}$folder' : ''}");
+  if (!(await dir.exists())) {
     await dir.create();
   }
   final file = File("${dir.path}${Platform.pathSeparator}$fileName");
-  if(!(await file.exists())){
+  if (!(await file.exists())) {
     await file.create();
   }
   await file.writeAsString(content);
@@ -202,29 +217,30 @@ saveToAbsolutePath(String content, String path) {
   file.writeAsString(content);
 }
 
-String getPIHForFirstInvoice(){
+String getPIHForFirstInvoice() {
   return 'NWZlY2ViNjZmZmM4NmYzOGQ5NTI3ODZjNmQ2OTZjNzljMmRiYzIzOWRkNGU5MWI0NjcyOWQ3M2EyN2ZiNTdlOQ==';
 }
 
-String generateUuid(){
+String generateUuid() {
   math.Random random = math.Random();
   return '${_generateHex(random, 8)}-${_generateHex(random, 4)}-${_generateHex(random, 4)}-${_generateHex(random, 4)}-${_generateHex(random, 12)}';
 }
 
-String _generateHex(math.Random random, int length){
+String _generateHex(math.Random random, int length) {
   final hexDigits = '0123456789abcdef';
-  return List.generate(length, (_) => hexDigits[random.nextInt(hexDigits.length)]).join();
+  return List.generate(
+      length, (_) => hexDigits[random.nextInt(hexDigits.length)]).join();
 }
 
-String getNowDateTimeYyyyMmDdHhMmSs(){
+String getNowDateTimeYyyyMmDdHhMmSs() {
   final dT = DateTime.now();
   return '${dT.year}${dT.month}${dT.day}${dT.hour}${dT.minute}${dT.second}';
 }
 
-String getZatcaCompliantDate(DateTime date){
+String getZatcaCompliantDate(DateTime date) {
   return date.toIso8601String().split('T')[0];
 }
 
-String getZatcaCompliantTime(DateTime time){
+String getZatcaCompliantTime(DateTime time) {
   return time.toIso8601String().split('T')[1].split('.')[0];
 }

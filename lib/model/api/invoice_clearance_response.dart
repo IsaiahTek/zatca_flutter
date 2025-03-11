@@ -5,25 +5,31 @@ import 'server_error_response.dart';
 import 'unauthorized_response.dart';
 import 'util.dart';
 
-enum InvoiceClearanceResponseStatus { cleared, notCleared, unauthorized, invalidRequest, unknown }
+enum InvoiceClearanceResponseStatus {
+  cleared,
+  notCleared,
+  unauthorized,
+  invalidRequest,
+  unknown
+}
 
-class ClearanceData{
+class ClearanceData {
   String clearedInvoice;
   String clearanceStatus;
 
   ClearanceData({required this.clearanceStatus, required this.clearedInvoice});
 
-  static ClearanceData fromJson(Map<String, dynamic> json){
+  static ClearanceData fromJson(Map<String, dynamic> json) {
     return ClearanceData(
       clearanceStatus: json['clearanceStatus'],
       clearedInvoice: json['clearedInvoice'],
     );
   }
 
-  Map<String, dynamic> toJson(){
+  Map<String, dynamic> toJson() {
     return {
       'clearanceStatus': clearanceStatus,
-      'clearedInvoice':clearedInvoice,
+      'clearedInvoice': clearedInvoice,
     };
   }
 }
@@ -51,10 +57,13 @@ class InvoiceClearanceResponse {
     required this.statusCode,
   });
 
-  factory InvoiceClearanceResponse.fromJson(Map<String, dynamic> json, int statusCode) {
+  factory InvoiceClearanceResponse.fromJson(
+      Map<String, dynamic> json, int statusCode) {
     return InvoiceClearanceResponse(
       validationResults: ValidationResults.fromJson(json['validationResults']),
-      clearanceData: json['validationResults'] != null ? ClearanceData.fromJson(json) : null,
+      clearanceData: json['validationResults'] != null
+          ? ClearanceData.fromJson(json)
+          : null,
       serverErrorResponse: ServerErrorResponse.fromJson(json, statusCode),
       unauthorizedResponse: UnauthorizedResponse.fromJson(json, statusCode),
       clearanceStatus: json['clearanceStatus'],
@@ -91,15 +100,18 @@ class ValidationResults {
   final List<MessageModel>? errorMessages;
   final String? status;
 
-  ValidationResults({this.infoMessages, this.warningMessages, this.errorMessages, this.status});
+  ValidationResults(
+      {this.infoMessages,
+      this.warningMessages,
+      this.errorMessages,
+      this.status});
 
   factory ValidationResults.fromJson(Map<String, dynamic> json) {
     return ValidationResults(
-      infoMessages: parseMessages(json['infoMessages']),
-      warningMessages: parseMessages(json['warningMessages']),
-      errorMessages: parseMessages(json['errorMessages']),
-      status: json['status']
-    );
+        infoMessages: parseMessages(json['infoMessages']),
+        warningMessages: parseMessages(json['warningMessages']),
+        errorMessages: parseMessages(json['errorMessages']),
+        status: json['status']);
   }
 
   Map<String, dynamic> toJson() => {

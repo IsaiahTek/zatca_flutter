@@ -39,7 +39,7 @@ class FatooraServiceFinder {
     _path = path;
   }
 
-  set setSdkHome(String path){
+  set setSdkHome(String path) {
     _sdkConfig = path;
   }
 
@@ -90,7 +90,7 @@ class FatooraServiceFinder {
         fatooraHomeSearchArgs = ['-c', 'echo \$FATOORA_HOME'];
         sdkConfigSearchArgs = ['-c', 'echo \$SDK_CONFIG'];
       }
-      
+
       Process.run(command, fatooraHomeSearchArgs, runInShell: true)
           .then((data) {
         String fHome = data.stdout.toString().trim();

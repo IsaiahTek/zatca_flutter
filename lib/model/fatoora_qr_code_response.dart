@@ -6,9 +6,6 @@ class FatooraQrCodeResponse {
   final FatooraServiceResponse response;
   final String? qrCode;
 
-  const FatooraQrCodeResponse({
-    required this.qrCode,
-    required this.response,
-    required this.status
-  });
+  const FatooraQrCodeResponse(
+      {required this.qrCode, required this.response, required this.status});
 }

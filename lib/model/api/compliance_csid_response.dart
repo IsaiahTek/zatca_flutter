@@ -19,7 +19,8 @@ class ComplianceCSIDResponse {
   });
 
   /// Parses JSON into the appropriate response type (Success, Error, or Failure).
-  factory ComplianceCSIDResponse.fromJson(int statusCode, Map<String, dynamic> json) {
+  factory ComplianceCSIDResponse.fromJson(
+      int statusCode, Map<String, dynamic> json) {
     CSIDResponseStatus status = _getStatus(statusCode);
 
     if (status == CSIDResponseStatus.success && json.containsKey('requestID')) {
@@ -28,26 +29,33 @@ class ComplianceCSIDResponse {
         status: status,
         successData: ComplianceSuccessData.fromJson(json),
       );
-    } else if (status == CSIDResponseStatus.clientError && json.containsKey('errors')) {
+    } else if (status == CSIDResponseStatus.clientError &&
+        json.containsKey('errors')) {
       return ComplianceCSIDResponse(
         statusCode: statusCode,
         status: status,
         errorData: ComplianceErrorData.fromJson(json),
       );
-    } else if (status == CSIDResponseStatus.serverError && json.containsKey('code') && json.containsKey('message')) {
+    } else if (status == CSIDResponseStatus.serverError &&
+        json.containsKey('code') &&
+        json.containsKey('message')) {
       return ComplianceCSIDResponse(
         statusCode: statusCode,
         status: status,
         failureData: ComplianceFailureData.fromJson(json),
       );
     } else {
-      return ComplianceCSIDResponse(statusCode: statusCode, status: CSIDResponseStatus.unknown);
+      return ComplianceCSIDResponse(
+          statusCode: statusCode, status: CSIDResponseStatus.unknown);
     }
   }
 
   /// Converts the model back to JSON.
   Map<String, dynamic> toJson() {
-    Map<String, dynamic> json = {'statusCode': statusCode, 'status': status.toString().split('.').last};
+    Map<String, dynamic> json = {
+      'statusCode': statusCode,
+      'status': status.toString().split('.').last
+    };
     if (successData != null) json.addAll(successData!.toJson());
     if (errorData != null) json.addAll(errorData!.toJson());
     if (failureData != null) json.addAll(failureData!.toJson());
@@ -58,7 +66,8 @@ class ComplianceCSIDResponse {
   static CSIDResponseStatus _getStatus(int statusCode) {
     if (statusCode == 200) return CSIDResponseStatus.success;
     if (statusCode == 400) return CSIDResponseStatus.clientError;
-    if (statusCode == 406 || statusCode == 500) return CSIDResponseStatus.serverError;
+    if (statusCode == 406 || statusCode == 500)
+      return CSIDResponseStatus.serverError;
     return CSIDResponseStatus.unknown;
   }
 }
@@ -162,6 +171,7 @@ class ComplianceFailureData {
 }
 
 /// Parses a JSON string into a ComplianceCSIDResponse object.
-ComplianceCSIDResponse parseComplianceCSIDResponse(int statusCode, String jsonStr) {
+ComplianceCSIDResponse parseComplianceCSIDResponse(
+    int statusCode, String jsonStr) {
   return ComplianceCSIDResponse.fromJson(statusCode, jsonDecode(jsonStr));
 }

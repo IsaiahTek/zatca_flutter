@@ -1,7 +1,7 @@
 import '../enums.dart';
 import 'invoice_result_base_model.dart';
 
-class InvoiceResultModel extends InvoiceResultBaseModel{
+class InvoiceResultModel extends InvoiceResultBaseModel {
   final InvoiceResultStatus status;
   final String clearedInvoice;
 

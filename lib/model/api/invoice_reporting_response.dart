@@ -2,7 +2,13 @@ import 'invoice_clearance_response.dart';
 import 'server_error_response.dart';
 import 'unauthorized_response.dart';
 
-enum ReportingResponseStatus { reported, notReported, unauthorized, invalidRequest, unknown }
+enum ReportingResponseStatus {
+  reported,
+  notReported,
+  unauthorized,
+  invalidRequest,
+  unknown
+}
 
 class InvoiceReportingResponse {
   final ValidationResults? validationResults;
@@ -27,7 +33,8 @@ class InvoiceReportingResponse {
     required this.statusCode,
   });
 
-  factory InvoiceReportingResponse.fromJson(Map<String, dynamic> json, int statusCode) {
+  factory InvoiceReportingResponse.fromJson(
+      Map<String, dynamic> json, int statusCode) {
     return InvoiceReportingResponse(
       validationResults: json['validationResults'] != null
           ? ValidationResults.fromJson(json['validationResults'])

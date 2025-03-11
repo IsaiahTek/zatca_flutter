@@ -1,6 +1,6 @@
 import 'package:xml/xml.dart';
 
-abstract class PartyBase{
+abstract class PartyBase {
   String name;
   String taxId;
   String address;
@@ -15,7 +15,6 @@ abstract class PartyBase{
 }
 
 class IndividualParty extends PartyBase {
-
   IndividualParty({
     required super.name,
     required super.taxId,
@@ -41,14 +40,14 @@ class IndividualParty extends PartyBase {
   }
 }
 
-class BusinessParty extends PartyBase{
-
+class BusinessParty extends PartyBase {
   String buildingNumber;
   String citySubdivision;
   String city;
   String postalZone;
   String countryCode;
   String businessID;
+
   /// schemeID is typically 'CRN'
   String schemeID;
 
@@ -61,6 +60,7 @@ class BusinessParty extends PartyBase{
     required this.city,
     required this.postalZone,
     required this.countryCode,
+
     /// schemeID is typically 'CRN'
     required this.schemeID,
     required this.businessID,
@@ -70,7 +70,8 @@ class BusinessParty extends PartyBase{
   void toXml(XmlBuilder builder) {
     builder.element('cac:Party', nest: () {
       builder.element('cac:PartyIdentification', nest: () {
-        builder.element('cbc:ID', nest: businessID, attributes: {'schemeID': schemeID});
+        builder.element('cbc:ID',
+            nest: businessID, attributes: {'schemeID': schemeID});
       });
       builder.element('cac:PostalAddress', nest: () {
         builder.element('cbc:StreetName', nest: address);

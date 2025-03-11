@@ -10,8 +10,8 @@ class Delivery {
   String get aDate => getZatcaCompliantDate(actualDate);
   String get lDate => getZatcaCompliantDate(latestDate);
 
-  toXml(XmlBuilder builder){
-    builder.element('cac:Delivery', nest: (){
+  toXml(XmlBuilder builder) {
+    builder.element('cac:Delivery', nest: () {
       builder.element('cbc:ActualDeliveryDate', nest: aDate);
       builder.element('cbc:LatestDeliveryDate', nest: lDate);
     });

@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:zatca_flutter/enums.dart';
 
-
 /// Main response model for Production CSID API
 class ProductionCSIDResponse {
   final int statusCode;
@@ -20,7 +19,8 @@ class ProductionCSIDResponse {
   });
 
   /// Parses JSON into the appropriate response type (Success, Error, or Failure).
-  factory ProductionCSIDResponse.fromJson(int statusCode, Map<String, dynamic> json) {
+  factory ProductionCSIDResponse.fromJson(
+      int statusCode, Map<String, dynamic> json) {
     CSIDResponseStatus status = _getStatus(statusCode);
 
     if (status == CSIDResponseStatus.success && json.containsKey('requestID')) {
@@ -29,26 +29,33 @@ class ProductionCSIDResponse {
         status: status,
         successData: ProductionCSIDSuccessData.fromJson(json),
       );
-    } else if (status == CSIDResponseStatus.clientError && json.containsKey('errors')) {
+    } else if (status == CSIDResponseStatus.clientError &&
+        json.containsKey('errors')) {
       return ProductionCSIDResponse(
         statusCode: statusCode,
         status: status,
         errorData: ProductionCSIDErrorData.fromJson(json),
       );
-    } else if (status == CSIDResponseStatus.serverError && json.containsKey('code') && json.containsKey('message')) {
+    } else if (status == CSIDResponseStatus.serverError &&
+        json.containsKey('code') &&
+        json.containsKey('message')) {
       return ProductionCSIDResponse(
         statusCode: statusCode,
         status: status,
         failureData: ProductionCSIDFailureData.fromJson(json),
       );
     } else {
-      return ProductionCSIDResponse(statusCode: statusCode, status: CSIDResponseStatus.unknown);
+      return ProductionCSIDResponse(
+          statusCode: statusCode, status: CSIDResponseStatus.unknown);
     }
   }
 
   /// Converts the model back to JSON.
   Map<String, dynamic> toJson() {
-    Map<String, dynamic> json = {'statusCode': statusCode, 'status': status.toString().split('.').last};
+    Map<String, dynamic> json = {
+      'statusCode': statusCode,
+      'status': status.toString().split('.').last
+    };
     if (successData != null) json.addAll(successData!.toJson());
     if (errorData != null) json.addAll(errorData!.toJson());
     if (failureData != null) json.addAll(failureData!.toJson());
@@ -59,7 +66,8 @@ class ProductionCSIDResponse {
   static CSIDResponseStatus _getStatus(int statusCode) {
     if (statusCode == 200) return CSIDResponseStatus.success;
     if (statusCode == 400) return CSIDResponseStatus.clientError;
-    if (statusCode == 406 || statusCode == 500) return CSIDResponseStatus.serverError;
+    if (statusCode == 406 || statusCode == 500)
+      return CSIDResponseStatus.serverError;
     return CSIDResponseStatus.unknown;
   }
 }
@@ -105,22 +113,20 @@ class ProductionCSIDRenewalSuccessData {
   final String secret;
   final String tokenType;
 
-  ProductionCSIDRenewalSuccessData({
-    required this.requestID,
-    required this.dispositionMessage,
-    required this.binarySecurityToken,
-    required this.secret,
-    required this.tokenType
-  });
+  ProductionCSIDRenewalSuccessData(
+      {required this.requestID,
+      required this.dispositionMessage,
+      required this.binarySecurityToken,
+      required this.secret,
+      required this.tokenType});
 
   factory ProductionCSIDRenewalSuccessData.fromJson(Map<String, dynamic> json) {
     return ProductionCSIDRenewalSuccessData(
-      requestID: json['requestID'],
-      dispositionMessage: json['dispositionMessage'],
-      binarySecurityToken: json['binarySecurityToken'],
-      secret: json['secret'],
-      tokenType: json['tokenType']
-    );
+        requestID: json['requestID'],
+        dispositionMessage: json['dispositionMessage'],
+        binarySecurityToken: json['binarySecurityToken'],
+        secret: json['secret'],
+        tokenType: json['tokenType']);
   }
 
   Map<String, dynamic> toJson() {
@@ -200,11 +206,12 @@ class ProductionCSIDFailureData {
 }
 
 /// Parses a JSON string into a ProductionCSIDResponse object.
-ProductionCSIDResponse parseProductionCSIDResponse(int statusCode, String jsonStr) {
+ProductionCSIDResponse parseProductionCSIDResponse(
+    int statusCode, String jsonStr) {
   return ProductionCSIDResponse.fromJson(statusCode, jsonDecode(jsonStr));
 }
 
-class ProductionCSIDRenewalResponse{
+class ProductionCSIDRenewalResponse {
   final int statusCode;
   final CSIDResponseStatus status;
   final ProductionCSIDRenewalSuccessData? successData;
@@ -220,7 +227,8 @@ class ProductionCSIDRenewalResponse{
   });
 
   /// Parses JSON into the appropriate response type (Success, Error, or Failure).
-  factory ProductionCSIDRenewalResponse.fromJson(int statusCode, Map<String, dynamic> json) {
+  factory ProductionCSIDRenewalResponse.fromJson(
+      int statusCode, Map<String, dynamic> json) {
     CSIDResponseStatus status = _getStatus(statusCode);
 
     if (status == CSIDResponseStatus.success && json.containsKey('requestID')) {
@@ -229,26 +237,33 @@ class ProductionCSIDRenewalResponse{
         status: status,
         successData: ProductionCSIDRenewalSuccessData.fromJson(json),
       );
-    } else if (status == CSIDResponseStatus.clientError && json.containsKey('errors')) {
+    } else if (status == CSIDResponseStatus.clientError &&
+        json.containsKey('errors')) {
       return ProductionCSIDRenewalResponse(
         statusCode: statusCode,
         status: status,
         errorData: ProductionCSIDErrorData.fromJson(json),
       );
-    } else if (status == CSIDResponseStatus.serverError && json.containsKey('code') && json.containsKey('message')) {
+    } else if (status == CSIDResponseStatus.serverError &&
+        json.containsKey('code') &&
+        json.containsKey('message')) {
       return ProductionCSIDRenewalResponse(
         statusCode: statusCode,
         status: status,
         failureData: ProductionCSIDFailureData.fromJson(json),
       );
     } else {
-      return ProductionCSIDRenewalResponse(statusCode: statusCode, status: CSIDResponseStatus.unknown);
+      return ProductionCSIDRenewalResponse(
+          statusCode: statusCode, status: CSIDResponseStatus.unknown);
     }
   }
 
   /// Converts the model back to JSON.
   Map<String, dynamic> toJson() {
-    Map<String, dynamic> json = {'statusCode': statusCode, 'status': status.toString().split('.').last};
+    Map<String, dynamic> json = {
+      'statusCode': statusCode,
+      'status': status.toString().split('.').last
+    };
     if (successData != null) json.addAll(successData!.toJson());
     if (errorData != null) json.addAll(errorData!.toJson());
     if (failureData != null) json.addAll(failureData!.toJson());
@@ -259,7 +274,8 @@ class ProductionCSIDRenewalResponse{
   static CSIDResponseStatus _getStatus(int statusCode) {
     if (statusCode == 200) return CSIDResponseStatus.success;
     if (statusCode == 400) return CSIDResponseStatus.clientError;
-    if (statusCode == 406 || statusCode == 500) return CSIDResponseStatus.serverError;
+    if (statusCode == 406 || statusCode == 500)
+      return CSIDResponseStatus.serverError;
     return CSIDResponseStatus.unknown;
   }
 }

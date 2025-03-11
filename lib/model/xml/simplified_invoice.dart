@@ -89,12 +89,13 @@ class SimplifiedInvoice {
         builder.element('cbc:ID', nest: 'ICV');
         builder.element('cbc:UUID', nest: icv);
       });
-      
+
       builder.element('cac:AdditionalDocumentReference', nest: () {
         builder.element('cbc:ID', nest: 'PIH');
         builder.element('cac:Attachment', nest: () {
           builder.element('cbc:EmbeddedDocumentBinaryObject',
-              attributes: {'mimeCode': 'text/plain'}, nest: pih.isEmpty?getPIHForFirstInvoice():pih);
+              attributes: {'mimeCode': 'text/plain'},
+              nest: pih.isEmpty ? getPIHForFirstInvoice() : pih);
         });
       });
 
@@ -116,8 +117,9 @@ class SimplifiedInvoice {
       //   });
       // });
 
-      builder.element('cac:TaxTotal', nest:(){
-        builder.element('cbc:TaxAmount', attributes: {'currencyID': tax.currency}, nest: tax.amount);
+      builder.element('cac:TaxTotal', nest: () {
+        builder.element('cbc:TaxAmount',
+            attributes: {'currencyID': tax.currency}, nest: tax.amount);
       });
       builder.element('cac:TaxTotal', nest: () => tax.toXml(builder));
       builder.element('cac:LegalMonetaryTotal',
@@ -131,8 +133,7 @@ class SimplifiedInvoice {
     return builder.buildDocument().toXmlString(pretty: true);
   }
 
-  Future<void> generateAndSaveXml(String fileName)async{
+  Future<void> generateAndSaveXml(String fileName) async {
     await saveToFile(toXml(), fileName);
   }
-  
 }

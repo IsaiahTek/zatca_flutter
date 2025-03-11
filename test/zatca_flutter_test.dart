@@ -1,10 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zatca_flutter/service/util.dart';
 
-
 void main() {
-
-  testWidgets('Invoice Hash Generation With custom output json file name', (WidgetTester testWidgets)async {
+  testWidgets('Invoice Hash Generation With custom output json file name',
+      (WidgetTester testWidgets) async {
     TestWidgetsFlutterBinding.ensureInitialized();
     // await ZatcaFlutter.init();
     // String fullPath = "Apps.dart";
@@ -18,11 +17,18 @@ void main() {
     String formatDateTimeForZatca(DateTime dateTime) {
       return dateTime.toUtc().toIso8601String().split('T')[0]; // YYYY-MM-DD
     }
+
     String formatTimeForZatca(DateTime dateTime) {
-      return dateTime.toUtc().toIso8601String().split('T')[1].split('.')[0]; // HH:mm:ss
+      return dateTime
+          .toUtc()
+          .toIso8601String()
+          .split('T')[1]
+          .split('.')[0]; // HH:mm:ss
     }
-    logInfo("DATE: ${formatDateTimeForZatca(DateTime.now())} <=> TIME: ${formatTimeForZatca(DateTime.now())}");
-    
+
+    logInfo(
+        "DATE: ${formatDateTimeForZatca(DateTime.now())} <=> TIME: ${formatTimeForZatca(DateTime.now())}");
+
     logInfo("UUID: ${generateUuid()}");
 
     expect(true, true);

@@ -30,7 +30,6 @@ enum Mode {
   production,
 }
 
-
 /// Abstract class for handling core communication with zatca/fatoora server.
 abstract class RequestBase {
   /// Set the mode of operation.
@@ -144,7 +143,7 @@ abstract class RequestBase {
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
         final jsonResponse = jsonDecode(response.body);
-        logInfo("RESPONSE json $jsonResponse");
+        logInfo("Compliance RESPONSE json $jsonResponse");
 
         return ComplianceInvoiceCheckResponse.fromJson(
             jsonResponse, response.statusCode);
@@ -318,8 +317,8 @@ abstract class RequestBase {
     }
   }
 
-  Future<InvoiceClearanceResponse?> requestClearance(
-      InvoiceRequest prop, {String? clearedInvoiceName}) async {
+  Future<InvoiceClearanceResponse?> requestClearance(InvoiceRequest prop,
+      {String? clearedInvoiceName}) async {
     String basicAuth =
         'Basic ${base64Encode(utf8.encode('${pcsidTokeys?.token}:${pcsidTokeys?.secret}'))}';
 
@@ -339,12 +338,17 @@ abstract class RequestBase {
       final jsonResponse = jsonDecode(response.body);
       logInfo("RESPONSE json ${jsonResponse['validationResults']}");
 
-      InvoiceClearanceResponse clearanceResponse = InvoiceClearanceResponse.fromJson(
-          jsonResponse, response.statusCode);
-      
-      if(clearanceResponse.clearedInvoice != null){
-        String base64DecodedInvoice = utf8.decode(base64Decode(clearanceResponse.clearedInvoice!));
-        saveToFile(base64DecodedInvoice, clearedInvoiceName??'cleared_invoice${getNowDateTimeYyyyMmDdHhMmSs()}.xml', folder: 'standard');
+      InvoiceClearanceResponse clearanceResponse =
+          InvoiceClearanceResponse.fromJson(jsonResponse, response.statusCode);
+
+      if (clearanceResponse.clearedInvoice != null) {
+        String base64DecodedInvoice =
+            utf8.decode(base64Decode(clearanceResponse.clearedInvoice!));
+        saveToFile(
+            base64DecodedInvoice,
+            clearedInvoiceName ??
+                'cleared_invoice${getNowDateTimeYyyyMmDdHhMmSs()}.xml',
+            folder: 'standard');
       }
       // if (response.statusCode >= 200 && response.statusCode < 300) {
       // } else {

@@ -50,8 +50,8 @@ class SimplifiedCreditNote {
     this.allowanceCharge,
   });
 
-  String toXml(){
-    if(supplier == null){
+  String toXml() {
+    if (supplier == null) {
       throw Exception("You need to first set your business info");
     }
     final builder = XmlBuilder();
@@ -85,12 +85,13 @@ class SimplifiedCreditNote {
         builder.element('cbc:ID', nest: 'ICV');
         builder.element('cbc:UUID', nest: icv);
       });
-      
+
       builder.element('cac:AdditionalDocumentReference', nest: () {
         builder.element('cbc:ID', nest: 'PIH');
         builder.element('cac:Attachment', nest: () {
           builder.element('cbc:EmbeddedDocumentBinaryObject',
-              attributes: {'mimeCode': 'text/plain'}, nest: pih.isEmpty?getPIHForFirstInvoice():pih);
+              attributes: {'mimeCode': 'text/plain'},
+              nest: pih.isEmpty ? getPIHForFirstInvoice() : pih);
         });
       });
 
@@ -108,8 +109,9 @@ class SimplifiedCreditNote {
       // AllowanceCharge builder
       allowanceCharge?.toXml(builder);
 
-      builder.element('cac:TaxTotal', nest:(){
-        builder.element('cbc:TaxAmount', attributes: {'currencyID': tax.currency}, nest: tax.amount);
+      builder.element('cac:TaxTotal', nest: () {
+        builder.element('cbc:TaxAmount',
+            attributes: {'currencyID': tax.currency}, nest: tax.amount);
       });
 
       builder.element('cac:TaxTotal', nest: () => tax.toXml(builder));
@@ -120,15 +122,13 @@ class SimplifiedCreditNote {
         InvoiceLine line = lines[id];
         builder.element('cac:InvoiceLine', nest: () => line.toXml(builder, id));
       }
-
-
     });
 
     return builder.buildDocument().toXmlString(pretty: true);
   }
 
-  Future<String?> generateAndSaveXml(String fileName)async{
-    if(supplier != null){
+  Future<String?> generateAndSaveXml(String fileName) async {
+    if (supplier != null) {
       return null;
     }
     return await saveToFile(toXml(), fileName);

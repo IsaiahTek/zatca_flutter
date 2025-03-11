@@ -6,9 +6,6 @@ class FatooraInvoiceHashResponse {
   final FatooraServiceResponse response;
   final String? hashValue;
 
-  const FatooraInvoiceHashResponse({
-    required this.hashValue,
-    required this.response,
-    required this.status
-  });
+  const FatooraInvoiceHashResponse(
+      {required this.hashValue, required this.response, required this.status});
 }

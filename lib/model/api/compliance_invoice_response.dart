@@ -2,7 +2,13 @@ import 'invoice_clearance_response.dart';
 import 'server_error_response.dart';
 import 'unauthorized_response.dart';
 
-enum CCSIDCheckResponseStatus { pass, error, unauthorized, invalidRequest, unknown }
+enum CCSIDCheckResponseStatus {
+  pass,
+  error,
+  unauthorized,
+  invalidRequest,
+  unknown
+}
 
 class ComplianceInvoiceCheckResponse {
   final ValidationResults? validationResults;
@@ -27,7 +33,8 @@ class ComplianceInvoiceCheckResponse {
     required this.statusCode,
   });
 
-  factory ComplianceInvoiceCheckResponse.fromJson(Map<String, dynamic> json, int statusCode) {
+  factory ComplianceInvoiceCheckResponse.fromJson(
+      Map<String, dynamic> json, int statusCode) {
     return ComplianceInvoiceCheckResponse(
       validationResults: json['validationResults'] != null
           ? ValidationResults.fromJson(json['validationResults'])

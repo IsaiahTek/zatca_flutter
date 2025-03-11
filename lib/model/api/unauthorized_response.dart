@@ -11,13 +11,16 @@ class UnauthorizedResponse {
     required this.message,
   });
 
-  static UnauthorizedResponse? fromJson(Map<String, dynamic> json, int statusCode) {
-    return statusCode == 401 ? UnauthorizedResponse(
-      timestamp: json['timestamp'],
-      statusCode: json['status'],
-      error: json['error'],
-      message: json['message'],
-    ) : null;
+  static UnauthorizedResponse? fromJson(
+      Map<String, dynamic> json, int statusCode) {
+    return statusCode == 401
+        ? UnauthorizedResponse(
+            timestamp: json['timestamp'],
+            statusCode: json['status'],
+            error: json['error'],
+            message: json['message'],
+          )
+        : null;
   }
 
   Map<String, dynamic> toJson() => {

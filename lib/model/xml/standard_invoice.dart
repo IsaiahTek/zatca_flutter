@@ -27,21 +27,20 @@ class StandardInvoice {
 
   MyBusinessInfo? get supplier => LocalStore.instance.myBusinessInfo;
 
-  StandardInvoice({
-    required this.icv,
-    required this.id,
-    required this.uuid,
-    required this.issueDate,
-    required this.issueTime,
-    required this.currency,
-    required this.customer,
-    required this.lines,
-    required this.tax,
-    required this.monetaryTotal,
-    // this.isFirstInvoice = false,
-    required this.pih,
-    required this.delivery
-  });
+  StandardInvoice(
+      {required this.icv,
+      required this.id,
+      required this.uuid,
+      required this.issueDate,
+      required this.issueTime,
+      required this.currency,
+      required this.customer,
+      required this.lines,
+      required this.tax,
+      required this.monetaryTotal,
+      // this.isFirstInvoice = false,
+      required this.pih,
+      required this.delivery});
 
   Map<String, dynamic> toJson() {
     return {
@@ -92,12 +91,13 @@ class StandardInvoice {
         builder.element('cbc:ID', nest: 'ICV');
         builder.element('cbc:UUID', nest: icv);
       });
-      
+
       builder.element('cac:AdditionalDocumentReference', nest: () {
         builder.element('cbc:ID', nest: 'PIH');
         builder.element('cac:Attachment', nest: () {
           builder.element('cbc:EmbeddedDocumentBinaryObject',
-              attributes: {'mimeCode': 'text/plain'}, nest: pih.isEmpty?getPIHForFirstInvoice():pih);
+              attributes: {'mimeCode': 'text/plain'},
+              nest: pih.isEmpty ? getPIHForFirstInvoice() : pih);
         });
       });
 
@@ -122,8 +122,9 @@ class StandardInvoice {
       //   });
       // });
 
-      builder.element('cac:TaxTotal', nest:(){
-        builder.element('cbc:TaxAmount', attributes: {'currencyID': tax.currency}, nest: tax.amount);
+      builder.element('cac:TaxTotal', nest: () {
+        builder.element('cbc:TaxAmount',
+            attributes: {'currencyID': tax.currency}, nest: tax.amount);
       });
       builder.element('cac:TaxTotal', nest: () => tax.toXml(builder));
       builder.element('cac:LegalMonetaryTotal',
@@ -137,8 +138,7 @@ class StandardInvoice {
     return builder.buildDocument().toXmlString(pretty: true);
   }
 
-  Future<void> generateAndSaveXml(String fileName)async{
+  Future<void> generateAndSaveXml(String fileName) async {
     await saveToFile(toXml(), fileName);
   }
-  
 }

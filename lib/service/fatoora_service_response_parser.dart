@@ -1,4 +1,3 @@
-
 import '../enums.dart';
 import '../model/error_model.dart';
 import '../model/fatoora_service_response.dart';
@@ -52,9 +51,8 @@ class FatooraServiceResponseParser {
     }
 
     // Determine response status
-    ResponseStatus status = errors.isEmpty
-        ? ResponseStatus.success
-        : ResponseStatus.failure;
+    ResponseStatus status =
+        errors.isEmpty ? ResponseStatus.success : ResponseStatus.failure;
 
     return FatooraServiceResponse(
       status: status,

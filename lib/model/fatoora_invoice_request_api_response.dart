@@ -7,5 +7,8 @@ class FatooraInvoiceRequestApiResponse {
   final InvoiceRequest? invoiceRequest;
   final FatooraServiceResponse response;
 
-  const FatooraInvoiceRequestApiResponse({required this.status, required this.invoiceRequest, required this.response});
+  const FatooraInvoiceRequestApiResponse(
+      {required this.status,
+      required this.invoiceRequest,
+      required this.response});
 }

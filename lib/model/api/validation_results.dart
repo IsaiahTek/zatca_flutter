@@ -5,7 +5,8 @@ class ValidationResults {
   final List<MessageModel>? warningMessages;
   final List<MessageModel>? errorMessages;
 
-  ValidationResults({this.infoMessages, this.warningMessages, this.errorMessages});
+  ValidationResults(
+      {this.infoMessages, this.warningMessages, this.errorMessages});
 
   factory ValidationResults.fromJson(Map<String, dynamic> json) {
     return ValidationResults(
@@ -16,10 +17,10 @@ class ValidationResults {
   }
 
   Map<String, dynamic> toJson() => {
-    'infoMessages': infoMessages?.map((m) => m.toJson()).toList(),
-    'warningMessages': warningMessages?.map((m) => m.toJson()).toList(),
-    'errorMessages': errorMessages?.map((m) => m.toJson()).toList(),
-  };
+        'infoMessages': infoMessages?.map((m) => m.toJson()).toList(),
+        'warningMessages': warningMessages?.map((m) => m.toJson()).toList(),
+        'errorMessages': errorMessages?.map((m) => m.toJson()).toList(),
+      };
 
   static List<MessageModel>? _parseMessages(dynamic data) {
     if (data == null) return null;

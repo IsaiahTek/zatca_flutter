@@ -1,5 +1,4 @@
 class CsrConfig {
-  
   String? commonName;
   String? serialNumber;
   String? organizationIdentifier;
@@ -10,19 +9,18 @@ class CsrConfig {
   String? locationAddress;
   String? industryBusinessCategory;
 
-  CsrConfig({
-    this.commonName,
-    this.serialNumber,
-    this.organizationIdentifier,
-    this.organizationUnitName,
-    this.organizationName,
-    this.countryName,
-    this.invoiceType,
-    this.locationAddress,
-    this.industryBusinessCategory
-  });
+  CsrConfig(
+      {this.commonName,
+      this.serialNumber,
+      this.organizationIdentifier,
+      this.organizationUnitName,
+      this.organizationName,
+      this.countryName,
+      this.invoiceType,
+      this.locationAddress,
+      this.industryBusinessCategory});
 
-  Map<String, dynamic> toJson(){
+  Map<String, dynamic> toJson() {
     Map<String, dynamic> data = {
       "csr.common.name": commonName,
       "csr.serial.number": serialNumber,
@@ -37,16 +35,15 @@ class CsrConfig {
     return data;
   }
 
-  CsrConfig.fromMap(Map<String, dynamic> csrRaw){
-      commonName = csrRaw["csr.common.name"];
-      serialNumber= csrRaw["csr.serial.number"];
-      organizationIdentifier= csrRaw["csr.organization.identifier"];
-      organizationUnitName= csrRaw["csr.organization.unit.name"];
-      organizationName= csrRaw["csr.organization.name"];
-      countryName= csrRaw["csr.country.name"];
-      invoiceType= csrRaw["csr.invoice.type"];
-      locationAddress= csrRaw["csr.location.address"];
-      industryBusinessCategory= csrRaw["csr.industry.business.category"];
+  CsrConfig.fromMap(Map<String, dynamic> csrRaw) {
+    commonName = csrRaw["csr.common.name"];
+    serialNumber = csrRaw["csr.serial.number"];
+    organizationIdentifier = csrRaw["csr.organization.identifier"];
+    organizationUnitName = csrRaw["csr.organization.unit.name"];
+    organizationName = csrRaw["csr.organization.name"];
+    countryName = csrRaw["csr.country.name"];
+    invoiceType = csrRaw["csr.invoice.type"];
+    locationAddress = csrRaw["csr.location.address"];
+    industryBusinessCategory = csrRaw["csr.industry.business.category"];
   }
-
 }

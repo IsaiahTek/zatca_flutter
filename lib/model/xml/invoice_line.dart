@@ -19,29 +19,35 @@ class InvoiceLine {
 
   void toXml(XmlBuilder builder, int id) {
     builder.element('cbc:ID', nest: id);
-    builder.element('cbc:InvoicedQuantity', attributes: {'unitCode': 'PCE'}, nest: quantity);
-    builder.element('cbc:LineExtensionAmount', attributes: {'currencyID': 'SAR'}, nest: total);
-    builder.element('cac:TaxTotal', nest: (){
-      builder.element('cbc:TaxAmount', attributes: {'currencyID': 'SAR'}, nest: tax.amount);
-      builder.element('cbc:RoundingAmount', attributes: {'currencyID': 'SAR'}, nest: num.parse(tax.taxableAmount) + num.parse(tax.amount));
+    builder.element('cbc:InvoicedQuantity',
+        attributes: {'unitCode': 'PCE'}, nest: quantity);
+    builder.element('cbc:LineExtensionAmount',
+        attributes: {'currencyID': 'SAR'}, nest: total);
+    builder.element('cac:TaxTotal', nest: () {
+      builder.element('cbc:TaxAmount',
+          attributes: {'currencyID': 'SAR'}, nest: tax.amount);
+      builder.element('cbc:RoundingAmount',
+          attributes: {'currencyID': 'SAR'},
+          nest: num.parse(tax.taxableAmount) + num.parse(tax.amount));
     });
-    builder.element('cac:Item', nest: (){
+    builder.element('cac:Item', nest: () {
       builder.element('cbc:Name', nest: name);
-      builder.element('cac:ClassifiedTaxCategory', nest: (){
+      builder.element('cac:ClassifiedTaxCategory', nest: () {
         builder.element('cbc:ID', nest: 'S');
-        builder.element('cbc:Percent', nest:tax.percent);
-        builder.element('cac:TaxScheme', nest: (){
+        builder.element('cbc:Percent', nest: tax.percent);
+        builder.element('cac:TaxScheme', nest: () {
           builder.element('cbc:ID', nest: 'VAT');
         });
       });
     });
-    builder.element('cac:Price', nest: (){
-      builder.element('cbc:PriceAmount', nest: price, attributes: {'currencyID': tax.currency});
+    builder.element('cac:Price', nest: () {
+      builder.element('cbc:PriceAmount',
+          nest: price, attributes: {'currencyID': tax.currency});
       // builder.element('cac:AllowanceCharge', nest: (){});
     });
   }
 
-  toJson(){
+  toJson() {
     return {
       'id': id,
       'price': price,

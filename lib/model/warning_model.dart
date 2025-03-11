@@ -3,10 +3,7 @@ class WarningModel {
   final String source;
   final String message;
 
-  const WarningModel({
-    required this.source,
-    required this.message
-  });
+  const WarningModel({required this.source, required this.message});
 
   @override
   String toString() {

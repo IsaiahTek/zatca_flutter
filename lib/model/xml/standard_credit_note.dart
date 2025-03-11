@@ -50,7 +50,7 @@ class SimplifiedCreditNote {
     this.allowanceCharge,
   });
 
-  String toXml(){
+  String toXml() {
     final builder = XmlBuilder();
     builder.processing('xml', 'version="1.0" encoding="UTF-8"');
     builder.element('Invoice', namespaces: {
@@ -82,12 +82,13 @@ class SimplifiedCreditNote {
         builder.element('cbc:ID', nest: 'ICV');
         builder.element('cbc:UUID', nest: icv);
       });
-      
+
       builder.element('cac:AdditionalDocumentReference', nest: () {
         builder.element('cbc:ID', nest: 'PIH');
         builder.element('cac:Attachment', nest: () {
           builder.element('cbc:EmbeddedDocumentBinaryObject',
-              attributes: {'mimeCode': 'text/plain'}, nest: pih.isEmpty?getPIHForFirstInvoice():pih);
+              attributes: {'mimeCode': 'text/plain'},
+              nest: pih.isEmpty ? getPIHForFirstInvoice() : pih);
         });
       });
 
@@ -105,10 +106,11 @@ class SimplifiedCreditNote {
       // AllowanceCharge builder
       allowanceCharge?.toXml(builder);
 
-      builder.element('cac:TaxTotal', nest:(){
-        builder.element('cbc:TaxAmount', attributes: {'currencyID': tax.currency}, nest: tax.amount);
+      builder.element('cac:TaxTotal', nest: () {
+        builder.element('cbc:TaxAmount',
+            attributes: {'currencyID': tax.currency}, nest: tax.amount);
       });
-      
+
       builder.element('cac:TaxTotal', nest: () => tax.toXml(builder));
       builder.element('cac:LegalMonetaryTotal',
           nest: () => monetaryTotal.toXml(builder));
@@ -117,14 +119,12 @@ class SimplifiedCreditNote {
         InvoiceLine line = lines[id];
         builder.element('cac:InvoiceLine', nest: () => line.toXml(builder, id));
       }
-
-
     });
 
     return builder.buildDocument().toXmlString(pretty: true);
   }
 
-  Future<void> generateAndSaveXml(String fileName)async{
+  Future<void> generateAndSaveXml(String fileName) async {
     saveToFile(toXml(), fileName);
   }
 }

@@ -7,11 +7,9 @@ abstract class InvoiceResultBaseModel {
   final List<ErrorModel> errors;
   final List<WarningModel> warnings;
 
-  const InvoiceResultBaseModel({
-    required this.invoiceHash,
-    required this.errors,
-    // required this.status,
-    required this.warnings
-  });
-
+  const InvoiceResultBaseModel(
+      {required this.invoiceHash,
+      required this.errors,
+      // required this.status,
+      required this.warnings});
 }

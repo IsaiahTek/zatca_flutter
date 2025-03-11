@@ -25,19 +25,18 @@ class FatooraService {
   static Future<FatooraServiceResponse> _runCommand(List<String> args) async {
     try {
       if (_fatooraPath != null) {
-        
         String workingDirectory = await getStorageFolderPath();
-        
+
         String command = Platform.isWindows ? 'cmd' : _fatooraPath!;
-        List<String> compositeArgs = Platform.isWindows ? ['/C', _fatooraPath!, ...args] : args;
-        
-        ProcessResult result = await Process.run(
-            command, compositeArgs,
-            runInShell : true,
-            workingDirectory : workingDirectory,
-            environment : {
-              'SDK_CONFIG' : _finder.sdkConfig ?? "",
-              'FATOORA_HOME' : _finder.fatooraHome ?? ""
+        List<String> compositeArgs =
+            Platform.isWindows ? ['/C', _fatooraPath!, ...args] : args;
+
+        ProcessResult result = await Process.run(command, compositeArgs,
+            runInShell: true,
+            workingDirectory: workingDirectory,
+            environment: {
+              'SDK_CONFIG': _finder.sdkConfig ?? "",
+              'FATOORA_HOME': _finder.fatooraHome ?? ""
             });
 
         FatooraServiceResponse response =
@@ -76,7 +75,9 @@ class FatooraService {
   }
 
   static _writeLogToFile(String message) async {
-    await saveToFile(message, "fatoora-error-${getNowDateTimeYyyyMmDdHhMmSs()}.log", folder: 'logs');
+    await saveToFile(
+        message, "fatoora-error-${getNowDateTimeYyyyMmDdHhMmSs()}.log",
+        folder: 'logs');
   }
 
   static String? _getNewFileName(
@@ -183,10 +184,10 @@ class FatooraService {
   /// Signs an invoice XML file using Fatoora CLI
   static Future<FatooraServiceResponse> signInvoice(
       {required String invoiceFileName,
-      String? outputSignedInvoiceFileName, bool forChecks = false}) async {
-
+      String? outputSignedInvoiceFileName,
+      bool forChecks = false}) async {
     await LocalStore.instance.switchCertInSDK(usePCSID: !forChecks);
-    
+
     final result = await _runCommand([
       '-sign',
       '-invoice',
@@ -199,31 +200,37 @@ class FatooraService {
   }
 
   /// Validates an invoice XML file using Fatoora CLI.
-  /// 
+  ///
   /// If `ignoreWarningForResponseStatus` is set to true the response status will return the global validation result instead.
   /// That means, if the GLOBAL VALIDATION RESULT IS PASSED then the response status will be SUCCESS regardles of any warning that might be available.
   /// This ignoreWarningForResponseStatus flag is added because the service could return GLOBAL VALIDATION RESULT = PASSED if there isn't a critical error.
-  static Future<FatooraServiceResponse> validateInvoice({
-    required String invoiceFileName,
-    bool ignoreWarningForResponseStatus = false
-  }) async {
+  static Future<FatooraServiceResponse> validateInvoice(
+      {required String invoiceFileName,
+      bool ignoreWarningForResponseStatus = false}) async {
     final result =
         await _runCommand(['-validate', '-invoice', invoiceFileName]);
 
-    if(result.infos != null && result.infos!.isNotEmpty && result.infos!.last.message.contains('GLOBAL VALIDATION RESULT = PASSED') && ignoreWarningForResponseStatus){
+    if (result.infos != null &&
+        result.infos!.isNotEmpty &&
+        result.infos!.last.message
+            .contains('GLOBAL VALIDATION RESULT = PASSED') &&
+        ignoreWarningForResponseStatus) {
       result.status = ResponseStatus.success;
     }
     return result;
   }
 
   /// Generate Invoice Hash
-  static Future<FatooraInvoiceHashResponse> generateInvoiceHash(String invoiceFileName) async {
-    final res = await _runCommand(['-generateHash', '-invoice', invoiceFileName]);
+  static Future<FatooraInvoiceHashResponse> generateInvoiceHash(
+      String invoiceFileName) async {
+    final res =
+        await _runCommand(['-generateHash', '-invoice', invoiceFileName]);
     String? extractHash(String raw) {
       RegExp regex = RegExp(r'INVOICE HASH = (.+)');
       Match? match = regex.firstMatch(raw);
       return match?.group(1);
     }
+
     String? hashValue;
     ResponseStatus status = ResponseStatus.failure;
     if (res.infos != null) {
@@ -235,7 +242,8 @@ class FatooraService {
         }
       }
     }
-    logInfo("HASH VALUE AFTER GENERATION = $hashValue AND STATUS = ${status.name.toUpperCase()}");
+    logInfo(
+        "HASH VALUE AFTER GENERATION = $hashValue AND STATUS = ${status.name.toUpperCase()}");
     return FatooraInvoiceHashResponse(
         hashValue: hashValue, response: res, status: status);
   }
@@ -268,7 +276,9 @@ class FatooraService {
 
   /// Generate Invoice Request API
   static Future<FatooraInvoiceRequestApiResponse> generateInvoiceRequestAPI(
-      {required String invoiceFileName, String? outputJsonFileName, bool forClearance = false}) async {
+      {required String invoiceFileName,
+      String? outputJsonFileName,
+      bool forClearance = false}) async {
     List<String> allJsonFilesBeforeExecution =
         await getAllFileNamesByExtension('json');
     FatooraServiceResponse response = await _runCommand([
@@ -299,13 +309,15 @@ class FatooraService {
           ? outputJsonFileName
           : newGeneratedFile ?? "";
       String? raw = await getFileContentAsString(finalOutputFileName);
-      if(raw != null){
-        invoiceRequest = InvoiceRequest.fromMap(
-            jsonDecode(raw));
-        if(forClearance){
+      if (raw != null) {
+        invoiceRequest = InvoiceRequest.fromMap(jsonDecode(raw));
+        if (forClearance) {
           final res = await generateInvoiceHash(invoiceFileName);
-          if(res.hashValue != null){
-            final newIR = InvoiceRequest(invoice: invoiceRequest.invoice, invoiceHash: res.hashValue!, uuid: invoiceRequest.uuid);
+          if (res.hashValue != null) {
+            final newIR = InvoiceRequest(
+                invoice: invoiceRequest.invoice,
+                invoiceHash: res.hashValue!,
+                uuid: invoiceRequest.uuid);
             saveToFile(jsonEncode(newIR.toMap()), finalOutputFileName);
             invoiceRequest = newIR;
           }

@@ -6,7 +6,6 @@ import 'package:zatca_flutter/model/my_business_info.dart';
 import 'service/fatoora_service_finder.dart';
 import 'service/util.dart';
 
-
 /// The model used by CSIDs
 class Tokeys {
   /// String value of the binary token
@@ -57,7 +56,6 @@ class Tokeys {
         toJsonString(), isForCompliance ? 'ccsid.json' : 'pcsid.json',
         folder: '.tokens');
   }
-
 }
 
 /// Local Storage that holds most data for communication within the app
@@ -76,7 +74,7 @@ class LocalStore {
     Tokeys._readLocalValues(isForCompliance: true).then((tokeys) {
       _ccsid = tokeys;
     });
-    MyBusinessInfo.load().then((d){
+    MyBusinessInfo.load().then((d) {
       myBusinessInfo = d;
     });
   }
@@ -109,8 +107,7 @@ class LocalStore {
     LocalStore.instance._pcsid = tokeys;
   }
 
-  Future<void> _convertCertAndSaveToStorage(
-      {required String cert}) async {
+  Future<void> _convertCertAndSaveToStorage({required String cert}) async {
     try {
       String certInPemFormat = utf8.decode(base64.decode(cert));
 
@@ -130,7 +127,8 @@ class LocalStore {
     }
   }
 
-  Future<void> switchCertInSDK({bool usePCSID = true})async{
-    return _convertCertAndSaveToStorage(cert: usePCSID ? pcsid!.token : ccsid!.token );
+  Future<void> switchCertInSDK({bool usePCSID = true}) async {
+    return _convertCertAndSaveToStorage(
+        cert: usePCSID ? pcsid!.token : ccsid!.token);
   }
 }

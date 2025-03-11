@@ -4,7 +4,7 @@ import 'package:zatca_flutter/local_store.dart';
 import 'package:zatca_flutter/model/xml/party.dart';
 import 'package:zatca_flutter/service/util.dart';
 
-class MyBusinessInfo extends BusinessParty{
+class MyBusinessInfo extends BusinessParty {
   String companyID;
 
   MyBusinessInfo({
@@ -19,16 +19,16 @@ class MyBusinessInfo extends BusinessParty{
     required super.schemeID,
     required super.businessID,
     required this.companyID,
-  }){
-    save().then((d){
+  }) {
+    save().then((d) {
       LocalStore.instance.myBusinessInfo = this;
     });
   }
 
-  Map<String, dynamic> toJson(){
+  Map<String, dynamic> toJson() {
     return {
-      'name':name,
-      'address':address,
+      'name': name,
+      'address': address,
       'taxId': taxId,
       'buildingNumber': buildingNumber,
       'city': city,
@@ -41,17 +41,28 @@ class MyBusinessInfo extends BusinessParty{
     };
   }
 
-  factory MyBusinessInfo.fromJson(Map<String, dynamic> json){
-    return MyBusinessInfo(name: json['name'], address: json['address'], taxId: json['taxId'], buildingNumber: json['buildingNumber'], citySubdivision: json['citySubdivision'], city: json['city'], postalZone: json['postalZone'], countryCode: json['countryCode'], schemeID: json['schemeID'], companyID: json['companyID'], businessID: json['businessID']);
+  factory MyBusinessInfo.fromJson(Map<String, dynamic> json) {
+    return MyBusinessInfo(
+        name: json['name'],
+        address: json['address'],
+        taxId: json['taxId'],
+        buildingNumber: json['buildingNumber'],
+        citySubdivision: json['citySubdivision'],
+        city: json['city'],
+        postalZone: json['postalZone'],
+        countryCode: json['countryCode'],
+        schemeID: json['schemeID'],
+        companyID: json['companyID'],
+        businessID: json['businessID']);
   }
 
-  Future<void> save()async{
+  Future<void> save() async {
     saveToFile(jsonEncode(toJson()), 'myBusinessInfo');
   }
 
-  static Future<MyBusinessInfo?> load()async{
+  static Future<MyBusinessInfo?> load() async {
     String? raw = await getFileContentAsString('myBusinessInfo');
-    if(raw != null){
+    if (raw != null) {
       return MyBusinessInfo.fromJson(jsonDecode(raw));
     }
   }

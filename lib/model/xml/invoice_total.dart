@@ -3,7 +3,10 @@ class InvoiceTotal {
   final double vatAmount;
   final double grandTotal;
 
-  InvoiceTotal({required this.subtotal, required this.vatAmount, required this.grandTotal});
+  InvoiceTotal(
+      {required this.subtotal,
+      required this.vatAmount,
+      required this.grandTotal});
 
   Map<String, dynamic> toJson() => {
         "subtotal": subtotal,
