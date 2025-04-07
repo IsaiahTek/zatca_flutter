@@ -64,6 +64,8 @@ class MyBusinessInfo extends BusinessParty {
     String? raw = await getFileContentAsString('myBusinessInfo');
     if (raw != null) {
       return MyBusinessInfo.fromJson(jsonDecode(raw));
+    }else{
+      return null;
     }
   }
 }

@@ -12,7 +12,7 @@ import 'package:zatca_flutter/model/xml/payment_means.dart';
 import 'package:zatca_flutter/model/xml/tax_details.dart';
 import 'package:zatca_flutter/service/util.dart';
 
-class SimplifiedCreditNote {
+class StandardCreditNote {
   String id;
   int icv;
   String uuid;
@@ -31,7 +31,7 @@ class SimplifiedCreditNote {
 
   MyBusinessInfo? get supplier => LocalStore.instance.myBusinessInfo;
 
-  SimplifiedCreditNote({
+  StandardCreditNote({
     required this.icv,
     required this.id,
     required this.uuid,
@@ -70,7 +70,7 @@ class SimplifiedCreditNote {
       builder.element('cbc:IssueTime',
           nest: issueTime.toIso8601String().split('T')[1].split('.')[0]);
       builder.element('cbc:InvoiceTypeCode',
-          nest: '383', attributes: {'name': '0211010'});
+          nest: '381', attributes: {'name': '0100000'});
       builder.element('cbc:DocumentCurrencyCode', nest: currency);
       // builder.element('cbc:Note', nest: 'en');
       builder.element('cbc:TaxCurrencyCode', nest: currency);
