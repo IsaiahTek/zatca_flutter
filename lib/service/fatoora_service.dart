@@ -5,7 +5,6 @@ import 'package:zatca_flutter/model/fatoora_invoice_hash_response.dart';
 import 'package:zatca_flutter/model/fatoora_invoice_request_api_response.dart';
 import 'package:zatca_flutter/model/fatoora_qr_code_response.dart';
 import 'package:zatca_flutter/model/invoice_request.dart';
-import 'package:zatca_flutter/request.dart';
 import 'package:zatca_flutter/service/util.dart';
 
 import '../local_store.dart';

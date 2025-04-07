@@ -1,5 +1,4 @@
 import 'package:zatca_flutter/model/api/message.dart';
-import 'package:zatca_flutter/service/util.dart';
 
 List<MessageModel>? parseMessages(dynamic data) {
   if (data == null) return null;

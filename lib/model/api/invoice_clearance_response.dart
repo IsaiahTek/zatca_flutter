@@ -1,5 +1,3 @@
-import 'package:zatca_flutter/service/util.dart';
-
 import 'message.dart';
 import 'server_error_response.dart';
 import 'unauthorized_response.dart';
