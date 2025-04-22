@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:zatca_flutter/model/my_business_info.dart';
-import 'package:zatca_flutter/zatca_flutter.dart';
 
 import 'service/fatoora_service_finder.dart';
 import 'service/util.dart';
@@ -128,7 +127,12 @@ class LocalStore {
     }
   }
 
+  /// Used internally by package. Package users don't need this
   Future<void> switchCertInSDK({bool usePCSID = true}) async {
+    return _handleSwitching(usePCSID: usePCSID);
+  }
+
+  Future<void> _handleSwitching({bool usePCSID = false}) async{
     return _convertCertAndSaveToStorage(
         cert: usePCSID ? pcsid!.token : ccsid!.token);
   }
