@@ -20,28 +20,22 @@ import 'package:zatca_flutter/service/util.dart';
 
 /// Application mode.
 enum Mode {
-  /// To be used when testing the application through the developer portal
+  /// To be used when testing the application through the developer portal.
   developerPortal,
 
-  /// To be used when testing the application through the simulation portal
+  /// To be used when testing the application through the simulation portal.
   simulation,
 
-  /// To be used when in production mode. This what you use for live application
+  /// To be used in production. This is what you use for live application.
   production,
 }
 
 /// Abstract class for handling core communication with zatca/fatoora server.
 abstract class RequestBase {
-  /// Set the mode of operation.
+  /// The mode of operation.
   final Mode mode;
-  String get _complianceCSIDUrl => "$_base/compliance";
-  String get _complianceCheckUrl => "$_base/compliance/invoices";
-  String get _productionCSIDUrl => "$_base/production/csids";
-  String get _productionCSIDRenewalUrl => "$_base/production/csids";
-  String get _reportingUrl => "$_base/invoices/reporting/single";
-  String get _clearanceUrl => "$_base/invoices/clearance/single";
 
-  late LocalStore _store;
+  final LocalStore _store = LocalStore.instance;
 
   /// Production CSID values
   Tokeys? get pcsidTokeys => _store.pcsid;
@@ -49,9 +43,15 @@ abstract class RequestBase {
   /// Compliance CSID values
   Tokeys? get ccsidTokeys => _store.ccsid;
 
-  RequestBase({required this.mode}) {
-    _store = LocalStore.instance;
-  }
+  /// Constructor
+  RequestBase({required this.mode});
+
+  String get _complianceCSIDUrl => "$_base/compliance";
+  String get _complianceCheckUrl => "$_base/compliance/invoices";
+  String get _productionCSIDUrl => "$_base/production/csids";
+  String get _productionCSIDRenewalUrl => "$_base/production/csids";
+  String get _reportingUrl => "$_base/invoices/reporting/single";
+  String get _clearanceUrl => "$_base/invoices/clearance/single";
 
   String get _base {
     String getBase(String e) =>
@@ -66,7 +66,7 @@ abstract class RequestBase {
     }
   }
 
-  /// CSR value should be base64 encoded and not a PEM value.
+  /// Make a request to Zatca/Fatoora server to get the Compliance CSID.
   Future<ComplianceCSIDResponse> requestComplianceCSID(
       {required CCSIDRequestProp request}) async {
     return _requestComplianceCSID(request: request);
@@ -115,7 +115,7 @@ abstract class RequestBase {
     }
   }
 
-  /// Re
+  /// Request Compliance Check for invoice/note from Zatca/Fatoora Server
   Future<ComplianceInvoiceCheckResponse?> requestComplianceCheck(
       {required InvoiceRequest prop}) async {
     return _requestComplianceCheck(prop: prop);
@@ -157,7 +157,9 @@ abstract class RequestBase {
     }
   }
 
-  Future<ProductionCSIDResponse> requestProductionCSIDOnboarding() async {
+  /// Request Production CSID for onboarding
+  Future<ProductionCSIDResponse> requestProductionCSIDOnboarding() async {return _requestProductionCSIDOnboarding();}
+  Future<ProductionCSIDResponse> _requestProductionCSIDOnboarding() async {
     String basicAuth =
         'Basic ${base64Encode(utf8.encode('${ccsidTokeys?.token}:${ccsidTokeys?.secret}'))}';
 
@@ -204,7 +206,10 @@ abstract class RequestBase {
     }
   }
 
+  /// Handle conversion and storage of Token & Key for Invoice/Note Signing.
   Future<void> convertTokenAndKeyToPemAndSaveToSDKForSigning(
+      {required CertAndKey certAndKey}) async {return _convertTokenAndKeyToPemAndSaveToSDKForSigning(certAndKey: certAndKey);}
+  Future<void> _convertTokenAndKeyToPemAndSaveToSDKForSigning(
       {required CertAndKey certAndKey}) async {
     try {
       String key = certAndKey.key;
@@ -238,7 +243,10 @@ abstract class RequestBase {
     }
   }
 
+  /// Request Production CSID Renewal.
   Future<ProductionCSIDRenewalResponse> requestProductionCSIDRenewal(
+      {required PCSIDRenewalRequestProp prop}) async { return _requestProductionCSIDRenewal(prop: prop);}
+  Future<ProductionCSIDRenewalResponse> _requestProductionCSIDRenewal(
       {required PCSIDRenewalRequestProp prop}) async {
     final Map<String, String> headers = {
       'Accept-Version': 'V2', // Ensure correct API version
@@ -283,7 +291,10 @@ abstract class RequestBase {
     }
   }
 
+  /// [B2C] Report an invoice/note to ZATCA/FATOORA Server
   Future<InvoiceReportingResponse?> requestReporting(
+      InvoiceRequest prop) async { return _requestReporting(prop);}
+  Future<InvoiceReportingResponse?> _requestReporting(
       InvoiceRequest prop) async {
     String basicAuth =
         'Basic ${base64Encode(utf8.encode('${pcsidTokeys?.token}:${pcsidTokeys?.secret}'))}';
@@ -317,7 +328,11 @@ abstract class RequestBase {
     }
   }
 
+  /// [B2C] Make a clearance request for a STANDARD invoice or a STANDARD credit/debit note.
   Future<InvoiceClearanceResponse?> requestClearance(InvoiceRequest prop,
+      {String? clearedInvoiceName}) async { return _requestClearance(prop);}
+
+  Future<InvoiceClearanceResponse?> _requestClearance(InvoiceRequest prop,
       {String? clearedInvoiceName}) async {
     String basicAuth =
         'Basic ${base64Encode(utf8.encode('${pcsidTokeys?.token}:${pcsidTokeys?.secret}'))}';
