@@ -328,7 +328,7 @@ abstract class RequestBase {
     }
   }
 
-  /// [B2C] Make a clearance request for a STANDARD invoice or a STANDARD credit/debit note.
+  /// [B2B] Make a clearance request for a STANDARD invoice or a STANDARD credit/debit note.
   Future<InvoiceClearanceResponse?> requestClearance(InvoiceRequest prop,
       {String? clearedInvoiceName}) async { return _requestClearance(prop);}
 
