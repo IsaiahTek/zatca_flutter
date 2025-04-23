@@ -440,15 +440,3 @@ class ProductionRequestBase extends RequestBase {
 
 ///
 class ProductionRequest extends ProductionRequestBase {}
-
-///
-class RequestTypes {
-  ///
-  SimulationRequest simulation = SimulationRequest();
-
-  ///
-  DeveloperPortalRequest developerPortal = DeveloperPortalRequest();
-
-  ///
-  ProductionRequest production = ProductionRequest();
-}
