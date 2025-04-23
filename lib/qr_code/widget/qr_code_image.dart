@@ -1,15 +1,30 @@
 import 'package:flutter/widgets.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-/// Use this widget to display the qr code as an image in your app
+
+/// A widget to display a QR code as an image in your app.
+///
+/// This widget renders a QR code using the data provided in [base64EncodedQrCode],
+/// which is typically obtained from the Fatoora service (for simplified invoices, debit notes,
+/// and credit notes) or from the ZATCA clearance data (for standard [B2B] invoices, debit notes, 
+/// and credit notes).
 class QrCodeImage extends StatelessWidget {
-  /// This is gotten from the fatoora service (for simplified invoice, debit note, and for credit note) or zatca clearance data (for standard [B2B] invoice, debit note, and credit note)
+  /// The base64 encoded QR code string, usually fetched from the Fatoora or ZATCA services.
+  ///
+  /// This is the data to be displayed as a QR code.
   final String base64EncodedQrCode;
 
-  /// Constructor
+  /// Constructor for [QrCodeImage].
+  ///
+  /// - [base64EncodedQrCode]: The base64 encoded QR code string to display.
+  /// - [key]: An optional key used for managing widget state (from the parent class).
   QrCodeImage({super.key, required this.base64EncodedQrCode});
 
   @override
   Widget build(BuildContext context) {
-    return QrImageView(data: base64EncodedQrCode, semanticsLabel: base64EncodedQrCode,);
+    // Returns the QR code image rendered from the base64EncodedQrCode string.
+    return QrImageView(
+      data: base64EncodedQrCode,
+      semanticsLabel: base64EncodedQrCode, // For accessibility purposes
+    );
   }
 }

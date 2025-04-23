@@ -277,7 +277,10 @@ class FatooraService {
         hashValue: hashValue, response: res, status: status);
   }
 
-  /// Generate QR Code
+  /// Generates a QR code for the invoice.
+  ///
+  /// This method generates a QR code based on the provided invoice XML file.
+  /// The QR code is returned as part of the `FatooraQrCodeResponse` object.
   static Future<FatooraQrCodeResponse> generateInvoiceQRCode(
       String invoiceFileName) async {
     return _generateInvoiceQRCode(invoiceFileName);
@@ -307,7 +310,12 @@ class FatooraService {
         qrCode: qrCode, response: response, status: status);
   }
 
-  /// Generate Invoice Request API
+  /// Generates an Invoice Request API for a given invoice.
+  ///
+  /// This method generates an API request for a given invoice XML file and returns
+  /// the response as a `FatooraInvoiceRequestApiResponse`. You can optionally
+  /// provide a file name for the output JSON file and specify whether the request
+  /// is for clearance.
   static Future<FatooraInvoiceRequestApiResponse> generateInvoiceRequestAPI(
       {required String invoiceFileName,
       String? outputJsonFileName,
@@ -371,7 +379,10 @@ class FatooraService {
         status: status, invoiceRequest: invoiceRequest, response: response);
   }
 
-  /// Basically provided for testing the Zatca SDK Installation.
+  /// Provides help information for using the Fatoora CLI.
+  ///
+  /// This method returns a response from the `-help` command, useful for testing the
+  /// SDK installation and for general reference.
   static Future<FatooraServiceResponse> getHelp() async {return _getHelp();}
   static Future<FatooraServiceResponse> _getHelp() async {
     return await _runCommand(['-help']);

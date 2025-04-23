@@ -1,13 +1,21 @@
 import 'dart:convert';
-
 import 'package:zatca_flutter/enums.dart';
 
-/// Main response model for Production CSID API
+/// Represents the main API response from the Production CSID endpoint.
 class ProductionCSIDResponse {
+  /// HTTP status code of the response.
   final int statusCode;
+
+  /// Categorized response status derived from the HTTP status code.
   final CSIDResponseStatus status;
+
+  /// Success data when the request is successful (status code 200).
   final ProductionCSIDSuccessData? successData;
+
+  /// Error data when there's a client-side error (status code 400).
   final ProductionCSIDErrorData? errorData;
+
+  /// Failure data when there's a server-side error (status code 406/500).
   final ProductionCSIDFailureData? failureData;
 
   ProductionCSIDResponse({
@@ -18,7 +26,7 @@ class ProductionCSIDResponse {
     this.failureData,
   });
 
-  /// Parses JSON into the appropriate response type (Success, Error, or Failure).
+  /// Parses JSON into the appropriate model based on status code and JSON structure.
   factory ProductionCSIDResponse.fromJson(
       int statusCode, Map<String, dynamic> json) {
     CSIDResponseStatus status = _getStatus(statusCode);
@@ -50,7 +58,7 @@ class ProductionCSIDResponse {
     }
   }
 
-  /// Converts the model back to JSON.
+  /// Serializes the model to JSON.
   Map<String, dynamic> toJson() {
     Map<String, dynamic> json = {
       'statusCode': statusCode,
@@ -62,17 +70,18 @@ class ProductionCSIDResponse {
     return json;
   }
 
-  /// Determines the response status based on the status code.
+  /// Returns response status category based on HTTP status code.
   static CSIDResponseStatus _getStatus(int statusCode) {
     if (statusCode == 200) return CSIDResponseStatus.success;
     if (statusCode == 400) return CSIDResponseStatus.clientError;
-    if (statusCode == 406 || statusCode == 500)
+    if (statusCode == 406 || statusCode == 500) {
       return CSIDResponseStatus.serverError;
+    }
     return CSIDResponseStatus.unknown;
   }
 }
 
-/// ✅ Success Response (200 OK)
+/// Represents the success response data for a Production CSID request.
 class ProductionCSIDSuccessData {
   final int requestID;
   final String dispositionMessage;
@@ -86,6 +95,7 @@ class ProductionCSIDSuccessData {
     required this.secret,
   });
 
+  /// Constructs the model from JSON.
   factory ProductionCSIDSuccessData.fromJson(Map<String, dynamic> json) {
     return ProductionCSIDSuccessData(
       requestID: json['requestID'],
@@ -95,6 +105,7 @@ class ProductionCSIDSuccessData {
     );
   }
 
+  /// Converts the model to JSON.
   Map<String, dynamic> toJson() {
     return {
       'requestID': requestID,
@@ -105,7 +116,7 @@ class ProductionCSIDSuccessData {
   }
 }
 
-/// ✅ Success Response (200 OK)
+/// Represents success data for a CSID renewal request.
 class ProductionCSIDRenewalSuccessData {
   final int requestID;
   final String dispositionMessage;
@@ -113,39 +124,45 @@ class ProductionCSIDRenewalSuccessData {
   final String secret;
   final String tokenType;
 
-  ProductionCSIDRenewalSuccessData(
-      {required this.requestID,
-      required this.dispositionMessage,
-      required this.binarySecurityToken,
-      required this.secret,
-      required this.tokenType});
+  ProductionCSIDRenewalSuccessData({
+    required this.requestID,
+    required this.dispositionMessage,
+    required this.binarySecurityToken,
+    required this.secret,
+    required this.tokenType,
+  });
 
-  factory ProductionCSIDRenewalSuccessData.fromJson(Map<String, dynamic> json) {
+  /// Constructs the model from JSON.
+  factory ProductionCSIDRenewalSuccessData.fromJson(
+      Map<String, dynamic> json) {
     return ProductionCSIDRenewalSuccessData(
-        requestID: json['requestID'],
-        dispositionMessage: json['dispositionMessage'],
-        binarySecurityToken: json['binarySecurityToken'],
-        secret: json['secret'],
-        tokenType: json['tokenType']);
+      requestID: json['requestID'],
+      dispositionMessage: json['dispositionMessage'],
+      binarySecurityToken: json['binarySecurityToken'],
+      secret: json['secret'],
+      tokenType: json['tokenType'],
+    );
   }
 
+  /// Converts the model to JSON.
   Map<String, dynamic> toJson() {
     return {
       'requestID': requestID,
       'dispositionMessage': dispositionMessage,
       'binarySecurityToken': binarySecurityToken,
       'secret': secret,
-      'tokenType': tokenType
+      'tokenType': tokenType,
     };
   }
 }
 
-/// ❌ Client Errors (400 Bad Request)
+/// Represents the data returned in case of client-side errors.
 class ProductionCSIDErrorData {
   final List<ProductionError> errors;
 
   ProductionCSIDErrorData({required this.errors});
 
+  /// Constructs the model from JSON.
   factory ProductionCSIDErrorData.fromJson(Map<String, dynamic> json) {
     return ProductionCSIDErrorData(
       errors: (json['errors'] as List)
@@ -154,6 +171,7 @@ class ProductionCSIDErrorData {
     );
   }
 
+  /// Converts the model to JSON.
   Map<String, dynamic> toJson() {
     return {
       'errors': errors.map((e) => e.toJson()).toList(),
@@ -161,13 +179,14 @@ class ProductionCSIDErrorData {
   }
 }
 
-/// 🚨 Specific Error Model
+/// Represents a single error object within a client error response.
 class ProductionError {
   final String code;
   final String message;
 
   ProductionError({required this.code, required this.message});
 
+  /// Constructs the model from JSON.
   factory ProductionError.fromJson(Map<String, dynamic> json) {
     return ProductionError(
       code: json['code'],
@@ -175,6 +194,7 @@ class ProductionError {
     );
   }
 
+  /// Converts the model to JSON.
   Map<String, dynamic> toJson() {
     return {
       'code': code,
@@ -183,13 +203,14 @@ class ProductionError {
   }
 }
 
-/// ⚠️ Server Errors (406, 500, etc.)
+/// Represents data returned for server-side failures (e.g. HTTP 500).
 class ProductionCSIDFailureData {
   final String code;
   final String message;
 
   ProductionCSIDFailureData({required this.code, required this.message});
 
+  /// Constructs the model from JSON.
   factory ProductionCSIDFailureData.fromJson(Map<String, dynamic> json) {
     return ProductionCSIDFailureData(
       code: json['code'],
@@ -197,6 +218,7 @@ class ProductionCSIDFailureData {
     );
   }
 
+  /// Converts the model to JSON.
   Map<String, dynamic> toJson() {
     return {
       'code': code,
@@ -205,12 +227,13 @@ class ProductionCSIDFailureData {
   }
 }
 
-/// Parses a JSON string into a ProductionCSIDResponse object.
+/// Utility function to parse a raw JSON string into a [ProductionCSIDResponse].
 ProductionCSIDResponse parseProductionCSIDResponse(
     int statusCode, String jsonStr) {
   return ProductionCSIDResponse.fromJson(statusCode, jsonDecode(jsonStr));
 }
 
+/// Represents the main API response from the Production CSID Renewal endpoint.
 class ProductionCSIDRenewalResponse {
   final int statusCode;
   final CSIDResponseStatus status;
@@ -226,7 +249,7 @@ class ProductionCSIDRenewalResponse {
     this.failureData,
   });
 
-  /// Parses JSON into the appropriate response type (Success, Error, or Failure).
+  /// Parses JSON into the appropriate model based on status code and structure.
   factory ProductionCSIDRenewalResponse.fromJson(
       int statusCode, Map<String, dynamic> json) {
     CSIDResponseStatus status = _getStatus(statusCode);
@@ -258,7 +281,7 @@ class ProductionCSIDRenewalResponse {
     }
   }
 
-  /// Converts the model back to JSON.
+  /// Serializes the model to JSON.
   Map<String, dynamic> toJson() {
     Map<String, dynamic> json = {
       'statusCode': statusCode,
@@ -270,12 +293,13 @@ class ProductionCSIDRenewalResponse {
     return json;
   }
 
-  /// Determines the response status based on the status code.
+  /// Returns the response status category based on HTTP status code.
   static CSIDResponseStatus _getStatus(int statusCode) {
     if (statusCode == 200) return CSIDResponseStatus.success;
     if (statusCode == 400) return CSIDResponseStatus.clientError;
-    if (statusCode == 406 || statusCode == 500)
+    if (statusCode == 406 || statusCode == 500) {
       return CSIDResponseStatus.serverError;
+    }
     return CSIDResponseStatus.unknown;
   }
 }

@@ -11,37 +11,71 @@ import 'package:zatca_flutter/service/util.dart';
 
 import 'party.dart';
 
+/// A class representing a standard invoice used for issuing an invoice to a customer.
+///
+/// The [StandardInvoice] class holds all necessary data for an invoice, including
+/// customer and supplier details, invoice lines (items), tax details, delivery information,
+/// and other related fields. It can generate the XML and JSON representations of the invoice,
+/// suitable for reporting and invoicing purposes.
 class StandardInvoice {
-  String id;
-  int icv;
-  String uuid;
-  DateTime issueDate;
-  DateTime issueTime;
-  String currency;
-  BusinessParty customer;
-  List<InvoiceLine> lines;
-  TaxDetails tax;
-  LegalMonetaryTotal monetaryTotal;
-  String pih;
-  Delivery delivery;
+  /// Unique identifier for the invoice.
+  final String id;
 
+  /// Internal control number (ICV) for the invoice.
+  final int icv;
+
+  /// Universal Unique Identifier (UUID) for the invoice.
+  final String uuid;
+
+  /// The date the invoice was issued.
+  final DateTime issueDate;
+
+  /// The time the invoice was issued.
+  final DateTime issueTime;
+
+  /// Currency used in the invoice (e.g., SAR for Saudi Riyals).
+  final String currency;
+
+  /// The customer to whom the invoice is issued.
+  final BusinessParty customer;
+
+  /// The list of items (invoice lines) associated with the invoice.
+  final List<InvoiceLine> lines;
+
+  /// The tax details related to the invoice.
+  final TaxDetails tax;
+
+  /// The legal monetary total of the invoice (e.g., subtotal, taxes, total).
+  final LegalMonetaryTotal monetaryTotal;
+
+  /// The PIH (Payment Instructions Header) or additional reference for the invoice.
+  final String pih;
+
+  /// The delivery information related to the invoice.
+  final Delivery delivery;
+
+  /// The supplier information, fetched from local storage.
   MyBusinessInfo? get supplier => LocalStore.instance.myBusinessInfo;
 
-  StandardInvoice(
-      {required this.icv,
-      required this.id,
-      required this.uuid,
-      required this.issueDate,
-      required this.issueTime,
-      required this.currency,
-      required this.customer,
-      required this.lines,
-      required this.tax,
-      required this.monetaryTotal,
-      // this.isFirstInvoice = false,
-      required this.pih,
-      required this.delivery});
+  /// Constructor to initialize the [StandardInvoice] object with necessary values.
+  StandardInvoice({
+    required this.icv,
+    required this.id,
+    required this.uuid,
+    required this.issueDate,
+    required this.issueTime,
+    required this.currency,
+    required this.customer,
+    required this.lines,
+    required this.tax,
+    required this.monetaryTotal,
+    required this.pih,
+    required this.delivery,
+  });
 
+  /// Converts the invoice to a JSON map, suitable for serializing to JSON format.
+  ///
+  /// Returns a map containing the invoice data.
   Map<String, dynamic> toJson() {
     return {
       "id": id,
@@ -56,8 +90,20 @@ class StandardInvoice {
     };
   }
 
+  /// Converts the invoice to a JSON string.
+  ///
+  /// This is a convenient method that encodes the JSON representation of the invoice.
+  ///
+  /// Returns the JSON string.
   String toJsonString() => jsonEncode(toJson());
 
+  /// Generates the XML representation of the invoice.
+  ///
+  /// This method creates an XML document structured with all the required elements for
+  /// the invoice, including information such as the invoice ID, customer details, items,
+  /// tax information, supplier details, and other related references like delivery and PIH.
+  ///
+  /// Returns the XML string representing the invoice.
   String toXml() {
     final builder = XmlBuilder();
     builder.processing('xml', 'version="1.0" encoding="UTF-8"');
@@ -80,18 +126,15 @@ class StandardInvoice {
       builder.element('cbc:InvoiceTypeCode',
           nest: '388', attributes: {'name': '0100000'});
       builder.element('cbc:DocumentCurrencyCode', nest: currency);
-      // builder.element('cbc:Note', nest: 'en');
       builder.element('cbc:TaxCurrencyCode', nest: currency);
 
-      // if(pih.isEmpty){
-      //   builder.element('cbc:PreviousInvoiceHash', nest: 'urn:ietf:rfc:3986');
-      // }
-
+      // Additional Document Reference for ICV
       builder.element('cac:AdditionalDocumentReference', nest: () {
         builder.element('cbc:ID', nest: 'ICV');
         builder.element('cbc:UUID', nest: icv);
       });
 
+      // Additional Document Reference for PIH
       builder.element('cac:AdditionalDocumentReference', nest: () {
         builder.element('cbc:ID', nest: 'PIH');
         builder.element('cac:Attachment', nest: () {
@@ -101,6 +144,7 @@ class StandardInvoice {
         });
       });
 
+      // Supplier and Customer parties
       builder.element('cac:AccountingSupplierParty',
           nest: () => supplier?.toXml(builder));
       builder.element('cac:AccountingCustomerParty',
@@ -109,35 +153,30 @@ class StandardInvoice {
       // Delivery builder
       delivery.toXml(builder);
 
-      // builder.element('cac:AllowanceCharge', nest: (){
-      //   builder.element('cbc:ChargeIndicator', nest: false);
-      //   builder.element('cbc:AllowanceChargeReason', nest: 'discount');
-      //   builder.element('cbc:Amount', attributes: {'currencyID': 'SAR'}, nest:0.00);
-      //   builder.element('cac:TaxCategory', nest: (){
-      //     builder.element('cbc:ID', attributes: {'schemeID': 'UN/ECE 5305', 'schemeAgencyID': '6'}, nest: 'S');
-      //     builder.element('cbc:Percent', nest: tax.percent);
-      //     builder.element('cac:TaxScheme', nest: (){
-      //       builder.element('cbc:ID', attributes: {'schemeID': 'UN/ECE 5153', 'schemeAgencyID': '6'}, nest: 'VAT');
-      //     });
-      //   });
-      // });
-
+      // Tax totals and Legal Monetary totals
       builder.element('cac:TaxTotal', nest: () {
         builder.element('cbc:TaxAmount',
             attributes: {'currencyID': tax.currency}, nest: tax.amount);
       });
+
       builder.element('cac:TaxTotal', nest: () => tax.toXml(builder));
       builder.element('cac:LegalMonetaryTotal',
           nest: () => monetaryTotal.toXml(builder));
 
+      // Invoice Lines (Items)
       for (int id = 0; id < lines.length; id++) {
         InvoiceLine line = lines[id];
         builder.element('cac:InvoiceLine', nest: () => line.toXml(builder, id));
       }
     });
+
     return builder.buildDocument().toXmlString(pretty: true);
   }
 
+  /// Generates and saves the XML representation of the invoice to a file.
+  ///
+  /// This method uses the [toXml()] method to generate the XML and then saves it to a file
+  /// using the provided [fileName]. The method is asynchronous.
   Future<void> generateAndSaveXml(String fileName) async {
     await saveToFile(toXml(), fileName);
   }

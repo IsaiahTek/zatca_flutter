@@ -1,4 +1,3 @@
-// Simplified Debit Note Model to hold the necessary data
 import 'package:xml/xml.dart';
 import 'package:zatca_flutter/local_store.dart';
 import 'package:zatca_flutter/model/my_business_info.dart';
@@ -12,25 +11,61 @@ import 'package:zatca_flutter/model/xml/payment_means.dart';
 import 'package:zatca_flutter/model/xml/tax_details.dart';
 import 'package:zatca_flutter/service/util.dart';
 
+/// A class representing a simplified debit note used in transactions.
+///
+/// The [SimplifiedDebitNote] class holds the necessary data for a debit note, including
+/// information about the supplier, customer, tax, items, and payment methods. It can also
+/// generate an XML representation of the debit note that can be used for reporting or invoicing.
 class SimplifiedDebitNote {
-  String id;
-  int icv;
-  String uuid;
-  DateTime issueDate;
-  DateTime issueTime;
-  String currency;
-  IndividualParty customer;
-  List<InvoiceLine> lines;
-  TaxDetails tax;
-  LegalMonetaryTotal monetaryTotal;
-  String pih;
-  BillingReference billingReference;
-  Delivery? delivery;
-  PaymentMeans paymentMeans;
-  AllowanceCharge? allowanceCharge;
+  /// Unique identifier for the debit note.
+  final String id;
 
+  /// Internal control number (ICV) for the debit note.
+  final int icv;
+
+  /// Universal Unique Identifier (UUID) for the debit note.
+  final String uuid;
+
+  /// The date the debit note was issued.
+  final DateTime issueDate;
+
+  /// The time the debit note was issued.
+  final DateTime issueTime;
+
+  /// Currency used in the debit note (e.g., SAR for Saudi Riyals).
+  final String currency;
+
+  /// The customer to whom the debit note is addressed.
+  final IndividualParty customer;
+
+  /// The list of items (invoice lines) associated with the debit note.
+  final List<InvoiceLine> lines;
+
+  /// The tax details related to the debit note.
+  final TaxDetails tax;
+
+  /// The legal monetary total of the debit note (e.g., subtotal, taxes, total).
+  final LegalMonetaryTotal monetaryTotal;
+
+  /// The PIH (Payment Instructions Header) or additional reference for the debit note.
+  final String pih;
+
+  /// The billing reference details associated with the debit note.
+  final BillingReference billingReference;
+
+  /// Delivery information, if applicable to the debit note.
+  final Delivery? delivery;
+
+  /// Payment means details specifying how the debit note will be paid.
+  final PaymentMeans paymentMeans;
+
+  /// Allowance or charge details, if applicable to the debit note.
+  final AllowanceCharge? allowanceCharge;
+
+  /// The supplier information, fetched from local storage.
   MyBusinessInfo? get supplier => LocalStore.instance.myBusinessInfo;
 
+  /// Constructor to initialize the [SimplifiedDebitNote] object with necessary values.
   SimplifiedDebitNote({
     required this.icv,
     required this.id,
@@ -42,7 +77,6 @@ class SimplifiedDebitNote {
     required this.lines,
     required this.tax,
     required this.monetaryTotal,
-    // this.isFirstInvoice = false,
     required this.pih,
     required this.billingReference,
     required this.paymentMeans,
@@ -50,6 +84,13 @@ class SimplifiedDebitNote {
     this.allowanceCharge,
   });
 
+  /// Generates the XML representation of the debit note in a format required for reporting.
+  ///
+  /// This method creates a fully structured XML document with all the necessary elements
+  /// such as the debit note ID, customer details, items, tax, and payment methods. It also
+  /// includes additional references like the ICV and PIH.
+  ///
+  /// Returns the XML string representing the debit note.
   String toXml() {
     final builder = XmlBuilder();
     builder.processing('xml', 'version="1.0" encoding="UTF-8"');
@@ -72,7 +113,6 @@ class SimplifiedDebitNote {
       builder.element('cbc:InvoiceTypeCode',
           nest: '381', attributes: {'name': '0211010'});
       builder.element('cbc:DocumentCurrencyCode', nest: currency);
-      // builder.element('cbc:Note', nest: 'en');
       builder.element('cbc:TaxCurrencyCode', nest: currency);
 
       // Build the BillingReference element.
@@ -123,6 +163,10 @@ class SimplifiedDebitNote {
     return builder.buildDocument().toXmlString(pretty: true);
   }
 
+  /// Generates the XML file for the debit note and saves it to a file.
+  ///
+  /// This method is used to generate the XML representation of the debit note and save it
+  /// to a file with the given [fileName]. It asynchronously saves the file to the local storage.
   Future<void> generateAndSaveXml(String fileName) async {
     saveToFile(toXml(), fileName);
   }

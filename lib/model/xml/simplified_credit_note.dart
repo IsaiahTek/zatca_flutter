@@ -1,4 +1,3 @@
-// Simplified Debit Note Model to hold the necessary data
 import 'package:xml/xml.dart';
 import 'package:zatca_flutter/local_store.dart';
 import 'package:zatca_flutter/model/my_business_info.dart';
@@ -12,25 +11,61 @@ import 'package:zatca_flutter/model/xml/payment_means.dart';
 import 'package:zatca_flutter/model/xml/tax_details.dart';
 import 'package:zatca_flutter/service/util.dart';
 
+/// A class representing a simplified credit note (or debit note) used in transactions.
+///
+/// The [SimplifiedCreditNote] class holds the necessary data for a credit note, including
+/// information about the supplier, customer, tax, items, and payment methods. It can also
+/// generate an XML representation of the credit note that can be used for reporting or invoicing.
 class SimplifiedCreditNote {
-  String id;
-  int icv;
-  String uuid;
-  DateTime issueDate;
-  DateTime issueTime;
-  String currency;
-  IndividualParty customer;
-  List<InvoiceLine> lines;
-  TaxDetails tax;
-  LegalMonetaryTotal monetaryTotal;
-  String pih;
-  BillingReference billingReference;
-  Delivery? delivery;
-  PaymentMeans paymentMeans;
-  AllowanceCharge? allowanceCharge;
+  /// Unique identifier for the credit note.
+  final String id;
 
+  /// Internal control number (ICV) for the credit note.
+  final int icv;
+
+  /// Universal Unique Identifier (UUID) for the credit note.
+  final String uuid;
+
+  /// The date the credit note was issued.
+  final DateTime issueDate;
+
+  /// The time the credit note was issued.
+  final DateTime issueTime;
+
+  /// Currency used in the credit note (e.g., SAR for Saudi Riyals).
+  final String currency;
+
+  /// The customer to whom the credit note is addressed.
+  final IndividualParty customer;
+
+  /// The list of items (invoice lines) associated with the credit note.
+  final List<InvoiceLine> lines;
+
+  /// The tax details related to the credit note.
+  final TaxDetails tax;
+
+  /// The legal monetary total of the credit note (e.g., subtotal, taxes, total).
+  final LegalMonetaryTotal monetaryTotal;
+
+  /// The PIH (Payment Instructions Header) or additional reference for the credit note.
+  final String pih;
+
+  /// The billing reference details associated with the credit note.
+  final BillingReference billingReference;
+
+  /// Delivery information, if applicable to the credit note.
+  final Delivery? delivery;
+
+  /// Payment means details specifying how the credit note will be paid.
+  final PaymentMeans paymentMeans;
+
+  /// Allowance or charge details, if applicable to the credit note.
+  final AllowanceCharge? allowanceCharge;
+
+  /// The supplier information, fetched from local storage.
   MyBusinessInfo? get supplier => LocalStore.instance.myBusinessInfo;
 
+  /// Constructor to initialize the [SimplifiedCreditNote] object with necessary values.
   SimplifiedCreditNote({
     required this.icv,
     required this.id,
@@ -42,7 +77,6 @@ class SimplifiedCreditNote {
     required this.lines,
     required this.tax,
     required this.monetaryTotal,
-    // this.isFirstInvoice = false,
     required this.pih,
     required this.billingReference,
     required this.paymentMeans,
@@ -50,6 +84,13 @@ class SimplifiedCreditNote {
     this.allowanceCharge,
   });
 
+  /// Generates the XML representation of the credit note in a format required for reporting.
+  ///
+  /// This method creates a fully structured XML document with all the necessary elements
+  /// such as the credit note ID, customer details, items, tax, and payment methods. It also
+  /// includes additional references like the ICV and PIH.
+  ///
+  /// Returns the XML string representing the credit note.
   String toXml() {
     if (supplier == null) {
       throw Exception("You need to first set your business info");
@@ -75,7 +116,6 @@ class SimplifiedCreditNote {
       builder.element('cbc:InvoiceTypeCode',
           nest: '383', attributes: {'name': '0211010'});
       builder.element('cbc:DocumentCurrencyCode', nest: currency);
-      // builder.element('cbc:Note', nest: 'en');
       builder.element('cbc:TaxCurrencyCode', nest: currency);
 
       // Build the BillingReference element.
@@ -127,6 +167,13 @@ class SimplifiedCreditNote {
     return builder.buildDocument().toXmlString(pretty: true);
   }
 
+  /// Generates the XML file for the credit note and saves it to a file.
+  ///
+  /// This method is used to generate the XML representation of the credit note and save it
+  /// to a file with the given [fileName]. If the supplier information is missing, an exception
+  /// will be thrown.
+  ///
+  /// Returns the file path where the XML is saved or `null` if the file could not be saved.
   Future<String?> generateAndSaveXml(String fileName) async {
     if (supplier != null) {
       return null;

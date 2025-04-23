@@ -1,37 +1,41 @@
 import 'dart:io';
-
 import 'package:zatca_flutter/service/util.dart';
 
-/// The main FATOORA CLI service.
+/// The main FATOORA CLI service for managing paths and configurations related to Fatoora SDK.
+///
+/// This class handles the initialization, retrieval, and management of the paths related to the Fatoora SDK,
+/// including the Fatoora home directory, SDK configuration, and certificates directory.
 class FatooraServiceFinder {
   static FatooraServiceFinder? _instance;
 
-  /// Set and get the csr file name to be used;
+  /// The default CSR file name used for the configuration.
   String csrFileName = "csrConfig.properties";
 
   String? _fatooraHome;
   String? _sdkConfig;
-
   String? _path;
 
-  /// Returns the SDK path
+  /// Returns the SDK path.
   String? get path => _getPath();
 
-  String? _getPath(){
+  String? _getPath() {
     return _path;
   }
 
-  /// Returns the installed ZATCA SDK Config folder path
+  /// Returns the installed ZATCA SDK Config folder path.
   String? get sdkConfig {
     return _sdkConfig;
   }
 
   String? _getFatooraHome() => _fatooraHome;
 
-  /// Returns the Fatoora Home path
+  /// Returns the Fatoora Home path.
   String? get fatooraHome => _getFatooraHome();
 
-  Directory? _getCertDir(){
+  /// Returns the default directory where the certificates are stored.
+  ///
+  /// The certificates directory is located in the parent directory of the Fatoora home.
+  Directory? _getCertDir() {
     if (_fatooraHome != null) {
       String parentDirPath = Directory(_fatooraHome!).parent.path;
       Directory certDir = Directory(
@@ -42,32 +46,36 @@ class FatooraServiceFinder {
     }
   }
 
-  /// Returns the Cert directory
+  /// Returns the Cert directory.
   Directory? get defaultCertDirectory => _getCertDir();
 
-  void _setFatooraPath(String path){
+  void _setFatooraPath(String path) {
     _path = path;
   }
 
-  void _setSdkHome(String path){
+  void _setSdkHome(String path) {
     _sdkConfig = path;
   }
 
+  /// Sets the Fatoora path.
   set setFatooraPath(String path) {
     _setFatooraPath(path);
   }
 
+  /// Sets the SDK configuration path.
   set setSdkHome(String path) {
     _setSdkHome(path);
   }
 
+  /// Private constructor for [FatooraServiceFinder].
   FatooraServiceFinder._() {
     _init();
   }
 
-  /// Initializing Fatoora Service
+  /// Initializes the Fatoora service by determining paths for the SDK and home directory.
   Future<void> init() => _init();
 
+  /// Command to search for Fatoora depending on the platform (Linux or Windows).
   String get _searchCommand {
     if (Platform.isLinux) {
       return 'which';
@@ -78,6 +86,7 @@ class FatooraServiceFinder {
     }
   }
 
+  /// Initializes paths for Fatoora and SDK configuration.
   Future<void> _init() async {
     if (path == null) {
       Process.run(_searchCommand, ["fatoora"]).then((data) {
@@ -122,7 +131,7 @@ class FatooraServiceFinder {
     } else {}
   }
 
-  /// An instant of the service and is the same accross usage.
+  /// Returns an instance of the service, ensuring that it's the same across usages.
   static FatooraServiceFinder get instance =>
       _instance ??= FatooraServiceFinder._();
 }

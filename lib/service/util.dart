@@ -212,35 +212,42 @@ Future<String> saveToFile(String content, String fileName,
   return file.path;
 }
 
+/// Saves content to a file at an absolute path.
 saveToAbsolutePath(String content, String path) {
   File file = File(path);
   file.writeAsString(content);
 }
 
+/// Returns a predefined PIH string for the first invoice.
 String getPIHForFirstInvoice() {
   return 'NWZlY2ViNjZmZmM4NmYzOGQ5NTI3ODZjNmQ2OTZjNzljMmRiYzIzOWRkNGU5MWI0NjcyOWQ3M2EyN2ZiNTdlOQ==';
 }
 
+/// Generates a random UUID.
 String generateUuid() {
   math.Random random = math.Random();
   return '${_generateHex(random, 8)}-${_generateHex(random, 4)}-${_generateHex(random, 4)}-${_generateHex(random, 4)}-${_generateHex(random, 12)}';
 }
 
+/// Internal function that generates a random hex string of the specified length.
 String _generateHex(math.Random random, int length) {
   final hexDigits = '0123456789abcdef';
   return List.generate(
       length, (_) => hexDigits[random.nextInt(hexDigits.length)]).join();
 }
 
+/// Returns the current date and time in the format: yyyyMMddHHmmss.
 String getNowDateTimeYyyyMmDdHhMmSs() {
   final dT = DateTime.now();
   return '${dT.year}${dT.month}${dT.day}${dT.hour}${dT.minute}${dT.second}';
 }
 
+/// Returns the date in ZATCA-compliant format (yyyy-MM-dd).
 String getZatcaCompliantDate(DateTime date) {
   return date.toIso8601String().split('T')[0];
 }
 
+/// Returns the time in ZATCA-compliant format (HH:mm:ss).
 String getZatcaCompliantTime(DateTime time) {
   return time.toIso8601String().split('T')[1].split('.')[0];
 }
