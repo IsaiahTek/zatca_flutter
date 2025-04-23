@@ -4,9 +4,12 @@ import '../model/fatoora_service_response.dart';
 import '../model/info_model.dart';
 import '../model/warning_model.dart';
 
+/// Fatoora Service Response Util. Used internally.
 class FatooraServiceResponseParser {
   /// Extracts all error, warning, and info messages from Fatoora CLI output
-  static FatooraServiceResponse extractResponses(String output) {
+  static FatooraServiceResponse extractResponses(String output) => _extractResponses(output);
+  
+  static FatooraServiceResponse _extractResponses(String output) {
     List<ErrorModel> errors = [];
     List<WarningModel> warnings = [];
     List<InfoModel> infos = [];

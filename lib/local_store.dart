@@ -42,10 +42,13 @@ class Tokeys {
         requestID: json['requestID']);
   }
 
+  static final String _ccsidFileName = 'ccsid.json';
+  static final String _pcsidFileName = 'pcsid.json';
+
   static Future<Tokeys?> _readLocalValues(
       {required bool isForCompliance}) async {
     String? raw = await getFileContentAsString(
-        isForCompliance ? 'ccsid.json' : 'pcsid.json',
+        isForCompliance ? _ccsidFileName : _pcsidFileName,
         folder: '.tokens');
     return raw != null ? Tokeys.fromJson(jsonDecode(raw)) : null;
   }
@@ -53,7 +56,7 @@ class Tokeys {
   /// Save Production/Compliance CSID value to storage.
   Future<void> _saveToLocal({required bool isForCompliance}) async {
     await saveToFile(
-        toJsonString(), isForCompliance ? 'ccsid.json' : 'pcsid.json',
+        toJsonString(), isForCompliance ? _ccsidFileName : _pcsidFileName,
         folder: '.tokens');
   }
 }

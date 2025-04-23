@@ -2,9 +2,11 @@ import 'dart:io';
 
 import 'package:zatca_flutter/service/util.dart';
 
+/// The main FATOORA CLI service.
 class FatooraServiceFinder {
   static FatooraServiceFinder? _instance;
 
+  /// Set and get the csr file name to be used;
   String csrFileName = "csrConfig.properties";
 
   String? _fatooraHome;
@@ -12,19 +14,24 @@ class FatooraServiceFinder {
 
   String? _path;
 
-  String? get path {
+  /// Returns the SDK path
+  String? get path => _getPath();
+
+  String? _getPath(){
     return _path;
   }
 
+  /// Returns the installed ZATCA SDK Config folder path
   String? get sdkConfig {
     return _sdkConfig;
   }
 
-  String? get fatooraHome {
-    return _fatooraHome;
-  }
+  String? _getFatooraHome() => _fatooraHome;
 
-  Directory? get defaultCertDirectory {
+  /// Returns the Fatoora Home path
+  String? get fatooraHome => _getFatooraHome();
+
+  Directory? _getCertDir(){
     if (_fatooraHome != null) {
       String parentDirPath = Directory(_fatooraHome!).parent.path;
       Directory certDir = Directory(
@@ -35,12 +42,23 @@ class FatooraServiceFinder {
     }
   }
 
-  set setFatooraPath(String path) {
+  /// Returns the Cert directory
+  Directory? get defaultCertDirectory => _getCertDir();
+
+  void _setFatooraPath(String path){
     _path = path;
   }
 
-  set setSdkHome(String path) {
+  void _setSdkHome(String path){
     _sdkConfig = path;
+  }
+
+  set setFatooraPath(String path) {
+    _setFatooraPath(path);
+  }
+
+  set setSdkHome(String path) {
+    _setSdkHome(path);
   }
 
   FatooraServiceFinder._() {
@@ -104,6 +122,7 @@ class FatooraServiceFinder {
     } else {}
   }
 
+  /// An instant of the service and is the same accross usage.
   static FatooraServiceFinder get instance =>
       _instance ??= FatooraServiceFinder._();
 }

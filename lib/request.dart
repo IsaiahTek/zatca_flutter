@@ -86,31 +86,42 @@ abstract class RequestBase {
     };
 
     try {
+      Uri uri =  Uri.parse(_complianceCSIDUrl);
       final response = await http.post(
-        Uri.parse(_complianceCSIDUrl),
+        uri,
         headers: headers,
         body: jsonEncode(body),
       );
 
-      ComplianceCSIDResponse res = ComplianceCSIDResponse.fromJson(
-          response.statusCode, jsonDecode(response.body));
-      if (res.successData != null &&
-          res.successData!.binarySecurityToken.isNotEmpty) {
-        String token = res.successData!.binarySecurityToken;
-        String secret = res.successData!.secret;
-        int requestID = res.successData!.requestID;
-        LocalStore.updateCcsid(
-            Tokeys(token: token, secret: secret, requestID: requestID));
-        // saveToFile(token, 'ccsid_binary_token',
-        //     folder: '.tokens');
+      if(response.statusCode >= 200 && response.statusCode < 300){
+        ComplianceCSIDResponse res = ComplianceCSIDResponse.fromJson(
+            response.statusCode, jsonDecode(response.body));
+        if (res.successData != null &&
+            res.successData!.binarySecurityToken.isNotEmpty) {
+          String token = res.successData!.binarySecurityToken;
+          String secret = res.successData!.secret;
+          int requestID = res.successData!.requestID;
+          LocalStore.updateCcsid(
+              Tokeys(token: token, secret: secret, requestID: requestID));
+          // saveToFile(token, 'ccsid_binary_token',
+          //     folder: '.tokens');
+        }
+        return res;
+      }else{
+        return ComplianceCSIDResponse(
+          statusCode: 400,
+          status: CSIDResponseStatus.serverError,
+          failureData: ComplianceFailureData(
+              code: response.statusCode.toString(), message: response.body),
+        );
       }
-      return res;
+
     } catch (e) {
       return ComplianceCSIDResponse(
         statusCode: 500,
-        status: CSIDResponseStatus.serverError,
+        status: CSIDResponseStatus.clientError,
         failureData: ComplianceFailureData(
-            code: "Network-Error", message: "Failed to connect: $e"),
+            code: "Client-Error", message: "Failed to connect: $e"),
       );
     }
   }
@@ -148,11 +159,11 @@ abstract class RequestBase {
         return ComplianceInvoiceCheckResponse.fromJson(
             jsonResponse, response.statusCode);
       } else {
-        log('HTTP error: ${response.statusCode}');
+        log('HTTP error: [REASON: ${response.reasonPhrase}, RESPONSE: ${response.body}');;
         return null;
       }
     } catch (e) {
-      log('Error submitting invoice: $e');
+      log('Error checking compliance: $e');
       return null;
     }
   }
@@ -182,26 +193,36 @@ abstract class RequestBase {
         body: jsonEncode(body),
       );
 
-      ProductionCSIDResponse res = ProductionCSIDResponse.fromJson(
-          response.statusCode, jsonDecode(response.body));
-      if (res.successData != null &&
-          res.successData!.binarySecurityToken.isNotEmpty) {
-        String token = res.successData!.binarySecurityToken;
-        String secret = res.successData!.secret;
-        int requestID = res.successData!.requestID;
-        LocalStore.updatePcsid(
-            Tokeys(token: token, secret: secret, requestID: requestID));
-        // saveToFile(token, 'pcsid_binary_token',
-        //     folder: '.tokens');
+      if(response.statusCode >= 200 && response.statusCode < 300){
+        ProductionCSIDResponse res = ProductionCSIDResponse.fromJson(
+            response.statusCode, jsonDecode(response.body));
+        if (res.successData != null &&
+            res.successData!.binarySecurityToken.isNotEmpty) {
+          String token = res.successData!.binarySecurityToken;
+          String secret = res.successData!.secret;
+          int requestID = res.successData!.requestID;
+          LocalStore.updatePcsid(
+              Tokeys(token: token, secret: secret, requestID: requestID));
+          // saveToFile(token, 'pcsid_binary_token',
+          //     folder: '.tokens');
+        }
+        return res;
+      }else{
+        return ProductionCSIDResponse(
+          statusCode: response.statusCode,
+          status: CSIDResponseStatus.serverError,
+          failureData: ProductionCSIDFailureData(
+              code: response.statusCode.toString(), message: response.body),
+        );
       }
-      return res;
+
     } catch (e) {
       logError("Error requesting Production CSID $e");
       return ProductionCSIDResponse(
         statusCode: 500,
-        status: CSIDResponseStatus.serverError,
+        status: CSIDResponseStatus.clientError,
         failureData: ProductionCSIDFailureData(
-            code: "Network-Error", message: "Failed to connect: $e"),
+            code: "Client-Error", message: "Failed to connect: $e"),
       );
     }
   }
@@ -267,24 +288,34 @@ abstract class RequestBase {
         body: jsonEncode(body),
       );
 
-      ProductionCSIDRenewalResponse res =
-          ProductionCSIDRenewalResponse.fromJson(
-              response.statusCode, jsonDecode(response.body));
-      if (res.successData != null &&
-          res.successData!.binarySecurityToken.isNotEmpty) {
-        String token = res.successData!.binarySecurityToken;
-        String secret = res.successData!.secret;
-        int requestID = res.successData!.requestID;
-        LocalStore.updatePcsid(
-            Tokeys(token: token, secret: secret, requestID: requestID));
-        // saveToFile(token, 'ccsid_binary_token',
-        //     folder: '.tokens');
+      if(response.statusCode >= 200 && response.statusCode < 300){
+        ProductionCSIDRenewalResponse res =
+            ProductionCSIDRenewalResponse.fromJson(
+                response.statusCode, jsonDecode(response.body));
+        if (res.successData != null &&
+            res.successData!.binarySecurityToken.isNotEmpty) {
+          String token = res.successData!.binarySecurityToken;
+          String secret = res.successData!.secret;
+          int requestID = res.successData!.requestID;
+          LocalStore.updatePcsid(
+              Tokeys(token: token, secret: secret, requestID: requestID));
+          // saveToFile(token, 'ccsid_binary_token',
+          //     folder: '.tokens');
+        }
+        return res;
+      }else{
+        return ProductionCSIDRenewalResponse(
+          statusCode: response.statusCode,
+          status: CSIDResponseStatus.serverError,
+          failureData: ProductionCSIDFailureData(
+              code: response.statusCode.toString(), message: response.body),
+        );
       }
-      return res;
+
     } catch (e) {
       return ProductionCSIDRenewalResponse(
         statusCode: 500,
-        status: CSIDResponseStatus.serverError,
+        status: CSIDResponseStatus.clientError,
         failureData: ProductionCSIDFailureData(
             code: "Network-Error", message: "Failed to connect: $e"),
       );
@@ -319,7 +350,7 @@ abstract class RequestBase {
         return InvoiceReportingResponse.fromJson(
             jsonResponse, response.statusCode);
       } else {
-        log('HTTP error: ${response.reasonPhrase}');
+        log('HTTP error: [REASON: ${response.reasonPhrase}, RESPONSE: ${response.body}');;
         return null;
       }
     } catch (e) {
@@ -350,27 +381,32 @@ abstract class RequestBase {
       final body = jsonEncode(prop.toMap());
       final response = await http.post(url, headers: headers, body: body);
 
-      final jsonResponse = jsonDecode(response.body);
-      logInfo("RESPONSE json ${jsonResponse['validationResults']}");
+      if (response.statusCode >= 200 && response.statusCode < 300){
+        final jsonResponse = jsonDecode(response.body);
+        logInfo("RESPONSE json ${jsonResponse['validationResults']}");
 
-      InvoiceClearanceResponse clearanceResponse =
-          InvoiceClearanceResponse.fromJson(jsonResponse, response.statusCode);
+        InvoiceClearanceResponse clearanceResponse =
+            InvoiceClearanceResponse.fromJson(jsonResponse, response.statusCode);
 
-      if (clearanceResponse.clearedInvoice != null) {
-        String base64DecodedInvoice =
-            utf8.decode(base64Decode(clearanceResponse.clearedInvoice!));
-        saveToFile(
-            base64DecodedInvoice,
-            clearedInvoiceName ??
-                'cleared_invoice${getNowDateTimeYyyyMmDdHhMmSs()}.xml',
-            folder: 'standard');
+        if (clearanceResponse.clearedInvoice != null) {
+          String base64DecodedInvoice =
+              utf8.decode(base64Decode(clearanceResponse.clearedInvoice!));
+          saveToFile(
+              base64DecodedInvoice,
+              clearedInvoiceName ??
+                  'cleared_invoice${getNowDateTimeYyyyMmDdHhMmSs()}.xml',
+              folder: 'standard');
+        }
+        return clearanceResponse;
+      }else{
+        log('HTTP error: [REASON: ${response.reasonPhrase}, RESPONSE: ${response.body}');
+        return null;
       }
       // if (response.statusCode >= 200 && response.statusCode < 300) {
       // } else {
       //   log('HTTP error: ${response.reasonPhrase} AND ${response.body}');
       //   return null;
       // }
-      return clearanceResponse;
     } catch (e) {
       logError("ERROR CLEARING INVOICE: $e");
       return null;
