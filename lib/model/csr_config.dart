@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:zatca_flutter/service/fatoora_service_finder.dart';
