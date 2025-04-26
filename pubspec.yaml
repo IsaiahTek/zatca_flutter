@@ -1,7 +1,6 @@
 name: zatca_flutter
 description: "A Flutter plugin that fully and perfectly implements with Zatca/Fatoora E-Invoicing Phase 1 & 2 requirements. It is the complete solution for creating a flutter e-invoicing desktop app (Windows & Linux) for use in Saudi Arabia."
 version: 0.0.1
-publish_to: 'none'
 
 repository: 'https://github.com/IsaiahTek/zatca_flutter.git'
 
