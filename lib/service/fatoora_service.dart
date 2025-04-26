@@ -19,19 +19,19 @@ import '../model/fatoora_service_response.dart';
 import 'fatoora_service_response_parser.dart';
 
 /// Zatca Fatoora Service has all the API for doing everything that the Zataca Java SDK provides.
-/// 
+///
 /// These include the following:
-/// 
+///
 /// [1] Generating CSR.
-/// 
+///
 /// [2] Signing Invoice/Note.
-/// 
+///
 /// [3] Validating Invoice/Note.
-/// 
+///
 /// [4] Generating Invoice Hash.
-/// 
+///
 /// [5] Generating Invoice QR Code.
-/// 
+///
 /// [6] Generating Invoice Request API.
 class FatooraService {
   static final FatooraServiceFinder _finder = FatooraServiceFinder.instance;
@@ -58,7 +58,8 @@ class FatooraService {
         FatooraServiceResponse response =
             FatooraServiceResponseParser.extractResponses(result.stdout);
         logInfo("RAW OUTPUT ${result.stdout}");
-        if((result.stderr as String).isNotEmpty) logInfo("RAW ERROR ${result.stderr}");
+        if ((result.stderr as String).isNotEmpty)
+          logInfo("RAW ERROR ${result.stderr}");
         logInfo("RESPONSE STATUS: ${response.status.name.toUpperCase()}");
         if (response.status == ResponseStatus.failure) {
           logError(
@@ -144,7 +145,6 @@ class FatooraService {
       String? privateKeyFile,
       String? outputCsrFile,
       bool getPem = false}) async {
-
     bool isForSimulation = ZatcaFlutter.mode == Mode.simulation;
     bool isForNoneProduction = ZatcaFlutter.mode == Mode.production;
 
@@ -156,7 +156,8 @@ class FatooraService {
 
     List<String> args = [
       '-csr',
-      '-csrConfig', "$csrFolder${Platform.pathSeparator}$csrConfigFile",
+      '-csrConfig',
+      "$csrFolder${Platform.pathSeparator}$csrConfigFile",
       if (getPem) '-pem',
       if (isForSimulation) '-sim',
       if (isForNoneProduction) '-nonprod'
@@ -196,14 +197,16 @@ class FatooraService {
       {required String invoiceFileName,
       String? outputSignedInvoiceFileName,
       bool isForComplianceCheck = false}) async {
-    return _signInvoice(invoiceFileName: invoiceFileName, outputSignedInvoiceFileName: outputSignedInvoiceFileName, isForComplianceCheck: isForComplianceCheck);
+    return _signInvoice(
+        invoiceFileName: invoiceFileName,
+        outputSignedInvoiceFileName: outputSignedInvoiceFileName,
+        isForComplianceCheck: isForComplianceCheck);
   }
 
   static Future<FatooraServiceResponse> _signInvoice(
       {required String invoiceFileName,
       String? outputSignedInvoiceFileName,
       bool isForComplianceCheck = false}) async {
-
     // A signed invoice could be used for either compliance check or for reporting/clearance.
     // Compliance Check Invoice requires CCSID while reporting/clearance requires PCSID.
     await LocalStore.instance.switchCertInSDK(usePCSID: !isForComplianceCheck);
@@ -227,8 +230,11 @@ class FatooraService {
   static Future<FatooraServiceResponse> validateInvoice(
       {required String invoiceFileName,
       bool ignoreWarningForResponseStatus = false}) async {
-    return _validateInvoice(invoiceFileName: invoiceFileName, ignoreWarningForResponseStatus: ignoreWarningForResponseStatus);
+    return _validateInvoice(
+        invoiceFileName: invoiceFileName,
+        ignoreWarningForResponseStatus: ignoreWarningForResponseStatus);
   }
+
   static Future<FatooraServiceResponse> _validateInvoice(
       {required String invoiceFileName,
       bool ignoreWarningForResponseStatus = false}) async {
@@ -250,6 +256,7 @@ class FatooraService {
       String invoiceFileName) async {
     return _generateInvoiceHash(invoiceFileName);
   }
+
   static Future<FatooraInvoiceHashResponse> _generateInvoiceHash(
       String invoiceFileName) async {
     final res =
@@ -285,6 +292,7 @@ class FatooraService {
       String invoiceFileName) async {
     return _generateInvoiceQRCode(invoiceFileName);
   }
+
   static Future<FatooraQrCodeResponse> _generateInvoiceQRCode(
       String invoiceFileName) async {
     FatooraServiceResponse response =
@@ -320,7 +328,10 @@ class FatooraService {
       {required String invoiceFileName,
       String? outputJsonFileName,
       bool forClearance = false}) async {
-    return _generateInvoiceRequestAPI(invoiceFileName: invoiceFileName, outputJsonFileName: outputJsonFileName, forClearance: forClearance);
+    return _generateInvoiceRequestAPI(
+        invoiceFileName: invoiceFileName,
+        outputJsonFileName: outputJsonFileName,
+        forClearance: forClearance);
   }
 
   static Future<FatooraInvoiceRequestApiResponse> _generateInvoiceRequestAPI(
@@ -383,7 +394,10 @@ class FatooraService {
   ///
   /// This method returns a response from the `-help` command, useful for testing the
   /// SDK installation and for general reference.
-  static Future<FatooraServiceResponse> getHelp() async {return _getHelp();}
+  static Future<FatooraServiceResponse> getHelp() async {
+    return _getHelp();
+  }
+
   static Future<FatooraServiceResponse> _getHelp() async {
     return await _runCommand(['-help']);
   }

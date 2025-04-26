@@ -1,10 +1,10 @@
-/// Represents an individual item in an invoice, including details such as description, 
+/// Represents an individual item in an invoice, including details such as description,
 /// quantity, unit price, taxable amount, VAT rate, and VAT amount.
 ///
-/// The [InvoiceItem] class contains the necessary fields to represent a single item 
-/// listed in an invoice, including pricing and VAT details. This is typically used in 
+/// The [InvoiceItem] class contains the necessary fields to represent a single item
+/// listed in an invoice, including pricing and VAT details. This is typically used in
 /// invoices for billing or tax reporting purposes.
-/// 
+///
 /// Fields:
 /// - [description]: A description of the item being billed.
 /// - [quantity]: The quantity of the item.
@@ -50,9 +50,9 @@ class InvoiceItem {
 
   /// Converts the [InvoiceItem] instance to a JSON map.
   ///
-  /// The method generates a map representation of the invoice item, which can be used 
+  /// The method generates a map representation of the invoice item, which can be used
   /// for serializing the object into JSON for APIs or storage.
-  /// 
+  ///
   /// Example:
   /// ```json
   /// {

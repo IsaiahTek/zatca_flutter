@@ -1,6 +1,6 @@
 /// Compliance CSID Request parameters model.
-/// 
-/// This class encapsulates the properties required when requesting a 
+///
+/// This class encapsulates the properties required when requesting a
 /// Compliance CSID (Cryptographic Stamp Identifier) from ZATCA.
 /// It includes essential information like the CSR and the OTP.
 class CCSIDRequestProp {
@@ -24,7 +24,7 @@ class CCSIDRequestProp {
 }
 
 /// Production CSID Renewal Request parameters model.
-/// 
+///
 /// This subclass of [CCSIDRequestProp] is specifically used when renewing
 /// a Production CSID. It retains the same structure but semantically indicates
 /// its use for renewal operations.

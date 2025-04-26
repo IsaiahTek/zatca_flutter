@@ -13,8 +13,8 @@ import 'party.dart';
 /// A class representing a simplified invoice used for transactions.
 ///
 /// The [SimplifiedInvoice] class holds all necessary data for an invoice, including
-/// the supplier and customer information, the invoice lines (items), tax details, 
-/// and other related fields. It can also generate both a JSON and an XML representation 
+/// the supplier and customer information, the invoice lines (items), tax details,
+/// and other related fields. It can also generate both a JSON and an XML representation
 /// of the invoice, suitable for reporting and invoicing purposes.
 class SimplifiedInvoice {
   /// Unique identifier for the invoice.

@@ -15,8 +15,8 @@ import 'package:zatca_flutter/service/util.dart';
 /// A class representing a standard credit note used for issuing credit to a customer.
 ///
 /// The [StandardCreditNote] class holds all necessary data for a credit note, including
-/// the customer and supplier information, the credit note lines (items), tax details, 
-/// payment means, delivery information, and other related fields. It can generate the 
+/// the customer and supplier information, the credit note lines (items), tax details,
+/// payment means, delivery information, and other related fields. It can generate the
 /// XML representation of the credit note, suitable for reporting and invoicing purposes.
 class StandardCreditNote {
   /// Unique identifier for the credit note.

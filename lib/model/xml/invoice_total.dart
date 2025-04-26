@@ -1,8 +1,8 @@
-/// Represents the total values of an invoice, including the subtotal, VAT amount, 
+/// Represents the total values of an invoice, including the subtotal, VAT amount,
 /// and the grand total.
 ///
-/// The [InvoiceTotal] class holds the final calculations for an invoice, summarizing 
-/// the subtotal before taxes, the VAT amount, and the final grand total after adding 
+/// The [InvoiceTotal] class holds the final calculations for an invoice, summarizing
+/// the subtotal before taxes, the VAT amount, and the final grand total after adding
 /// taxes. It is used to represent the overall financial summary of an invoice.
 class InvoiceTotal {
   /// The subtotal amount before VAT is applied.
@@ -27,7 +27,7 @@ class InvoiceTotal {
 
   /// Converts the [InvoiceTotal] instance into a JSON map.
   ///
-  /// This method generates a map representation of the invoice total, which can be 
+  /// This method generates a map representation of the invoice total, which can be
   /// used for serializing the object into JSON format for APIs or storage.
   /// Example:
   /// ```json

@@ -4,7 +4,7 @@ import 'package:zatca_flutter/model/xml/tax_details.dart';
 
 /// Represents an allowance or charge, typically used in tax-related transactions.
 ///
-/// This class models an allowance or charge element, which is used to represent discounts or 
+/// This class models an allowance or charge element, which is used to represent discounts or
 /// additional charges in financial transactions, particularly in the context of tax invoices.
 ///
 /// It includes the following properties:

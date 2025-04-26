@@ -5,7 +5,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 ///
 /// This widget renders a QR code using the data provided in [base64EncodedQrCode],
 /// which is typically obtained from the Fatoora service (for simplified invoices, debit notes,
-/// and credit notes) or from the ZATCA clearance data (for standard [B2B] invoices, debit notes, 
+/// and credit notes) or from the ZATCA clearance data (for standard [B2B] invoices, debit notes,
 /// and credit notes).
 class QrCodeImage extends StatelessWidget {
   /// The base64 encoded QR code string, usually fetched from the Fatoora or ZATCA services.

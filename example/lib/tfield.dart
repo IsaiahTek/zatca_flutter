@@ -33,7 +33,7 @@ class Tfield extends StatelessWidget {
               maxLines: minline,
               style: TextStyle(fontSize: 15.0),
               controller: controller,
-              readOnly: readOnly??false,
+              readOnly: readOnly ?? false,
               decoration: InputDecoration(
                   isDense: true,
                   hintText: hint,

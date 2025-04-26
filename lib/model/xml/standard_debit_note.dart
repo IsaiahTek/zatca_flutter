@@ -15,8 +15,8 @@ import 'package:zatca_flutter/service/util.dart';
 /// A class representing a standard debit note used for issuing debit to a customer.
 ///
 /// The [StandardDebitNote] class holds all necessary data for a debit note, including
-/// the customer and supplier information, the debit note lines (items), tax details, 
-/// payment means, delivery information, and other related fields. It can generate the 
+/// the customer and supplier information, the debit note lines (items), tax details,
+/// payment means, delivery information, and other related fields. It can generate the
 /// XML representation of the debit note, suitable for reporting and invoicing purposes.
 class StandardDebitNote {
   /// Unique identifier for the debit note.

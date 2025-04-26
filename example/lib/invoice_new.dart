@@ -23,7 +23,6 @@ class InvoiceNew extends StatefulWidget {
 }
 
 class _InvoiceNewState extends State<InvoiceNew> {
-
   String? base64EncodedQrCode;
   String? xml;
   String? responseStatus;
@@ -375,100 +374,122 @@ class _InvoiceNewState extends State<InvoiceNew> {
                               borderRadius: BorderRadius.circular(3))),
                     ),
                   ),
-                  ElevatedButton(onPressed: () async {
-                    setState(() {
-                      responseStatus = "Processing...";
-                      xml = "Processing...";
-                      base64EncodedQrCode = "Processing...";
-                    });
+                  ElevatedButton(
+                      onPressed: () async {
+                        setState(() {
+                          responseStatus = "Processing...";
+                          xml = "Processing...";
+                          base64EncodedQrCode = "Processing...";
+                        });
 
-                    // Create the invoice object
-                    SimplifiedInvoice simplifiedInvoice = SimplifiedInvoice(
-                      icv: 1,
-                      pih:'',  // Pass in an empty string like this if this is your first invoice. Otherwise, pass in the actual PIH (Previous Invoice Hash)
-                      id: "INV-001",
-                      uuid: generateUuid(),
-                      issueDate: DateTime.now(),
-                      issueTime: DateTime.now(),
-                      currency: 'SAR',
-                      customer: IndividualParty(
-                        name: "Elizabeth",
-                        taxId: "310298993344553",
-                        address: "address 3az",
-                      ),
-                      lines: [
-                        InvoiceLine(
-                          quantity: "1",
-                          price: "64",
-                          total: "64",
+                        // Create the invoice object
+                        SimplifiedInvoice simplifiedInvoice = SimplifiedInvoice(
+                          icv: 1,
+                          pih:
+                              '', // Pass in an empty string like this if this is your first invoice. Otherwise, pass in the actual PIH (Previous Invoice Hash)
+                          id: "INV-001",
+                          uuid: generateUuid(),
+                          issueDate: DateTime.now(),
+                          issueTime: DateTime.now(),
+                          currency: 'SAR',
+                          customer: IndividualParty(
+                            name: "Elizabeth",
+                            taxId: "310298993344553",
+                            address: "address 3az",
+                          ),
+                          lines: [
+                            InvoiceLine(
+                              quantity: "1",
+                              price: "64",
+                              total: "64",
+                              tax: TaxDetails(
+                                amount: "9.60", // 64 * 15% = 9.60
+                                percent: "15",
+                                currency: 'SAR',
+                                taxableAmount: '64',
+                                code: TaxCategoryCode
+                                    .standard, // Ensure taxable amount matches total
+                              ),
+                              name: 'Garri',
+                            )
+                          ],
                           tax: TaxDetails(
-                            amount: "9.60", // 64 * 15% = 9.60
+                            amount: "9.60", // Sum of line-level tax amounts
                             percent: "15",
                             currency: 'SAR',
-                            taxableAmount:
-                                '64', code: TaxCategoryCode.standard, // Ensure taxable amount matches total
+                            taxableAmount: '64',
+                            code: TaxCategoryCode
+                                .standard, // Total taxable amount
                           ),
-                          name: 'Garri',
-                        )
-                      ],
-                      tax: TaxDetails(
-                        amount: "9.60", // Sum of line-level tax amounts
-                        percent: "15",
-                        currency: 'SAR',
-                        taxableAmount: '64', code: TaxCategoryCode.standard, // Total taxable amount
-                      ),
-                      monetaryTotal: LegalMonetaryTotal(
-                        lineExtensionAmount: "64", // Sum of line totals
-                        taxExclusiveAmount:
-                            "64", // Same as lineExtensionAmount
-                        taxInclusiveAmount:
-                            "73.60", // taxExclusiveAmount + total VAT
-                        payableAmount: "73.60", // Final payable amount
-                        allowanceTotalAmount: 0.0,
-                        prepaidAmount: 0.0
-                      ),
-                    );
-        
-                    simplifiedInvoice.generateAndSaveXml('simple_invoice.xml');   // Generate and save the invoice xml data from the invoice object
-        
-                    
-                    // Sign the invoice if it's Simplified (B2C)
-                    FatooraServiceResponse signRes = await FatooraService.signInvoice(invoiceFileName: 'simple_invoice.xml', isForComplianceCheck: true);
+                          monetaryTotal: LegalMonetaryTotal(
+                              lineExtensionAmount: "64", // Sum of line totals
+                              taxExclusiveAmount:
+                                  "64", // Same as lineExtensionAmount
+                              taxInclusiveAmount:
+                                  "73.60", // taxExclusiveAmount + total VAT
+                              payableAmount: "73.60", // Final payable amount
+                              allowanceTotalAmount: 0.0,
+                              prepaidAmount: 0.0),
+                        );
 
-                    // Get the XML of the signed invoice
-                    xml = await getFileContentAsString('simple_invoice_signed.xml');
-                    setState(() {
-                      xml;
-                    });
+                        simplifiedInvoice.generateAndSaveXml(
+                            'simple_invoice.xml'); // Generate and save the invoice xml data from the invoice object
 
-                    // Get the QR Code from the signed invoice
-                    FatooraQrCodeResponse qrCodeResponse = await FatooraService.generateInvoiceQRCode('simple_invoice_signed.xml');
-        
-                    setState(() {
-                      base64EncodedQrCode = qrCodeResponse.qrCode;
-                    });
-        
-                    debugPrint("SIGNATURE (${signRes.status.name.toUpperCase()}): ${signRes.infos?.map((d)=>d.message)}");
+                        // Sign the invoice if it's Simplified (B2C)
+                        FatooraServiceResponse signRes =
+                            await FatooraService.signInvoice(
+                                invoiceFileName: 'simple_invoice.xml',
+                                isForComplianceCheck: true);
 
-                    // Validate signed invoice locally before doing compliance check, reporting or clearance
-                    FatooraServiceResponse validationRes = await FatooraService.validateInvoice(invoiceFileName: 'simple_invoice_signed.xml', ignoreWarningForResponseStatus: true);
-                    
-                    debugPrint("VALIDATION (${validationRes.status.name.toUpperCase()}): SUCCESS (${validationRes.infos?.length}); FAILURE (${validationRes.errors?.length}) WARNING (${validationRes.warnings?.length}) ${validationRes.infos?.map((d)=>d.message)}");
+                        // Get the XML of the signed invoice
+                        xml = await getFileContentAsString(
+                            'simple_invoice_signed.xml');
+                        setState(() {
+                          xml;
+                        });
 
-                    // Generate the Request API for compliance check, reporting or clearance
-                    FatooraInvoiceRequestApiResponse invoiceApi = await FatooraService.generateInvoiceRequestAPI(invoiceFileName: 'simple_invoice_signed.xml');
-        
-                    // debugPrint("INVOICE API: ${invoiceApi.invoiceRequest?.toMap()}");
-        
-                    // Check compliance on zatca server.
-                    ComplianceInvoiceCheckResponse? res = await Controller.instance.request.requestComplianceCheck(prop: invoiceApi.invoiceRequest!);
-        
-                    if(res?.status != null){
-                      setState(() {
-                        responseStatus = "${res?.clearanceStatus??res?.reportingStatus??res?.status.name.toUpperCase()}\n\n${res?.validationResults?.toJson()}";
-                      });
-                    }
-                  }, child: Text('Add')),
+                        // Get the QR Code from the signed invoice
+                        FatooraQrCodeResponse qrCodeResponse =
+                            await FatooraService.generateInvoiceQRCode(
+                                'simple_invoice_signed.xml');
+
+                        setState(() {
+                          base64EncodedQrCode = qrCodeResponse.qrCode;
+                        });
+
+                        debugPrint(
+                            "SIGNATURE (${signRes.status.name.toUpperCase()}): ${signRes.infos?.map((d) => d.message)}");
+
+                        // Validate signed invoice locally before doing compliance check, reporting or clearance
+                        FatooraServiceResponse validationRes =
+                            await FatooraService.validateInvoice(
+                                invoiceFileName: 'simple_invoice_signed.xml',
+                                ignoreWarningForResponseStatus: true);
+
+                        debugPrint(
+                            "VALIDATION (${validationRes.status.name.toUpperCase()}): SUCCESS (${validationRes.infos?.length}); FAILURE (${validationRes.errors?.length}) WARNING (${validationRes.warnings?.length}) ${validationRes.infos?.map((d) => d.message)}");
+
+                        // Generate the Request API for compliance check, reporting or clearance
+                        FatooraInvoiceRequestApiResponse invoiceApi =
+                            await FatooraService.generateInvoiceRequestAPI(
+                                invoiceFileName: 'simple_invoice_signed.xml');
+
+                        // debugPrint("INVOICE API: ${invoiceApi.invoiceRequest?.toMap()}");
+
+                        // Check compliance on zatca server.
+                        ComplianceInvoiceCheckResponse? res = await Controller
+                            .instance.request
+                            .requestComplianceCheck(
+                                prop: invoiceApi.invoiceRequest!);
+
+                        if (res?.status != null) {
+                          setState(() {
+                            responseStatus =
+                                "${res?.clearanceStatus ?? res?.reportingStatus ?? res?.status.name.toUpperCase()}\n\n${res?.validationResults?.toJson()}";
+                          });
+                        }
+                      },
+                      child: Text('Add')),
                 ],
               ),
               SizedBox(
@@ -494,7 +515,8 @@ class _InvoiceNewState extends State<InvoiceNew> {
                               padding: EdgeInsets.all(2),
                               alignment: Alignment.center,
                               child: Text('Product ID',
-                                  style: TextStyle(fontWeight: FontWeight.bold)),
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
                             ),
                           ),
                           GridColumn(
@@ -503,7 +525,8 @@ class _InvoiceNewState extends State<InvoiceNew> {
                               padding: EdgeInsets.all(2),
                               alignment: Alignment.center,
                               child: Text('Product Name',
-                                  style: TextStyle(fontWeight: FontWeight.bold)),
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
                             ),
                           ),
                           GridColumn(
@@ -512,7 +535,8 @@ class _InvoiceNewState extends State<InvoiceNew> {
                               padding: EdgeInsets.all(2),
                               alignment: Alignment.center,
                               child: Text(' Qty',
-                                  style: TextStyle(fontWeight: FontWeight.bold)),
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
                             ),
                           ),
                           GridColumn(
@@ -521,7 +545,8 @@ class _InvoiceNewState extends State<InvoiceNew> {
                               padding: EdgeInsets.all(2),
                               alignment: Alignment.center,
                               child: Text('Price',
-                                  style: TextStyle(fontWeight: FontWeight.bold)),
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
                             ),
                           ),
                           GridColumn(
@@ -530,7 +555,8 @@ class _InvoiceNewState extends State<InvoiceNew> {
                               padding: EdgeInsets.all(2),
                               alignment: Alignment.center,
                               child: Text('Price WT',
-                                  style: TextStyle(fontWeight: FontWeight.bold)),
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
                             ),
                           ),
                           GridColumn(
@@ -539,7 +565,8 @@ class _InvoiceNewState extends State<InvoiceNew> {
                               padding: EdgeInsets.all(2),
                               alignment: Alignment.center,
                               child: Text('Discount%',
-                                  style: TextStyle(fontWeight: FontWeight.bold)),
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
                             ),
                           ),
                           GridColumn(
@@ -548,7 +575,8 @@ class _InvoiceNewState extends State<InvoiceNew> {
                               padding: EdgeInsets.all(2),
                               alignment: Alignment.center,
                               child: Text('Discount Amnt',
-                                  style: TextStyle(fontWeight: FontWeight.bold)),
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
                             ),
                           ),
                           GridColumn(
@@ -557,7 +585,8 @@ class _InvoiceNewState extends State<InvoiceNew> {
                               padding: EdgeInsets.all(2),
                               alignment: Alignment.center,
                               child: Text('Total',
-                                  style: TextStyle(fontWeight: FontWeight.bold)),
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
                             ),
                           ),
                         ],
@@ -590,7 +619,8 @@ class _InvoiceNewState extends State<InvoiceNew> {
                     decoration: BoxDecoration(border: Border.all(width: 0.3)),
                     width: 350,
                     height: 200,
-                    child: SingleChildScrollView(child: Text(responseStatus??'Respose here..')),
+                    child: SingleChildScrollView(
+                        child: Text(responseStatus ?? 'Respose here..')),
                   ),
                   SizedBox(
                     width: 20,
@@ -600,7 +630,8 @@ class _InvoiceNewState extends State<InvoiceNew> {
                     decoration: BoxDecoration(border: Border.all(width: 0.3)),
                     width: 450,
                     height: 200,
-                    child: SingleChildScrollView(child: Text(xml??'Invoice XML here... ')),
+                    child: SingleChildScrollView(
+                        child: Text(xml ?? 'Invoice XML here... ')),
                   ),
                   SizedBox(
                     width: 20,
@@ -610,7 +641,12 @@ class _InvoiceNewState extends State<InvoiceNew> {
                     decoration: BoxDecoration(border: Border.all(width: 0.3)),
                     width: 200,
                     height: 200,
-                    child: base64EncodedQrCode != null ? base64EncodedQrCode == "Processing..." ? Text("Processing...") : QrCodeImage(base64EncodedQrCode: base64EncodedQrCode!) : Center(child: Text('Qr Code')),
+                    child: base64EncodedQrCode != null
+                        ? base64EncodedQrCode == "Processing..."
+                            ? Text("Processing...")
+                            : QrCodeImage(
+                                base64EncodedQrCode: base64EncodedQrCode!)
+                        : Center(child: Text('Qr Code')),
                   )
                 ],
               ),

@@ -135,7 +135,7 @@ class LocalStore {
     return _handleSwitching(usePCSID: usePCSID);
   }
 
-  Future<void> _handleSwitching({bool usePCSID = false}) async{
+  Future<void> _handleSwitching({bool usePCSID = false}) async {
     return _convertCertAndSaveToStorage(
         cert: usePCSID ? pcsid!.token : ccsid!.token);
   }

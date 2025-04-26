@@ -17,10 +17,10 @@ enum TaxCategoryCode {
 /// A map that maps each [TaxCategoryCode] to its respective string value used in the system.
 /// The string values are commonly used for serialization or communication with external services.
 final Map<TaxCategoryCode, String> taxCategoryCodeValues = {
-  TaxCategoryCode.exempt: 'E',             // Exempt tax category
-  TaxCategoryCode.standard: 'S',           // Standard tax category
-  TaxCategoryCode.outsideVatScope: 'O',   // Outside VAT scope
-  TaxCategoryCode.zeroRated: 'Z'          // Zero-rated tax category
+  TaxCategoryCode.exempt: 'E', // Exempt tax category
+  TaxCategoryCode.standard: 'S', // Standard tax category
+  TaxCategoryCode.outsideVatScope: 'O', // Outside VAT scope
+  TaxCategoryCode.zeroRated: 'Z' // Zero-rated tax category
 };
 
 /// Enum for Tax Scheme Codes, which represent different types of tax schemes.

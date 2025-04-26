@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:zatca_flutter/enums.dart';
 
 /// Main response model for Compliance CSID API
-/// 
+///
 /// This model represents the response structure from the Compliance CSID API, which could be a success, error, or failure response.
 class ComplianceCSIDResponse {
   /// The HTTP status code returned by the server.
@@ -21,7 +21,7 @@ class ComplianceCSIDResponse {
   final ComplianceFailureData? failureData;
 
   /// Constructor for initializing the response model.
-  /// 
+  ///
   /// Parameters:
   /// - [statusCode]: The status code from the server (e.g., 200 for success).
   /// - [status]: The response status (success, client error, server error, or unknown).
@@ -37,7 +37,7 @@ class ComplianceCSIDResponse {
   });
 
   /// Parses JSON into the appropriate response type (Success, Error, or Failure).
-  /// 
+  ///
   /// Based on the status code, the JSON data is parsed into the corresponding response data class (success, error, or failure).
   factory ComplianceCSIDResponse.fromJson(
       int statusCode, Map<String, dynamic> json) {
@@ -71,7 +71,7 @@ class ComplianceCSIDResponse {
   }
 
   /// Converts the model back to JSON.
-  /// 
+  ///
   /// This method converts the response model into a JSON structure, including the status and corresponding data.
   Map<String, dynamic> toJson() {
     Map<String, dynamic> json = {
@@ -85,7 +85,7 @@ class ComplianceCSIDResponse {
   }
 
   /// Determines the response status based on the status code.
-  /// 
+  ///
   /// This method maps the status code to an appropriate response status (success, client error, server error, or unknown).
   static CSIDResponseStatus _getStatus(int statusCode) {
     if (statusCode == 200) return CSIDResponseStatus.success;
@@ -98,7 +98,7 @@ class ComplianceCSIDResponse {
 }
 
 /// Success Response (200 OK)
-/// 
+///
 /// This class represents the success response data for a valid CSID request.
 class ComplianceSuccessData {
   /// The unique request ID for the CSID request.
@@ -114,7 +114,7 @@ class ComplianceSuccessData {
   final String secret;
 
   /// Constructor for the success data.
-  /// 
+  ///
   /// Parameters:
   /// - [requestID]: The unique request ID.
   /// - [dispositionMessage]: The message regarding the request's disposition.
@@ -149,14 +149,14 @@ class ComplianceSuccessData {
 }
 
 /// Client Errors (400 Bad Request)
-/// 
+///
 /// This class represents the error data returned for a client-side issue in the CSID API.
 class ComplianceErrorData {
   /// A list of errors that occurred on the client side.
   final List<ComplianceError> errors;
 
   /// Constructor for the client error data.
-  /// 
+  ///
   /// Parameters:
   /// - [errors]: A list of specific error details.
   ComplianceErrorData({required this.errors});
@@ -179,7 +179,7 @@ class ComplianceErrorData {
 }
 
 /// Specific Error Model
-/// 
+///
 /// This class represents a single error in the list of errors for client-side issues.
 class ComplianceError {
   /// The error code associated with the specific issue.
@@ -189,7 +189,7 @@ class ComplianceError {
   final String message;
 
   /// Constructor for the specific error.
-  /// 
+  ///
   /// Parameters:
   /// - [code]: The error code.
   /// - [message]: A description of the error.
@@ -213,7 +213,7 @@ class ComplianceError {
 }
 
 /// Server Errors (406, 500, etc.)
-/// 
+///
 /// This class represents the failure data returned for server-side issues in the CSID API.
 class ComplianceFailureData {
   /// The error code returned from the server in case of failure.
@@ -223,7 +223,7 @@ class ComplianceFailureData {
   final String message;
 
   /// Constructor for the server failure data.
-  /// 
+  ///
   /// Parameters:
   /// - [code]: The error code from the server.
   /// - [message]: The error message from the server.
@@ -247,13 +247,13 @@ class ComplianceFailureData {
 }
 
 /// Parses a JSON string into a ComplianceCSIDResponse object.
-/// 
+///
 /// This function is a utility to simplify parsing JSON strings into the `ComplianceCSIDResponse` model.
-/// 
+///
 /// Parameters:
 /// - [statusCode]: The HTTP status code of the response.
 /// - [jsonStr]: The raw JSON string containing the response data.
-/// 
+///
 /// Returns a `ComplianceCSIDResponse` object.
 ComplianceCSIDResponse parseComplianceCSIDResponse(
     int statusCode, String jsonStr) {

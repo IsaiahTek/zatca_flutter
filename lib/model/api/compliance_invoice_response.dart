@@ -21,7 +21,7 @@ enum CCSIDCheckResponseStatus {
 }
 
 /// Response model for invoice compliance status checking.
-/// 
+///
 /// This model is used to represent the outcome of a compliance check for an invoice submission to ZATCA.
 /// It captures both successful validations and various error cases including unauthorized access or server failures.
 class ComplianceInvoiceCheckResponse {
@@ -66,7 +66,7 @@ class ComplianceInvoiceCheckResponse {
   });
 
   /// Factory constructor that creates a [ComplianceInvoiceCheckResponse] object from JSON.
-  /// 
+  ///
   /// It attempts to parse fields like validation results, reporting/clearance status,
   /// QR code statuses, and any potential error responses based on the HTTP status code.
   factory ComplianceInvoiceCheckResponse.fromJson(

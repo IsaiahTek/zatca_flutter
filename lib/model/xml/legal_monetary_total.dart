@@ -1,11 +1,11 @@
 import 'package:xml/xml.dart';
 
-/// Represents the legal monetary totals for an invoice, including various financial 
+/// Represents the legal monetary totals for an invoice, including various financial
 /// amounts such as line extension, tax amounts, prepaid amounts, and the payable amount.
 ///
-/// The [LegalMonetaryTotal] class holds the essential financial summary related to the 
-/// invoice's monetary totals, such as the line extension amount, tax exclusive and inclusive 
-/// amounts, allowance total, prepaid amounts, and payable amounts. These totals are often 
+/// The [LegalMonetaryTotal] class holds the essential financial summary related to the
+/// invoice's monetary totals, such as the line extension amount, tax exclusive and inclusive
+/// amounts, allowance total, prepaid amounts, and payable amounts. These totals are often
 /// required for legal or regulatory compliance in many invoicing systems.
 class LegalMonetaryTotal {
   /// The total amount before any tax is applied (line extension amount).
@@ -64,7 +64,8 @@ class LegalMonetaryTotal {
     builder.element('cbc:TaxInclusiveAmount',
         nest: taxInclusiveAmount, attributes: {'currencyID': 'SAR'});
     builder.element('cbc:AllowanceTotalAmount',
-        nest: allowanceTotalAmount.toString(), attributes: {'currencyID': 'SAR'});
+        nest: allowanceTotalAmount.toString(),
+        attributes: {'currencyID': 'SAR'});
     builder.element('cbc:PrepaidAmount',
         nest: prepaidAmount.toString(), attributes: {'currencyID': 'SAR'});
     builder.element('cbc:PayableAmount',

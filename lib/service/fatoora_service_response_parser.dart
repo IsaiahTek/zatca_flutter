@@ -9,7 +9,6 @@ import '../model/warning_model.dart';
 /// This class is used internally to extract error, warning, and info messages
 /// from the Fatoora CLI output and encapsulate them into a structured response.
 class FatooraServiceResponseParser {
-  
   /// Extracts all error, warning, and info messages from the Fatoora CLI output.
   ///
   /// This method processes the raw output from the Fatoora service and extracts the
@@ -19,7 +18,8 @@ class FatooraServiceResponseParser {
   /// [output] The raw string output from the Fatoora service CLI.
   ///
   /// Returns a [FatooraServiceResponse] containing the extracted data.
-  static FatooraServiceResponse extractResponses(String output) => _extractResponses(output);
+  static FatooraServiceResponse extractResponses(String output) =>
+      _extractResponses(output);
 
   /// Internal method to extract error, warning, and info messages from the output.
   ///

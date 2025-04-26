@@ -13,16 +13,18 @@ String _getBaseName(String fullPath) {
 }
 
 /// Reads the content of a user-generated file as a string.
-/// 
+///
 /// [fileName]: Name of the file to read.
 /// [folder]: Optional subfolder inside storage.
-/// 
+///
 /// Returns the file content as a string or `null` if the file does not exist or fails to read.
-Future<String?> getFileContentAsString(String fileName, {String? folder}) async {
+Future<String?> getFileContentAsString(String fileName,
+    {String? folder}) async {
   return _getFileContentAsString(fileName, folder: folder);
 }
 
-Future<String?> _getFileContentAsString(String fileName, {String? folder}) async {
+Future<String?> _getFileContentAsString(String fileName,
+    {String? folder}) async {
   String directory = await _getStorageFolderPath();
   final dir = Directory(
       "$directory${folder != null ? '${Platform.pathSeparator}$folder' : ''}");
@@ -56,9 +58,9 @@ Future<String> _getStorageFolderPath() async {
 }
 
 /// Fetches the names of all files with the specified extension.
-/// 
+///
 /// [extension]: Extension without the dot (e.g., 'txt').
-/// 
+///
 /// Example:
 /// ```dart
 /// getAllFileNamesByExtension('example');
@@ -78,10 +80,10 @@ Future<List<String>> _getAllFileNamesByExtension(String extension) async {
 }
 
 /// Loads an [InvoiceRequest] from a JSON file.
-/// 
+///
 /// [fileName]: Name of the file to load.
 /// [useAsAbsolutePath]: If true, treats [fileName] as a full absolute path.
-/// 
+///
 /// Returns an [InvoiceRequest] object or `null` if file not found or parsing fails.
 Future<InvoiceRequest?> loadInvoiceRequest(
     {required String fileName, bool useAsAbsolutePath = false}) async {
@@ -107,13 +109,15 @@ Future<InvoiceRequest?> _loadInvoiceRequest(
 }
 
 /// Renames a file from [oldName] to [newName].
-/// 
+///
 /// Returns `true` if successful, `false` otherwise.
-Future<bool> renameFile({required String oldName, required String newName}) async {
+Future<bool> renameFile(
+    {required String oldName, required String newName}) async {
   return _renameFile(oldName: oldName, newName: newName);
 }
 
-Future<bool> _renameFile({required String oldName, required String newName}) async {
+Future<bool> _renameFile(
+    {required String oldName, required String newName}) async {
   try {
     String oldPath = await getStorageFolderPath();
     File file = File("$oldPath${Platform.pathSeparator}$oldName");
@@ -136,11 +140,12 @@ void logInfo(String message) {
 }
 
 /// Saves [content] to a file [fileName] in optional [folder].
-/// 
+///
 /// Creates the file if it does not exist.
-/// 
+///
 /// Returns the full path of the saved file.
-Future<String> saveToFile(String content, String fileName, {String? folder}) async {
+Future<String> saveToFile(String content, String fileName,
+    {String? folder}) async {
   final String directory = await getStorageFolderPath();
   final dir = Directory(
       "$directory${folder != null ? '${Platform.pathSeparator}$folder' : ''}");
@@ -156,7 +161,7 @@ Future<String> saveToFile(String content, String fileName, {String? folder}) asy
 }
 
 /// Saves [content] to an absolute [path].
-/// 
+///
 /// Overwrites if the file already exists.
 Future<void> saveToAbsolutePath(String content, String path) async {
   File file = File(path);

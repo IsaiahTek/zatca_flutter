@@ -5,7 +5,6 @@ import 'package:einvoice/state/store.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'package:zatca_flutter/enums.dart';
-import 'package:zatca_flutter/model/api/compliance_invoice_response.dart';
 import 'package:zatca_flutter/model/api/invoice_clearance_response.dart';
 import 'package:zatca_flutter/model/fatoora_invoice_request_api_response.dart';
 import 'package:zatca_flutter/model/xml/delivery.dart';
@@ -81,27 +80,25 @@ class _InvoiceViewState extends State<InvoiceView> {
                 TextButton.icon(
                     icon: Icon(Icons.add),
                     onPressed: () async {
-
                       StandardInvoice standardInvoice = StandardInvoice(
                         icv: 1,
-                        pih:'',
+                        pih: '',
                         id: "INV-001",
                         uuid: generateUuid(),
                         issueDate: DateTime.now(),
                         issueTime: DateTime.now(),
                         currency: 'SAR',
                         customer: BusinessParty(
-                          businessID: '1010010000',
-                          address: "RRRD2929",
-                          name: "Info Tech Supply LTD",
-                          taxId: "399999999955553",
-                          buildingNumber: "3233",
-                          citySubdivision: "Al-Murabba",
-                          city: "Riyadh",
-                          postalZone: "23333",
-                          countryCode: "SA",
-                          schemeID: 'CRN'
-                        ),
+                            businessID: '1010010000',
+                            address: "RRRD2929",
+                            name: "Info Tech Supply LTD",
+                            taxId: "399999999955553",
+                            buildingNumber: "3233",
+                            citySubdivision: "Al-Murabba",
+                            city: "Riyadh",
+                            postalZone: "23333",
+                            countryCode: "SA",
+                            schemeID: 'CRN'),
                         lines: [
                           InvoiceLine(
                             quantity: "1",
@@ -111,8 +108,9 @@ class _InvoiceViewState extends State<InvoiceView> {
                               amount: "9.60", // 64 * 15% = 9.60
                               percent: "15",
                               currency: 'SAR',
-                              taxableAmount:
-                                  '64', code: TaxCategoryCode.standard, // Ensure taxable amount matches total
+                              taxableAmount: '64',
+                              code: TaxCategoryCode
+                                  .standard, // Ensure taxable amount matches total
                             ),
                             name: 'Garri',
                           )
@@ -121,31 +119,41 @@ class _InvoiceViewState extends State<InvoiceView> {
                           amount: "9.60", // Sum of line-level tax amounts
                           percent: "15",
                           currency: 'SAR',
-                          taxableAmount: '64', code: TaxCategoryCode.standard, // Total taxable amount
+                          taxableAmount: '64',
+                          code:
+                              TaxCategoryCode.standard, // Total taxable amount
                         ),
                         monetaryTotal: LegalMonetaryTotal(
-                          lineExtensionAmount: "64", // Sum of line totals
-                          taxExclusiveAmount:
-                              "64", // Same as lineExtensionAmount
-                          taxInclusiveAmount:
-                              "73.60", // taxExclusiveAmount + total VAT
-                          payableAmount: "73.60", // Final payable amount
-                          allowanceTotalAmount: 0.0,
-                          prepaidAmount: 0.0
-                        ), delivery: Delivery(actualDate: DateTime.now(), latestDate: DateTime.now()),
+                            lineExtensionAmount: "64", // Sum of line totals
+                            taxExclusiveAmount:
+                                "64", // Same as lineExtensionAmount
+                            taxInclusiveAmount:
+                                "73.60", // taxExclusiveAmount + total VAT
+                            payableAmount: "73.60", // Final payable amount
+                            allowanceTotalAmount: 0.0,
+                            prepaidAmount: 0.0),
+                        delivery: Delivery(
+                            actualDate: DateTime.now(),
+                            latestDate: DateTime.now()),
                       );
 
-                      standardInvoice.generateAndSaveXml('standard_invoice.xml');
+                      standardInvoice
+                          .generateAndSaveXml('standard_invoice.xml');
 
-                      FatooraInvoiceRequestApiResponse invoiceApi = await FatooraService.generateInvoiceRequestAPI(invoiceFileName: 'standard_invoice.xml', forClearance: true);
-                      debugPrint("INVOICE API: ${invoiceApi.invoiceRequest?.toMap()}");
+                      FatooraInvoiceRequestApiResponse invoiceApi =
+                          await FatooraService.generateInvoiceRequestAPI(
+                              invoiceFileName: 'standard_invoice.xml',
+                              forClearance: true);
+                      debugPrint(
+                          "INVOICE API: ${invoiceApi.invoiceRequest?.toMap()}");
                       Controller controller = Controller.instance;
-                      InvoiceClearanceResponse? res = await controller.request.requestClearance(invoiceApi.invoiceRequest!);
+                      InvoiceClearanceResponse? res = await controller.request
+                          .requestClearance(invoiceApi.invoiceRequest!);
 
-                      debugPrint("RESULT FROM CHECKS ${res?.statusCode} ${res?.clearanceStatus} ${res?.validationResults?.toJson()}");
+                      debugPrint(
+                          "RESULT FROM CHECKS ${res?.statusCode} ${res?.clearanceStatus} ${res?.validationResults?.toJson()}");
 
                       // FatooraService.validateInvoice(invoiceFileName: 'standard_invoice.xml');
-
                     },
                     label: Text('Test'))
               ],

@@ -86,14 +86,14 @@ abstract class RequestBase {
     };
 
     try {
-      Uri uri =  Uri.parse(_complianceCSIDUrl);
+      Uri uri = Uri.parse(_complianceCSIDUrl);
       final response = await http.post(
         uri,
         headers: headers,
         body: jsonEncode(body),
       );
 
-      if(response.statusCode >= 200 && response.statusCode < 300){
+      if (response.statusCode >= 200 && response.statusCode < 300) {
         ComplianceCSIDResponse res = ComplianceCSIDResponse.fromJson(
             response.statusCode, jsonDecode(response.body));
         if (res.successData != null &&
@@ -107,7 +107,7 @@ abstract class RequestBase {
           //     folder: '.tokens');
         }
         return res;
-      }else{
+      } else {
         return ComplianceCSIDResponse(
           statusCode: 400,
           status: CSIDResponseStatus.serverError,
@@ -115,7 +115,6 @@ abstract class RequestBase {
               code: response.statusCode.toString(), message: response.body),
         );
       }
-
     } catch (e) {
       return ComplianceCSIDResponse(
         statusCode: 500,
@@ -159,7 +158,8 @@ abstract class RequestBase {
         return ComplianceInvoiceCheckResponse.fromJson(
             jsonResponse, response.statusCode);
       } else {
-        log('HTTP error: [REASON: ${response.reasonPhrase}, RESPONSE: ${response.body}');;
+        log('HTTP error: [REASON: ${response.reasonPhrase}, RESPONSE: ${response.body}');
+        ;
         return null;
       }
     } catch (e) {
@@ -169,7 +169,10 @@ abstract class RequestBase {
   }
 
   /// Request Production CSID for onboarding
-  Future<ProductionCSIDResponse> requestProductionCSIDOnboarding() async {return _requestProductionCSIDOnboarding();}
+  Future<ProductionCSIDResponse> requestProductionCSIDOnboarding() async {
+    return _requestProductionCSIDOnboarding();
+  }
+
   Future<ProductionCSIDResponse> _requestProductionCSIDOnboarding() async {
     String basicAuth =
         'Basic ${base64Encode(utf8.encode('${ccsidTokeys?.token}:${ccsidTokeys?.secret}'))}';
@@ -193,7 +196,7 @@ abstract class RequestBase {
         body: jsonEncode(body),
       );
 
-      if(response.statusCode >= 200 && response.statusCode < 300){
+      if (response.statusCode >= 200 && response.statusCode < 300) {
         ProductionCSIDResponse res = ProductionCSIDResponse.fromJson(
             response.statusCode, jsonDecode(response.body));
         if (res.successData != null &&
@@ -207,7 +210,7 @@ abstract class RequestBase {
           //     folder: '.tokens');
         }
         return res;
-      }else{
+      } else {
         return ProductionCSIDResponse(
           statusCode: response.statusCode,
           status: CSIDResponseStatus.serverError,
@@ -215,7 +218,6 @@ abstract class RequestBase {
               code: response.statusCode.toString(), message: response.body),
         );
       }
-
     } catch (e) {
       logError("Error requesting Production CSID $e");
       return ProductionCSIDResponse(
@@ -229,7 +231,11 @@ abstract class RequestBase {
 
   /// Handle conversion and storage of Token & Key for Invoice/Note Signing.
   Future<void> convertTokenAndKeyToPemAndSaveToSDKForSigning(
-      {required CertAndKey certAndKey}) async {return _convertTokenAndKeyToPemAndSaveToSDKForSigning(certAndKey: certAndKey);}
+      {required CertAndKey certAndKey}) async {
+    return _convertTokenAndKeyToPemAndSaveToSDKForSigning(
+        certAndKey: certAndKey);
+  }
+
   Future<void> _convertTokenAndKeyToPemAndSaveToSDKForSigning(
       {required CertAndKey certAndKey}) async {
     try {
@@ -266,7 +272,10 @@ abstract class RequestBase {
 
   /// Request Production CSID Renewal.
   Future<ProductionCSIDRenewalResponse> requestProductionCSIDRenewal(
-      {required PCSIDRenewalRequestProp prop}) async { return _requestProductionCSIDRenewal(prop: prop);}
+      {required PCSIDRenewalRequestProp prop}) async {
+    return _requestProductionCSIDRenewal(prop: prop);
+  }
+
   Future<ProductionCSIDRenewalResponse> _requestProductionCSIDRenewal(
       {required PCSIDRenewalRequestProp prop}) async {
     final Map<String, String> headers = {
@@ -288,7 +297,7 @@ abstract class RequestBase {
         body: jsonEncode(body),
       );
 
-      if(response.statusCode >= 200 && response.statusCode < 300){
+      if (response.statusCode >= 200 && response.statusCode < 300) {
         ProductionCSIDRenewalResponse res =
             ProductionCSIDRenewalResponse.fromJson(
                 response.statusCode, jsonDecode(response.body));
@@ -303,7 +312,7 @@ abstract class RequestBase {
           //     folder: '.tokens');
         }
         return res;
-      }else{
+      } else {
         return ProductionCSIDRenewalResponse(
           statusCode: response.statusCode,
           status: CSIDResponseStatus.serverError,
@@ -311,7 +320,6 @@ abstract class RequestBase {
               code: response.statusCode.toString(), message: response.body),
         );
       }
-
     } catch (e) {
       return ProductionCSIDRenewalResponse(
         statusCode: 500,
@@ -324,7 +332,10 @@ abstract class RequestBase {
 
   /// [B2C] Report an invoice/note to ZATCA/FATOORA Server
   Future<InvoiceReportingResponse?> requestReporting(
-      InvoiceRequest prop) async { return _requestReporting(prop);}
+      InvoiceRequest prop) async {
+    return _requestReporting(prop);
+  }
+
   Future<InvoiceReportingResponse?> _requestReporting(
       InvoiceRequest prop) async {
     String basicAuth =
@@ -350,7 +361,8 @@ abstract class RequestBase {
         return InvoiceReportingResponse.fromJson(
             jsonResponse, response.statusCode);
       } else {
-        log('HTTP error: [REASON: ${response.reasonPhrase}, RESPONSE: ${response.body}');;
+        log('HTTP error: [REASON: ${response.reasonPhrase}, RESPONSE: ${response.body}');
+        ;
         return null;
       }
     } catch (e) {
@@ -361,7 +373,9 @@ abstract class RequestBase {
 
   /// [B2B] Make a clearance request for a STANDARD invoice or a STANDARD credit/debit note.
   Future<InvoiceClearanceResponse?> requestClearance(InvoiceRequest prop,
-      {String? clearedInvoiceName}) async { return _requestClearance(prop);}
+      {String? clearedInvoiceName}) async {
+    return _requestClearance(prop);
+  }
 
   Future<InvoiceClearanceResponse?> _requestClearance(InvoiceRequest prop,
       {String? clearedInvoiceName}) async {
@@ -381,12 +395,13 @@ abstract class RequestBase {
       final body = jsonEncode(prop.toMap());
       final response = await http.post(url, headers: headers, body: body);
 
-      if (response.statusCode >= 200 && response.statusCode < 300){
+      if (response.statusCode >= 200 && response.statusCode < 300) {
         final jsonResponse = jsonDecode(response.body);
         logInfo("RESPONSE json ${jsonResponse['validationResults']}");
 
         InvoiceClearanceResponse clearanceResponse =
-            InvoiceClearanceResponse.fromJson(jsonResponse, response.statusCode);
+            InvoiceClearanceResponse.fromJson(
+                jsonResponse, response.statusCode);
 
         if (clearanceResponse.clearedInvoice != null) {
           String base64DecodedInvoice =
@@ -398,7 +413,7 @@ abstract class RequestBase {
               folder: 'standard');
         }
         return clearanceResponse;
-      }else{
+      } else {
         log('HTTP error: [REASON: ${response.reasonPhrase}, RESPONSE: ${response.body}');
         return null;
       }

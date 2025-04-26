@@ -39,13 +39,13 @@ class CsrConfig {
   String? industryBusinessCategory;
 
   final Completer<String> _savedFileCompleter = Completer<String>();
+
   /// The file path/name of the created csr config file.
   Future<String> get filePath => _savedFileCompleter.future;
 
-  void _setFilePath(String fP){
+  void _setFilePath(String fP) {
     _savedFileCompleter.complete(fP);
   }
-
 
   /// Constructs a [CsrConfig] object with optional named parameters.
   CsrConfig({
@@ -58,7 +58,7 @@ class CsrConfig {
     this.invoiceType,
     this.locationAddress,
     this.industryBusinessCategory,
-  }){
+  }) {
     _createCsrConfigFile();
   }
 
@@ -110,7 +110,6 @@ class CsrConfig {
   Future<void> save() async {
     _createCsrConfigFile();
   }
-
 
   /// Creates a [CsrConfig] instance from a JSON-compatible [Map].
   ///

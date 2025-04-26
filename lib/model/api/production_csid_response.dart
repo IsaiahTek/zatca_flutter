@@ -133,8 +133,7 @@ class ProductionCSIDRenewalSuccessData {
   });
 
   /// Constructs the model from JSON.
-  factory ProductionCSIDRenewalSuccessData.fromJson(
-      Map<String, dynamic> json) {
+  factory ProductionCSIDRenewalSuccessData.fromJson(Map<String, dynamic> json) {
     return ProductionCSIDRenewalSuccessData(
       requestID: json['requestID'],
       dispositionMessage: json['dispositionMessage'],

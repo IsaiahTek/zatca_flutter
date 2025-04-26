@@ -10,7 +10,7 @@ import 'package:zatca_flutter/model/invoice_request.dart';
 import 'package:zatca_flutter/service/fatoora_service.dart';
 import 'package:zatca_flutter/zatca_flutter.dart';
 
-class Controller{
+class Controller {
   Controller._();
   static Controller? _instance;
   static Controller get instance => _instance ??= Controller._();
@@ -34,38 +34,51 @@ class Controller{
   RequestBase request = ZatcaFlutter.request;
 
   Future<FatooraServiceCsrResponse> generateCsr({
-  required String csrConfigFile,
-  String? privateKeyFile,
-  String? outputCsrFile,
-}){
-    return FatooraService.generateCsr(csrConfigFile: csrConfigFile, outputCsrFile: outputCsrFile, privateKeyFile:  privateKeyFile);
+    required String csrConfigFile,
+    String? privateKeyFile,
+    String? outputCsrFile,
+  }) {
+    return FatooraService.generateCsr(
+        csrConfigFile: csrConfigFile,
+        outputCsrFile: outputCsrFile,
+        privateKeyFile: privateKeyFile);
   }
 
-  Future<void> generateInvoiceRequest(String invoiceFileName, String? jsonOutputFile)async{
-    FatooraService.generateInvoiceRequestAPI(invoiceFileName: invoiceFileName, outputJsonFileName: jsonOutputFile);
+  Future<void> generateInvoiceRequest(
+      String invoiceFileName, String? jsonOutputFile) async {
+    FatooraService.generateInvoiceRequestAPI(
+        invoiceFileName: invoiceFileName, outputJsonFileName: jsonOutputFile);
   }
 
-  Future<ComplianceCSIDResponse> makeCCSIDRequest(CCSIDRequestProp prop)async{
+  Future<ComplianceCSIDResponse> makeCCSIDRequest(CCSIDRequestProp prop) async {
     debugPrint("REQUEST MODE WHILE MAKING CCSID Request ${request.mode.name}");
-    ComplianceCSIDResponse response = await request.requestComplianceCSID(request: prop);
+    ComplianceCSIDResponse response =
+        await request.requestComplianceCSID(request: prop);
     ccsidData = response.successData;
-    if(response.errorData != null && response.errorData!.errors.isNotEmpty) debugPrint("ERROR REQUESTING CCSID ${response.errorData?.errors.toString()}");
-    if(response.failureData != null) debugPrint("FAILURE REQUESTING CCSID ${response.failureData?.message} ${response.failureData?.toJson()}");
+    if (response.errorData != null && response.errorData!.errors.isNotEmpty)
+      debugPrint(
+          "ERROR REQUESTING CCSID ${response.errorData?.errors.toString()}");
+    if (response.failureData != null)
+      debugPrint(
+          "FAILURE REQUESTING CCSID ${response.failureData?.message} ${response.failureData?.toJson()}");
     return response;
   }
 
-  Future<void> checkCompliance(ComplianceSuccessData auth, InvoiceRequest requestProp)async{
+  Future<void> checkCompliance(
+      ComplianceSuccessData auth, InvoiceRequest requestProp) async {
     request.requestComplianceCheck(prop: requestProp);
   }
 
-  Future<ProductionCSIDResponse> makePCSIDRequest(PCSIDRequestProp prop)async{
-    ProductionCSIDResponse response = await request.requestProductionCSIDOnboarding();
+  Future<ProductionCSIDResponse> makePCSIDRequest(PCSIDRequestProp prop) async {
+    ProductionCSIDResponse response =
+        await request.requestProductionCSIDOnboarding();
     pcsidData = response.successData;
     return response;
   }
 
-  Future<void> getCertAndSaveForSigning({required CertAndKey certAndKey})async{
-    return request.convertTokenAndKeyToPemAndSaveToSDKForSigning(certAndKey: certAndKey);
+  Future<void> getCertAndSaveForSigning(
+      {required CertAndKey certAndKey}) async {
+    return request.convertTokenAndKeyToPemAndSaveToSDKForSigning(
+        certAndKey: certAndKey);
   }
-
 }

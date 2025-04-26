@@ -1,11 +1,11 @@
 import 'package:xml/xml.dart';
 import 'package:zatca_flutter/model/xml/tax_details.dart';
 
-/// Represents a line item in an invoice, including details such as the item name, 
+/// Represents a line item in an invoice, including details such as the item name,
 /// quantity, price, total, and tax information.
 ///
-/// The [InvoiceLine] class is used to model an individual item in an invoice, 
-/// capturing details such as the name, quantity, unit price, total amount, 
+/// The [InvoiceLine] class is used to model an individual item in an invoice,
+/// capturing details such as the name, quantity, unit price, total amount,
 /// and the associated tax information for proper invoicing and tax reporting.
 class InvoiceLine {
   /// An optional identifier for the invoice line.
@@ -46,23 +46,23 @@ class InvoiceLine {
   /// The method generates the XML representation of the invoice line, including
   /// the item details, price, tax, and other related information. This is typically
   /// used for generating XML-based invoices.
-  /// 
+  ///
   /// [id] is the unique identifier for this invoice line.
   void toXml(XmlBuilder builder, int id) {
     builder.element('cbc:ID', nest: id);
-    builder.element('cbc:InvoicedQuantity', 
+    builder.element('cbc:InvoicedQuantity',
         attributes: {'unitCode': 'PCE'}, nest: quantity);
-    builder.element('cbc:LineExtensionAmount', 
+    builder.element('cbc:LineExtensionAmount',
         attributes: {'currencyID': 'SAR'}, nest: total);
-    
+
     builder.element('cac:TaxTotal', nest: () {
-      builder.element('cbc:TaxAmount', 
+      builder.element('cbc:TaxAmount',
           attributes: {'currencyID': 'SAR'}, nest: tax.amount);
-      builder.element('cbc:RoundingAmount', 
-          attributes: {'currencyID': 'SAR'}, 
+      builder.element('cbc:RoundingAmount',
+          attributes: {'currencyID': 'SAR'},
           nest: num.parse(tax.taxableAmount) + num.parse(tax.amount));
     });
-    
+
     builder.element('cac:Item', nest: () {
       builder.element('cbc:Name', nest: name);
       builder.element('cac:ClassifiedTaxCategory', nest: () {
@@ -75,14 +75,14 @@ class InvoiceLine {
     });
 
     builder.element('cac:Price', nest: () {
-      builder.element('cbc:PriceAmount', 
+      builder.element('cbc:PriceAmount',
           nest: price, attributes: {'currencyID': tax.currency});
     });
   }
 
   /// Converts the [InvoiceLine] instance into a JSON map.
   ///
-  /// This method generates a map representation of the invoice line, which can be 
+  /// This method generates a map representation of the invoice line, which can be
   /// used for serializing the object into JSON format for APIs or storage.
   /// Example:
   /// ```json
@@ -100,7 +100,7 @@ class InvoiceLine {
       'price': price,
       'quantity': quantity,
       'total': total,
-      'tax': tax.toJson()  // Assuming `TaxDetails` has a `toJson` method.
+      'tax': tax.toJson() // Assuming `TaxDetails` has a `toJson` method.
     };
   }
 }
