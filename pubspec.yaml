@@ -8,6 +8,13 @@ environment:
   sdk: ^3.6.1
   flutter: ">=1.17.0"
 
+topics:
+  - zatca
+  - fatoora
+  - phase2
+  - einvoice
+  - xml
+
 dependencies:
   asn1lib: ^1.5.9
   flutter:
