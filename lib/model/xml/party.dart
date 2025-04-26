@@ -116,6 +116,10 @@ class BusinessParty extends PartyBase {
         builder.element('cbc:ID',
             nest: businessID, attributes: {'schemeID': schemeID});
       });
+      // builder.element('cac:PartyIdentification', nest: () {
+      //   builder.element('cbc:ID',
+      //       nest: taxId, attributes: {'schemeID': 'VAT'});
+      // });
       builder.element('cac:PostalAddress', nest: () {
         builder.element('cbc:StreetName', nest: address);
         builder.element('cbc:BuildingNumber', nest: buildingNumber);

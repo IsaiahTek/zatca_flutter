@@ -21,7 +21,7 @@ import 'package:zatca_flutter/service/util.dart';
 /// Application mode.
 enum Mode {
   /// To be used when testing the application through the developer portal.
-  developerPortal,
+  sandbox,
 
   /// To be used when testing the application through the simulation portal.
   simulation,
@@ -57,7 +57,7 @@ abstract class RequestBase {
     String getBase(String e) =>
         "https://gw-fatoora.zatca.gov.sa/e-invoicing/$e";
     switch (mode) {
-      case Mode.developerPortal:
+      case Mode.sandbox:
         return getBase("developer-portal");
       case Mode.production:
         return getBase("core");
@@ -426,7 +426,7 @@ class SimulationRequest extends SimulationRequestBase {}
 ///
 class DeveloperPortalRequestBase extends RequestBase {
   ///
-  DeveloperPortalRequestBase({super.mode = Mode.developerPortal});
+  DeveloperPortalRequestBase({super.mode = Mode.sandbox});
 }
 
 ///

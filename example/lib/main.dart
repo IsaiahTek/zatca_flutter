@@ -6,7 +6,7 @@ import 'package:zatca_flutter/zatca_flutter.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  ZatcaFlutter.init(mode: Mode.developerPortal);
+  ZatcaFlutter.init(mode: Mode.sandbox);
   runApp(const App());
 }
 

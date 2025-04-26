@@ -60,7 +60,7 @@ class _SetupState extends State<Setup> {
 
   void fetchAndUpdateFields() {
     
-    loadCsrConfig().then((csr) {
+    CsrConfig.load().then((csr) {
       _commonNameController.text = csr?.commonName ?? "";
       _serialNumberController.text = csr?.serialNumber ?? "";
       _orgIdController.text = csr?.organizationIdentifier ?? "";
@@ -409,8 +409,7 @@ class _SetupState extends State<Setup> {
                                               _industryBusinessCategoryController
                                                   .text);
           
-                                      String? filePath = await createCsrConfigFile(
-                                          csrConfig: csrConfig);
+                                      String? filePath = await csrConfig.filePath;
                                       debugPrint(
                                           "Done Creating the csrConfig File $filePath");
                                           FatooraServiceCsrResponse response = await controller.generateCsr(
@@ -422,7 +421,7 @@ class _SetupState extends State<Setup> {
                                           await getFileContentAsString(
                                               response.csrOutputFileName);
                                       _generatedCsrController.text = controller.csr.toString();
-                                              debugPrint("ERROR @ CSR GENERATION: ${response.response.warnings?.map((e)=>e.message)}");
+                                              if(response.response.warnings != null && response.response.warnings!.isNotEmpty) debugPrint("ERROR @ CSR GENERATION: ${response.response.warnings?.map((e)=>e.message)}");
                                       _privateKeyController.text =
                                           (await getFileContentAsString(
                                               response.keyOutputFileName))??"";

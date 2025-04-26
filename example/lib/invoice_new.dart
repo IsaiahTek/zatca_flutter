@@ -385,7 +385,7 @@ class _InvoiceNewState extends State<InvoiceNew> {
                     // Create the invoice object
                     SimplifiedInvoice simplifiedInvoice = SimplifiedInvoice(
                       icv: 1,
-                      pih:'',
+                      pih:'',  // Pass in an empty string like this if this is your first invoice. Otherwise, pass in the actual PIH (Previous Invoice Hash)
                       id: "INV-001",
                       uuid: generateUuid(),
                       issueDate: DateTime.now(),

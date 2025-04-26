@@ -5,6 +5,7 @@ import 'package:einvoice/state/store.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'package:zatca_flutter/enums.dart';
+import 'package:zatca_flutter/model/api/compliance_invoice_response.dart';
 import 'package:zatca_flutter/model/api/invoice_clearance_response.dart';
 import 'package:zatca_flutter/model/fatoora_invoice_request_api_response.dart';
 import 'package:zatca_flutter/model/xml/delivery.dart';
@@ -81,7 +82,7 @@ class _InvoiceViewState extends State<InvoiceView> {
                     icon: Icon(Icons.add),
                     onPressed: () async {
 
-                      StandardInvoice simplifiedInvoice = StandardInvoice(
+                      StandardInvoice standardInvoice = StandardInvoice(
                         icv: 1,
                         pih:'',
                         id: "INV-001",
@@ -132,50 +133,18 @@ class _InvoiceViewState extends State<InvoiceView> {
                           allowanceTotalAmount: 0.0,
                           prepaidAmount: 0.0
                         ), delivery: Delivery(actualDate: DateTime.now(), latestDate: DateTime.now()),
-                        // billingReference: BillingReference(invoiceIssueDate: DateTime.now(), invoiceNumber: 1),
-                        // paymentMeans: PaymentMeans(code: PaymentMeansCode.creditCard, instructionNote: "Credit card was used to make the payment"),
                       );
 
-                      simplifiedInvoice.generateAndSaveXml('standard_invoice.xml');
-
-                      // FatooraServiceResponse signRes = await FatooraService.signInvoice(invoiceFileName: 'note.xml', forChecks: true);
-                      // debugPrint("SIGNATURE (${signRes.status.name.toUpperCase()}): ${signRes.infos?.map((d)=>d.message)}");
-
-                      // FatooraQrCodeResponse qrCodeResponse =
-                      //     await FatooraService.generateQRInvoiceCode(
-                      //         'simple_invoice.xml');
-                      // if (qrCodeResponse.qrCode != null ||
-                      //     qrCodeResponse.status == ResponseStatus.success) {
-                      //   // SimplifiedInvoice sIn = SimplifiedInvoice(id: "id", uuid: "uuid", issueDate: DateTime.now(), issueTime: DateTime.now(), typeCode: '392', currency: 'SAR',
-                      //   // supplier: SupplierParty(address: "address", name: "name", taxId: "taxId", buildingNumber: "buildingNumber", citySubdivision: "citySubdivision", city: "city", postalZone: "postalZone", countryCode: "countryCode"),
-                      //   // customer: Party(name: "Elizabeth", taxId: "taxId4", address: "address 3az"), lines: [InvoiceLine(quantity: "2", price: "32", total: "64", tax: TaxDetails(amount: "3", percent: "20"))], tax: TaxDetails(amount: "3", percent: "20"), monetaryTotal: LegalMonetaryTotal(lineExtensionAmount: "40", taxExclusiveAmount: "200", taxInclusiveAmount: "140", payableAmount: "42"));
-
-                      //   // SimplifiedInvoiceToXmlConverter.saveXmlToFile(SimplifiedInvoiceToXmlConverter.generateXml(sIn), 'simple_invoice.xml');
-
-                      //   // FatooraServiceResponse res = await FatooraService.signInvoice(invoiceFileName: "simple_invoice.xml", outputSignedInvoiceFileName: 'd.xml');
-
-                      //   // debugPrint("RESPONSE DATA ${res.infos} ${res.warnings} ${res.errors}");
-                      //   // setState(() {
-                      //   //   info = (res.infos?.map((d)=>d.message)).toString();
-                      //   //   warning = (res.warnings?.map((d)=>d.message)).toString();
-                      //   //   error = (res.errors?.map((d)=>d.message)).toString();
-                      //   // });
-                      // } else {
-                      //   debugPrint(
-                      //       "COULDN'T GENERATE QR CODE ${qrCodeResponse.qrCode}, ${qrCodeResponse.response.errors?.map((er) => er.message)}");
-                      // }
-
-                      // FatooraServiceResponse validationRes = await FatooraService.validateInvoice(invoiceFileName: 'note_signed.xml', ignoreWarningForResponseStatus: true);
-                      // debugPrint("VALIDATION (${validationRes.status.name.toUpperCase()}): SUCCESS (${validationRes.infos?.length}); FAILURE (${validationRes.errors?.length}) WARNING (${validationRes.warnings?.length}) ${validationRes.infos?.map((d)=>d.message)}");
-
-                      // await FatooraService.signInvoice(invoiceFileName: 'note.xml', forChecks: false);
+                      standardInvoice.generateAndSaveXml('standard_invoice.xml');
 
                       FatooraInvoiceRequestApiResponse invoiceApi = await FatooraService.generateInvoiceRequestAPI(invoiceFileName: 'standard_invoice.xml', forClearance: true);
-                      // debugPrint("INVOICE API: ${invoiceApi.invoiceRequest?.toMap()}");
+                      debugPrint("INVOICE API: ${invoiceApi.invoiceRequest?.toMap()}");
                       Controller controller = Controller.instance;
                       InvoiceClearanceResponse? res = await controller.request.requestClearance(invoiceApi.invoiceRequest!);
 
-                      debugPrint("RESULT FROM CHECKS ${res?.statusCode} ${res?.clearanceStatus} ${res?.clearanceData?.toJson()}");
+                      debugPrint("RESULT FROM CHECKS ${res?.statusCode} ${res?.clearanceStatus} ${res?.validationResults?.toJson()}");
+
+                      // FatooraService.validateInvoice(invoiceFileName: 'standard_invoice.xml');
 
                     },
                     label: Text('Test'))

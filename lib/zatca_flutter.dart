@@ -42,7 +42,7 @@ class ZatcaFlutter {
   /// 
   /// The mode can be one of the following:
   /// - [Mode.production]: Used when communicating with the production environment.
-  /// - [Mode.developerPortal]: Used when interacting with the developer portal.
+  /// - [Mode.sandbox]: Used when interacting with the developer portal.
   /// - [Mode.simulation]: Used when operating in a simulation environment.
   static Mode get mode => _getMode();
 
@@ -56,7 +56,7 @@ class ZatcaFlutter {
     switch (mode) {
       case Mode.production:
         return ProductionRequest();
-      case Mode.developerPortal:
+      case Mode.sandbox:
         return DeveloperPortalRequest();
       default:
         return SimulationRequest();

@@ -2,26 +2,27 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'dart:math' as math;
-import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:zatca_flutter/model/csr_config.dart';
 import 'package:zatca_flutter/model/invoice_request.dart';
-import 'package:zatca_flutter/service/fatoora_service_finder.dart';
 
+/// Returns the base name (file name without path) from a full file path.
 String _getBaseName(String fullPath) {
   String separator = Platform.pathSeparator;
   List<String> paths = fullPath.split(separator);
   return paths.isNotEmpty ? paths.last : fullPath;
 }
 
-/// Needed for reading any user generated file content as string.
-Future<String?> getFileContentAsString(String fileName,
-    {String? folder}) async {
+/// Reads the content of a user-generated file as a string.
+/// 
+/// [fileName]: Name of the file to read.
+/// [folder]: Optional subfolder inside storage.
+/// 
+/// Returns the file content as a string or `null` if the file does not exist or fails to read.
+Future<String?> getFileContentAsString(String fileName, {String? folder}) async {
   return _getFileContentAsString(fileName, folder: folder);
 }
 
-Future<String?> _getFileContentAsString(String fileName,
-    {String? folder}) async {
+Future<String?> _getFileContentAsString(String fileName, {String? folder}) async {
   String directory = await _getStorageFolderPath();
   final dir = Directory(
       "$directory${folder != null ? '${Platform.pathSeparator}$folder' : ''}");
@@ -33,12 +34,12 @@ Future<String?> _getFileContentAsString(String fileName,
     final File file = File("${dir.path}${Platform.pathSeparator}$fileName");
     content = await file.readAsString();
   } catch (e) {
-    //
+    // Ignore error silently
   }
   return content;
 }
 
-/// Needed for getting the package storage folder path on the user system.
+/// Retrieves the base storage folder path for the app.
 Future<String> getStorageFolderPath() async {
   return _getStorageFolderPath();
 }
@@ -54,12 +55,14 @@ Future<String> _getStorageFolderPath() async {
   return dir.path;
 }
 
-/// To fetch the names of all files that have an extionsion of .example call it thus:
+/// Fetches the names of all files with the specified extension.
+/// 
+/// [extension]: Extension without the dot (e.g., 'txt').
+/// 
+/// Example:
+/// ```dart
+/// getAllFileNamesByExtension('example');
 /// ```
-/// getAllFileNamesByExtension('example')
-/// ```
-///
-/// Notice it doesn't require the dot to be added`
 Future<List<String>> getAllFileNamesByExtension(String extension) {
   return _getAllFileNamesByExtension(extension);
 }
@@ -74,76 +77,12 @@ Future<List<String>> _getAllFileNamesByExtension(String extension) async {
   return keyFiles;
 }
 
-/// Generates a CSR configuration file
-Future<String> createCsrConfigFile({
-  required CsrConfig csrConfig,
-}) async {
-  return _createCsrConfigFile(csrConfig: csrConfig);
-}
-
-Future<String> _createCsrConfigFile({
-  required CsrConfig csrConfig,
-}) async {
-  String fileName = FatooraServiceFinder.instance.csrFileName;
-  final content = '''
-      csr.common.name=${csrConfig.commonName}
-      csr.serial.number=${csrConfig.serialNumber}
-      csr.organization.identifier=${csrConfig.organizationIdentifier}
-      csr.organization.unit.name=${csrConfig.organizationUnitName}
-      csr.organization.name=${csrConfig.organizationName}
-      csr.country.name=${csrConfig.countryName}
-      csr.invoice.type=${csrConfig.invoiceType}
-      csr.location.address=${csrConfig.locationAddress}
-      csr.industry.business.category=${csrConfig.industryBusinessCategory}
-      ''';
-
-  try {
-    String filePath = await saveToFile(content, fileName);
-    debugPrint('✅ CSR config file created: $filePath');
-    return fileName;
-  } catch (e) {
-    logError("Error Creating the config .properties file: $e");
-    throw Exception("Error Creating the config .properties file: $e");
-  }
-}
-
-/// loadCsr file as Future of .
-/// If you make useFullPath true then the package assumes you're providing absolute path and won't prepend any directory.
-Future<CsrConfig?> loadCsrConfig() async {
-  return _loadCsrConfig();
-}
-
-Future<CsrConfig?> _loadCsrConfig() async {
-  String fileName = FatooraServiceFinder.instance.csrFileName;
-  String docPath = await getStorageFolderPath();
-  String computedPath = "$docPath${Platform.pathSeparator}$fileName";
-  final file = File(computedPath);
-  if (!await file.exists()) {
-    logError("File not found: $computedPath");
-    return null;
-  }
-
-  final lines = await file.readAsLines();
-  final Map<String, String> properties = {};
-
-  for (var line in lines) {
-    line = line.trim();
-    if (line.isEmpty || line.startsWith('#') || line.startsWith('!')) {
-      continue; // Skip comments and empty lines
-    }
-
-    final separatorIndex = line.indexOf('=');
-    if (separatorIndex == -1) continue; // Invalid line, skip
-
-    final key = line.substring(0, separatorIndex).trim();
-    final value = line.substring(separatorIndex + 1).trim();
-
-    properties[key] = value;
-  }
-
-  return CsrConfig.fromMap(properties);
-}
-
+/// Loads an [InvoiceRequest] from a JSON file.
+/// 
+/// [fileName]: Name of the file to load.
+/// [useAsAbsolutePath]: If true, treats [fileName] as a full absolute path.
+/// 
+/// Returns an [InvoiceRequest] object or `null` if file not found or parsing fails.
 Future<InvoiceRequest?> loadInvoiceRequest(
     {required String fileName, bool useAsAbsolutePath = false}) async {
   return _loadInvoiceRequest(
@@ -163,19 +102,18 @@ Future<InvoiceRequest?> _loadInvoiceRequest(
   }
 
   String jsonString = await file.readAsString();
-
   Map<String, dynamic> invoiceRequestJson = jsonDecode(jsonString);
   return InvoiceRequest.fromMap(invoiceRequestJson);
 }
 
-/// Rename File if needed
-Future<bool> renameFile(
-    {required String oldName, required String newName}) async {
+/// Renames a file from [oldName] to [newName].
+/// 
+/// Returns `true` if successful, `false` otherwise.
+Future<bool> renameFile({required String oldName, required String newName}) async {
   return _renameFile(oldName: oldName, newName: newName);
 }
 
-Future<bool> _renameFile(
-    {required String oldName, required String newName}) async {
+Future<bool> _renameFile({required String oldName, required String newName}) async {
   try {
     String oldPath = await getStorageFolderPath();
     File file = File("$oldPath${Platform.pathSeparator}$oldName");
@@ -187,17 +125,22 @@ Future<bool> _renameFile(
   }
 }
 
+/// Logs an error message in red color in the console.
 void logError(String message) {
   log("\x1B[31m $message");
 }
 
+/// Logs an info message in green color in the console.
 void logInfo(String message) {
   log("\x1b[38;5;32m $message");
 }
 
-/// Create a file and write the string as the content to the file.
-Future<String> saveToFile(String content, String fileName,
-    {String? folder}) async {
+/// Saves [content] to a file [fileName] in optional [folder].
+/// 
+/// Creates the file if it does not exist.
+/// 
+/// Returns the full path of the saved file.
+Future<String> saveToFile(String content, String fileName, {String? folder}) async {
   final String directory = await getStorageFolderPath();
   final dir = Directory(
       "$directory${folder != null ? '${Platform.pathSeparator}$folder' : ''}");
@@ -212,42 +155,44 @@ Future<String> saveToFile(String content, String fileName,
   return file.path;
 }
 
-/// Saves content to a file at an absolute path.
-saveToAbsolutePath(String content, String path) {
+/// Saves [content] to an absolute [path].
+/// 
+/// Overwrites if the file already exists.
+Future<void> saveToAbsolutePath(String content, String path) async {
   File file = File(path);
-  file.writeAsString(content);
+  await file.writeAsString(content);
 }
 
-/// Returns a predefined PIH string for the first invoice.
+/// Returns the predefined PIH (Public Invoice Hash) string for the first invoice.
 String getPIHForFirstInvoice() {
   return 'NWZlY2ViNjZmZmM4NmYzOGQ5NTI3ODZjNmQ2OTZjNzljMmRiYzIzOWRkNGU5MWI0NjcyOWQ3M2EyN2ZiNTdlOQ==';
 }
 
-/// Generates a random UUID.
+/// Generates a random UUID (Universally Unique Identifier).
 String generateUuid() {
   math.Random random = math.Random();
   return '${_generateHex(random, 8)}-${_generateHex(random, 4)}-${_generateHex(random, 4)}-${_generateHex(random, 4)}-${_generateHex(random, 12)}';
 }
 
-/// Internal function that generates a random hex string of the specified length.
+/// Internal function that generates a random hexadecimal string of given [length].
 String _generateHex(math.Random random, int length) {
   final hexDigits = '0123456789abcdef';
   return List.generate(
       length, (_) => hexDigits[random.nextInt(hexDigits.length)]).join();
 }
 
-/// Returns the current date and time in the format: yyyyMMddHHmmss.
+/// Returns the current date and time in the format: `yyyyMMddHHmmss`.
 String getNowDateTimeYyyyMmDdHhMmSs() {
   final dT = DateTime.now();
   return '${dT.year}${dT.month}${dT.day}${dT.hour}${dT.minute}${dT.second}';
 }
 
-/// Returns the date in ZATCA-compliant format (yyyy-MM-dd).
+/// Formats a [DateTime] object into a ZATCA-compliant date string (`yyyy-MM-dd`).
 String getZatcaCompliantDate(DateTime date) {
   return date.toIso8601String().split('T')[0];
 }
 
-/// Returns the time in ZATCA-compliant format (HH:mm:ss).
+/// Formats a [DateTime] object into a ZATCA-compliant time string (`HH:mm:ss`).
 String getZatcaCompliantTime(DateTime time) {
   return time.toIso8601String().split('T')[1].split('.')[0];
 }
