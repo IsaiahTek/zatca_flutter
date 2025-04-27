@@ -17,7 +17,7 @@ class QrCodeImage extends StatelessWidget {
   ///
   /// - [base64EncodedQrCode]: The base64 encoded QR code string to display.
   /// - [key]: An optional key used for managing widget state (from the parent class).
-  QrCodeImage({super.key, required this.base64EncodedQrCode});
+  const QrCodeImage({super.key, required this.base64EncodedQrCode});
 
   @override
   Widget build(BuildContext context) {

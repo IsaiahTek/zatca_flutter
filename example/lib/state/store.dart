@@ -55,12 +55,14 @@ class Controller {
     ComplianceCSIDResponse response =
         await request.requestComplianceCSID(request: prop);
     ccsidData = response.successData;
-    if (response.errorData != null && response.errorData!.errors.isNotEmpty)
+    if (response.errorData != null && response.errorData!.errors.isNotEmpty) {
       debugPrint(
           "ERROR REQUESTING CCSID ${response.errorData?.errors.toString()}");
-    if (response.failureData != null)
+    }
+    if (response.failureData != null) {
       debugPrint(
           "FAILURE REQUESTING CCSID ${response.failureData?.message} ${response.failureData?.toJson()}");
+    }
     return response;
   }
 

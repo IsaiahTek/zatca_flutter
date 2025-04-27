@@ -159,7 +159,6 @@ abstract class RequestBase {
             jsonResponse, response.statusCode);
       } else {
         log('HTTP error: [REASON: ${response.reasonPhrase}, RESPONSE: ${response.body}');
-        ;
         return null;
       }
     } catch (e) {
@@ -362,7 +361,6 @@ abstract class RequestBase {
             jsonResponse, response.statusCode);
       } else {
         log('HTTP error: [REASON: ${response.reasonPhrase}, RESPONSE: ${response.body}');
-        ;
         return null;
       }
     } catch (e) {

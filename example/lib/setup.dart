@@ -446,9 +446,11 @@ class _SetupState extends State<Setup> {
                                     _generatedCsrController.text =
                                         controller.csr.toString();
                                     if (response.response.warnings != null &&
-                                        response.response.warnings!.isNotEmpty)
+                                        response
+                                            .response.warnings!.isNotEmpty) {
                                       debugPrint(
                                           "ERROR @ CSR GENERATION: ${response.response.warnings?.map((e) => e.message)}");
+                                    }
                                     _privateKeyController.text =
                                         (await getFileContentAsString(
                                                 response.keyOutputFileName)) ??

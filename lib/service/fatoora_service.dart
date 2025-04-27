@@ -58,8 +58,9 @@ class FatooraService {
         FatooraServiceResponse response =
             FatooraServiceResponseParser.extractResponses(result.stdout);
         logInfo("RAW OUTPUT ${result.stdout}");
-        if ((result.stderr as String).isNotEmpty)
+        if ((result.stderr as String).isNotEmpty) {
           logInfo("RAW ERROR ${result.stderr}");
+        }
         logInfo("RESPONSE STATUS: ${response.status.name.toUpperCase()}");
         if (response.status == ResponseStatus.failure) {
           logError(
