@@ -404,11 +404,11 @@ abstract class RequestBase {
         if (clearanceResponse.clearedInvoice != null) {
           String base64DecodedInvoice =
               utf8.decode(base64Decode(clearanceResponse.clearedInvoice!));
-          saveToFile(
-              base64DecodedInvoice,
-              clearedInvoiceName ??
-                  'cleared_invoice${getNowDateTimeYyyyMmDdHhMmSs()}.xml',
-              folder: 'standard');
+          String fileName = clearedInvoiceName ??
+              'cleared_invoice-${getNowDateTimeYyyyMmDdHhMmSs()}.xml';
+          await saveToFile(base64DecodedInvoice, fileName, folder: 'standard');
+          clearanceResponse = InvoiceClearanceResponse.fromJson(
+              {...jsonResponse, "fileName": fileName}, response.statusCode);
         }
         return clearanceResponse;
       } else {

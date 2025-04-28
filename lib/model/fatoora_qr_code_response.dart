@@ -29,4 +29,8 @@ class FatooraQrCodeResponse {
     required this.response,
     required this.status,
   });
+
+  // Map<String, dynamic> toJson(){
+  //   return {"qrCode": qrCode, "status": status, "response" : response.toJson()};
+  // }
 }

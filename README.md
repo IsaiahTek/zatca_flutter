@@ -82,7 +82,7 @@ Actually, by just creating an instance of MyBusinessInfo, the business info is a
 
 
 
-### CSR File Generation
+### CSR Config File Generation
 ```dart
 CsrConfig(
     commonName: 'Your Common Name',
@@ -95,9 +95,9 @@ CsrConfig(
     locationAddress: 'Business Address',
     industryBusinessCategory: 'Business Category');
 ```
-Once an instance of `CsrConfig` is created, the `csrConfig.properties` file will automatically be save.
+Once an instance of `CsrConfig` is created, the `csrConfig.properties` file will automatically be saved.
 
-After creating and instance of CsrConfig file, you can await the value of the `filePath` where the file is created if you need to by just doing:
+After creating an instance of CsrConfig file, you can await the value of the `filePath` where the file is created if you need to by just doing the following:
 ```dart
 CsrConfig csrConfig = CsrConfig(
     commonName: 'Your Common Name',
@@ -230,6 +230,211 @@ Note: if you do not specify the `outputSignedInvoiceFileName`, the signed invoic
 ### Generating Invoice RequestAPI `FatooraService.generateInvoiceRequestAPI`
 Invoice/Note request API is the JSON data format that consist of `uuid`, `invoiceHash` and `invoice` data and is required for invoice/note compliance check, reporting, and clearance.
 If you want to generate the request API for clearance, you should pass in `forClearance:true` to the `FatooraService.generateInvoiceRequestAPI()` method. Otherwise, the plugin assumes you are generating the request API for reporting.
+```dart
+// Generate the Request API for compliance check, reporting or clearance
+FatooraInvoiceRequestApiResponse invoiceApi =
+    await FatooraService.generateInvoiceRequestAPI(
+        invoiceFileName: 'simple_invoice_signed.xml');
+```
+
+
+## Example of Reporting An Invoice [B2C]
+```dart
+// Create the invoice object
+SimplifiedInvoice simplifiedInvoice = SimplifiedInvoice(
+    icv: 1,
+    pih:
+        '', // Pass in an empty string like this if this is your first invoice. Otherwise, pass in the actual PIH (Previous Invoice Hash)
+    id: "INV-001",
+    uuid: generateUuid(),
+    issueDate: DateTime.now(),
+    issueTime: DateTime.now(),
+    currency: 'SAR',
+    customer: IndividualParty(
+    name: "Elizabeth",
+    taxId: "310298993344553",
+    address: "address 3az",
+    ),
+    lines: [
+    InvoiceLine(
+        quantity: "1",
+        price: "64",
+        total: "64",
+        tax: TaxDetails(
+        amount: "9.60", // 64 * 15% = 9.60
+        percent: "15",
+        currency: 'SAR',
+        taxableAmount: '64',
+        code: TaxCategoryCode
+            .standard, // Ensure taxable amount matches total
+        ),
+        name: 'Garri',
+    )
+    ],
+    tax: TaxDetails(
+    amount: "9.60", // Sum of line-level tax amounts
+    percent: "15",
+    currency: 'SAR',
+    taxableAmount: '64',
+    code: TaxCategoryCode
+        .standard, // Total taxable amount
+    ),
+    monetaryTotal: LegalMonetaryTotal(
+        lineExtensionAmount: "64", // Sum of line totals
+        taxExclusiveAmount:
+            "64", // Same as lineExtensionAmount
+        taxInclusiveAmount:
+            "73.60", // taxExclusiveAmount + total VAT
+        payableAmount: "73.60", // Final payable amount
+        allowanceTotalAmount: 0.0,
+        prepaidAmount: 0.0),
+);
+
+// XML creation
+simplifiedInvoice.generateAndSaveXml(
+    'simple_invoice.xml'); // Generate and save the invoice xml data from the invoice object
+
+// Sign the invoice if it's Simplified (B2C)
+FatooraServiceResponse signRes =
+    await FatooraService.signInvoice(
+        invoiceFileName: 'simple_invoice.xml',
+        isForComplianceCheck: true);
+
+// Get the XML of the signed invoice
+xml = await getFileContentAsString(
+    'simple_invoice_signed.xml');
+
+// Get the QR Code from the signed invoice
+FatooraQrCodeResponse qrCodeResponse =
+    await FatooraService.generateInvoiceQRCode(
+        'simple_invoice_signed.xml');
+
+// Get the qrCode String like this
+String base64EncodedQrCode = qrCodeResponse.qrCode;
+
+
+debugPrint(
+    "SIGNATURE (${signRes.status.name.toUpperCase()}): ${signRes.infos?.map((d) => d.message)}");
+
+// Validate signed invoice locally before doing compliance check, reporting or clearance
+FatooraServiceResponse validationRes =
+    await FatooraService.validateInvoice(
+        invoiceFileName: 'simple_invoice_signed.xml',
+        ignoreWarningForResponseStatus: true);
+
+debugPrint(
+    "VALIDATION (${validationRes.status.name.toUpperCase()}): SUCCESS (${validationRes.infos?.length}); FAILURE (${validationRes.errors?.length}) WARNING (${validationRes.warnings?.length}) ${validationRes.infos?.map((d) => d.message)}");
+
+// Generate the Request API for compliance check, reporting or clearance
+FatooraInvoiceRequestApiResponse invoiceApi =
+    await FatooraService.generateInvoiceRequestAPI(
+        invoiceFileName: 'simple_invoice_signed.xml');
+
+// Check compliance on zatca server.
+ComplianceInvoiceCheckResponse? res = await Controller
+    .instance.request
+    .requestComplianceCheck(
+        prop: invoiceApi.invoiceRequest!);
+
+if (res?.status != null) {
+    setState(() {
+    responseStatus =
+        "${res?.clearanceStatus ?? res?.reportingStatus ?? res?.status.name.toUpperCase()}\n\n${res?.validationResults?.toJson()}";
+    });
+}
+```
+
+## Example of Executing Invoice Clearance
+```dart
+StandardInvoice standardInvoice = StandardInvoice(
+    icv: 1,
+    pih: '',
+    id: "INV-001",
+    uuid: generateUuid(),
+    issueDate: DateTime.now(),
+    issueTime: DateTime.now(),
+    currency: 'SAR',
+    customer: BusinessParty(
+        businessID: '1010010000',
+        address: "RRRD2929",
+        name: "Info Tech Supply LTD",
+        taxId: "399999999955553",
+        buildingNumber: "3233",
+        citySubdivision: "Al-Murabba",
+        city: "Riyadh",
+        postalZone: "23333",
+        countryCode: "SA",
+        schemeID: 'CRN'),
+    lines: [
+        InvoiceLine(
+        quantity: "1",
+        price: "64",
+        total: "64",
+        tax: TaxDetails(
+            amount: "9.60", // 64 * 15% = 9.60
+            percent: "15",
+            currency: 'SAR',
+            taxableAmount: '64',
+            code: TaxCategoryCode
+                .standard, // Ensure taxable amount matches total
+        ),
+        name: 'Garri',
+        )
+    ],
+    tax: TaxDetails(
+        amount: "9.60", // Sum of line-level tax amounts
+        percent: "15",
+        currency: 'SAR',
+        taxableAmount: '64',
+        code:
+            TaxCategoryCode.standard, // Total taxable amount
+    ),
+    monetaryTotal: LegalMonetaryTotal(
+        lineExtensionAmount: "64", // Sum of line totals
+        taxExclusiveAmount:
+            "64", // Same as lineExtensionAmount
+        taxInclusiveAmount:
+            "73.60", // taxExclusiveAmount + total VAT
+        payableAmount: "73.60", // Final payable amount
+        allowanceTotalAmount: 0.0,
+        prepaidAmount: 0.0),
+    delivery: Delivery(
+        actualDate: DateTime.now(),
+        latestDate: DateTime.now()),
+);
+
+// Create the XML
+standardInvoice
+    .generateAndSaveXml('standard_invoice.xml');
+
+// Request API generation
+FatooraInvoiceRequestApiResponse invoiceApi =
+    await FatooraService.generateInvoiceRequestAPI(
+        invoiceFileName: 'standard_invoice.xml',
+        forClearance: true);
+
+debugPrint(
+    "INVOICE API: ${invoiceApi.invoiceRequest?.toMap()}");
+ZatcaFlutter zatca = ZatcaFlutter.instance;
+InvoiceClearanceResponse? res = await zatca.request
+    .requestClearance(invoiceApi.invoiceRequest!);
+
+debugPrint(
+    "RESULT FROM CLEARANCE ${res?.statusCode} ${res?.clearanceStatus} ${res?.validationResults?.toJson()}");
+
+debugPrint(
+    "CLEARED INVOICE: \n${res?.clearedInvoice}\n\nCLEARANCE DATA: \n${res?.fileName}");
+
+String? qrCode = await ClearedInvoiceService.getQrCode(res.fileName!);  // To get the qrCode of the cleared invoice
+
+
+String? invoiceHash = await ClearedInvoiceService.getInvoiceHash(res.fileName!);  // To get the qrCode of the cleared invoice
+```
+
+## Displaying the QR CODE
+```dart
+QrCodeImage(base64EncodedQrCode: qrCode);
+```
 
 See the documentation or example app for more usage.
 

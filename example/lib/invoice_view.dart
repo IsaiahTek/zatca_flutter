@@ -13,6 +13,8 @@ import 'package:zatca_flutter/model/xml/legal_monetary_total.dart';
 import 'package:zatca_flutter/model/xml/party.dart';
 import 'package:zatca_flutter/model/xml/standard_invoice.dart';
 import 'package:zatca_flutter/model/xml/tax_details.dart';
+import 'package:zatca_flutter/qr_code/widget/qr_code_image.dart';
+import 'package:zatca_flutter/service/cleared_invoice_service.dart';
 import 'package:zatca_flutter/service/fatoora_service.dart';
 import 'package:zatca_flutter/service/util.dart';
 // import 'package:zatca/zatca.dart';
@@ -29,20 +31,12 @@ class _InvoiceViewState extends State<InvoiceView> {
   String? warning;
   String? info;
 
-  String workingDir = "";
-  String qrCode = "";
+  bool processing = false;
+  bool processed = false;
+  String? qrCode;
 
   @override
   void initState() {
-    // getStorageFolderPath().then((path){
-    //   Process.run("fatoora", ['-help']).then((data){
-    //     Process.run("pwd", []).then((wD){
-    //       setState(() {
-    //         workingDir = "OUTPUT:${data.stdout}; ERROR: ${data.stderr}; WORKING DIR: ${wD.stdout} EwD: ${wD.stderr} STORAGE PATH: $path";
-    //       });
-    //     });
-    //   });
-    // });
     super.initState();
   }
 
@@ -80,6 +74,10 @@ class _InvoiceViewState extends State<InvoiceView> {
                 TextButton.icon(
                     icon: Icon(Icons.add),
                     onPressed: () async {
+                      setState(() {
+                        processing = true;
+                        processed = false;
+                      });
                       StandardInvoice standardInvoice = StandardInvoice(
                         icv: 1,
                         pih: '',
@@ -151,7 +149,20 @@ class _InvoiceViewState extends State<InvoiceView> {
                           .requestClearance(invoiceApi.invoiceRequest!);
 
                       debugPrint(
-                          "RESULT FROM CHECKS ${res?.statusCode} ${res?.clearanceStatus} ${res?.validationResults?.toJson()}");
+                          "RESULT FROM CLEARANCE ${res?.statusCode} ${res?.clearanceStatus} ${res?.validationResults?.toJson()}");
+
+                      debugPrint(
+                          "CLEARED INVOICE: \n${res?.clearedInvoice}\n\nCLEARANCE DATA: \n${res?.fileName}");
+
+                      if (res != null && res.fileName != null) {
+                        qrCode = await ClearedInvoiceService.getQrCode(
+                            res.fileName!);
+                        setState(() {
+                          qrCode;
+                        });
+                      }
+                      processing = false;
+                      processed = true;
 
                       // FatooraService.validateInvoice(invoiceFileName: 'standard_invoice.xml');
                     },
@@ -219,10 +230,28 @@ class _InvoiceViewState extends State<InvoiceView> {
                 ),
                 // SizedBox(height: 50,),
                 Text("${error?.length != 4 && error != null ? error : ''}"),
-                Text(
-                    "WARNING: ${warning?.length != 4 && warning != null ? warning : ''}"),
-                Text("INFO: ${info?.length != 4 && info != null ? info : ''}"),
-                Text(workingDir)
+
+                processing ? Text("Processing...") : SizedBox.shrink(),
+                qrCode != null
+                    ? Column(
+                        children: [
+                          Text(
+                              "QR CODE: ${qrCode?.substring(0, 20)}${qrCode != null && qrCode!.length > 20 ? '...' : ''}"),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Container(
+                              decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.grey),
+                                  borderRadius: BorderRadius.circular(12)),
+                              width: 240,
+                              child: QrCodeImage(base64EncodedQrCode: qrCode!)),
+                        ],
+                      )
+                    : processed
+                        ? Text(
+                            "Couldn't extract the QR Code from the cleared data file given. $qrCode, $processing")
+                        : SizedBox.shrink()
               ],
             ),
           ),

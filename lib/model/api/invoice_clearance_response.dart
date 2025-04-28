@@ -64,10 +64,13 @@ class InvoiceClearanceResponse {
   final String? clearanceStatus;
 
   /// Base64 hash of the invoice.
-  final String? invoiceHash;
+  final String? fileName;
 
   /// Base64 encoded cleared invoice.
   final String? clearedInvoice;
+
+  /// Base64 encoded qrCode of the cleared invoice
+  final String? base64EncodedQrCode;
 
   /// Details of any server-side error returned by ZATCA.
   final ServerErrorResponse? serverErrorResponse;
@@ -89,7 +92,8 @@ class InvoiceClearanceResponse {
     this.serverErrorResponse,
     this.unauthorizedResponse,
     this.clearedInvoice,
-    this.invoiceHash,
+    this.base64EncodedQrCode,
+    this.fileName,
     required this.status,
     required this.statusCode,
   });
@@ -98,18 +102,19 @@ class InvoiceClearanceResponse {
   factory InvoiceClearanceResponse.fromJson(
       Map<String, dynamic> json, int statusCode) {
     return InvoiceClearanceResponse(
-      validationResults: ValidationResults.fromJson(json['validationResults']),
-      clearanceData: json['validationResults'] != null
-          ? ClearanceData.fromJson(json)
-          : null,
-      serverErrorResponse: ServerErrorResponse.fromJson(json, statusCode),
-      unauthorizedResponse: UnauthorizedResponse.fromJson(json, statusCode),
-      clearanceStatus: json['clearanceStatus'],
-      status: _parseStatus(json['clearanceStatus']),
-      statusCode: statusCode,
-      invoiceHash: json['invoiceHash'],
-      clearedInvoice: json['clearedInvoice'],
-    );
+        validationResults:
+            ValidationResults.fromJson(json['validationResults']),
+        clearanceData: json['validationResults'] != null
+            ? ClearanceData.fromJson(json)
+            : null,
+        serverErrorResponse: ServerErrorResponse.fromJson(json, statusCode),
+        unauthorizedResponse: UnauthorizedResponse.fromJson(json, statusCode),
+        clearanceStatus: json['clearanceStatus'],
+        status: _parseStatus(json['clearanceStatus']),
+        statusCode: statusCode,
+        fileName: json['fileName'],
+        clearedInvoice: json['clearedInvoice'],
+        base64EncodedQrCode: json['base64EncodedQrCode']);
   }
 
   /// Converts the object into a JSON map.
@@ -131,6 +136,12 @@ class InvoiceClearanceResponse {
       default:
         return InvoiceClearanceResponseStatus.unknown;
     }
+  }
+
+  /// Extract the QR Code from the cleared invoice return by Zatca
+  Future<String> getQrCode() async {
+    String code = '';
+    return code;
   }
 }
 
