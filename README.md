@@ -440,7 +440,11 @@ See the documentation or example app for more usage.
 
 
 ## Sponsorship
-Please support us to keep maintaining this package if you find it useful and love helping. Thanks
+Please support us to keep maintaining this package if you find it useful and want to help us.
+
+[Sponsor Us on GitHub](https://github.com/sponsors/IsaiahTek)
+
+Thanks
 
 ## Contributing
 If you are interested in contributing to this package reach-out to me via GitHub.

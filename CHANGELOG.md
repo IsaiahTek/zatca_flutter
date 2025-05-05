@@ -1,3 +1,7 @@
+## 0.1.1
+Minor update    <!-- Github Sponsorship added -->
+
+
 ## 0.1.0
 Added the file name of the cleared invoice to the Cleared invoice response model.
 Added Cleared Invoice Service for extracting the QR Code and Invoice Hash of the cleared invoice.

@@ -82,6 +82,7 @@ class LocalStore {
     });
   }
 
+  /// Business information.
   MyBusinessInfo? myBusinessInfo;
 
   static LocalStore? _instance;
