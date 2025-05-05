@@ -31,7 +31,8 @@ class ProductionCSIDResponse {
   ///
   /// - [statusCode]: HTTP response code.
   /// - [json]: JSON body of the response.
-  factory ProductionCSIDResponse.fromJson(int statusCode, Map<String, dynamic> json) {
+  factory ProductionCSIDResponse.fromJson(
+      int statusCode, Map<String, dynamic> json) {
     CSIDResponseStatus status = _getStatus(statusCode);
 
     if (status == CSIDResponseStatus.success && json.containsKey('requestID')) {
@@ -40,13 +41,16 @@ class ProductionCSIDResponse {
         status: status,
         successData: ProductionCSIDSuccessData.fromJson(json),
       );
-    } else if (status == CSIDResponseStatus.clientError && json.containsKey('errors')) {
+    } else if (status == CSIDResponseStatus.clientError &&
+        json.containsKey('errors')) {
       return ProductionCSIDResponse(
         statusCode: statusCode,
         status: status,
         errorData: ProductionCSIDErrorData.fromJson(json),
       );
-    } else if (status == CSIDResponseStatus.serverError && json.containsKey('code') && json.containsKey('message')) {
+    } else if (status == CSIDResponseStatus.serverError &&
+        json.containsKey('code') &&
+        json.containsKey('message')) {
       return ProductionCSIDResponse(
         statusCode: statusCode,
         status: status,
@@ -76,7 +80,9 @@ class ProductionCSIDResponse {
   static CSIDResponseStatus _getStatus(int statusCode) {
     if (statusCode == 200) return CSIDResponseStatus.success;
     if (statusCode == 400) return CSIDResponseStatus.clientError;
-    if (statusCode == 406 || statusCode == 500) return CSIDResponseStatus.serverError;
+    if (statusCode == 406 || statusCode == 500) {
+      return CSIDResponseStatus.serverError;
+    }
     return CSIDResponseStatus.unknown;
   }
 }
@@ -248,7 +254,8 @@ class ProductionCSIDFailureData {
 ///
 /// - [statusCode]: HTTP status code.
 /// - [jsonStr]: JSON response string.
-ProductionCSIDResponse parseProductionCSIDResponse(int statusCode, String jsonStr) {
+ProductionCSIDResponse parseProductionCSIDResponse(
+    int statusCode, String jsonStr) {
   return ProductionCSIDResponse.fromJson(statusCode, jsonDecode(jsonStr));
 }
 
@@ -282,7 +289,8 @@ class ProductionCSIDRenewalResponse {
   ///
   /// - [statusCode]: HTTP response code.
   /// - [json]: JSON body of the renewal response.
-  factory ProductionCSIDRenewalResponse.fromJson(int statusCode, Map<String, dynamic> json) {
+  factory ProductionCSIDRenewalResponse.fromJson(
+      int statusCode, Map<String, dynamic> json) {
     CSIDResponseStatus status = _getStatus(statusCode);
 
     if (status == CSIDResponseStatus.success && json.containsKey('requestID')) {
@@ -291,13 +299,16 @@ class ProductionCSIDRenewalResponse {
         status: status,
         successData: ProductionCSIDRenewalSuccessData.fromJson(json),
       );
-    } else if (status == CSIDResponseStatus.clientError && json.containsKey('errors')) {
+    } else if (status == CSIDResponseStatus.clientError &&
+        json.containsKey('errors')) {
       return ProductionCSIDRenewalResponse(
         statusCode: statusCode,
         status: status,
         errorData: ProductionCSIDErrorData.fromJson(json),
       );
-    } else if (status == CSIDResponseStatus.serverError && json.containsKey('code') && json.containsKey('message')) {
+    } else if (status == CSIDResponseStatus.serverError &&
+        json.containsKey('code') &&
+        json.containsKey('message')) {
       return ProductionCSIDRenewalResponse(
         statusCode: statusCode,
         status: status,
@@ -327,7 +338,9 @@ class ProductionCSIDRenewalResponse {
   static CSIDResponseStatus _getStatus(int statusCode) {
     if (statusCode == 200) return CSIDResponseStatus.success;
     if (statusCode == 400) return CSIDResponseStatus.clientError;
-    if (statusCode == 406 || statusCode == 500) return CSIDResponseStatus.serverError;
+    if (statusCode == 406 || statusCode == 500) {
+      return CSIDResponseStatus.serverError;
+    }
     return CSIDResponseStatus.unknown;
   }
 }

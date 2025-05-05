@@ -1,5 +1,5 @@
-## 0.1.1
-Minor update    <!-- Github Sponsorship added -->
+## 0.1.2
+Minor update    <!-- dart format -->
 
 
 ## 0.1.0
