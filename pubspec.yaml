@@ -1,6 +1,6 @@
 name: zatca_flutter
 description: "A Flutter plugin that fully and perfectly implements with Zatca/Fatoora E-Invoicing Phase 1 & 2 requirements."
-version: 0.1.2
+version: 0.1.3
 
 repository: 'https://github.com/IsaiahTek/zatca_flutter.git'
 
@@ -11,7 +11,7 @@ environment:
 topics:
   - zatca
   - fatoora
-  - phase2
+  - qrcode
   - einvoice
   - xml
 

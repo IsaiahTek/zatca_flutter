@@ -1,3 +1,6 @@
+## 0.1.3
+Updated simplified credit note xml file creation to not check for supplier info.
+
 ## 0.1.2
 Minor update    <!-- dart format -->
 
