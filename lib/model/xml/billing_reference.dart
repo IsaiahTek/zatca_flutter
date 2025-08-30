@@ -20,8 +20,7 @@ class BillingReference {
   ///
   /// [invoiceNumber] is the unique identifier for the invoice.
   /// [invoiceIssueDate] (optional) is the date when the invoice was issued.
-  BillingReference(
-      {required this.invoiceNumber, this.invoiceIssueDate});
+  BillingReference({required this.invoiceNumber, this.invoiceIssueDate});
 
   /// Converts the [BillingReference] instance to an XML representation using the [XmlBuilder].
   ///

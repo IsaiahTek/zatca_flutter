@@ -148,7 +148,7 @@ class SimplifiedInvoice {
       // Supplier and Customer parties
       builder.element('cac:AccountingSupplierParty',
           nest: () => supplier?.toXml(builder));
-      if(customer != null){
+      if (customer != null) {
         builder.element('cac:AccountingCustomerParty',
             nest: () => customer?.toXml(builder));
       }
