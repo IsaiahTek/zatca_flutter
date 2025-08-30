@@ -412,7 +412,7 @@ abstract class RequestBase {
         }
         return clearanceResponse;
       } else {
-        log('HTTP error: [REASON: ${response.reasonPhrase}, RESPONSE: ${response.body}');
+        log('HTTP error: [REASON: ${response.reasonPhrase}, RESPONSE: ${response.body}]');
         return null;
       }
       // if (response.statusCode >= 200 && response.statusCode < 300) {

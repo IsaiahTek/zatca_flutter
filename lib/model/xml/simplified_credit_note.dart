@@ -175,9 +175,9 @@ class SimplifiedCreditNote {
   ///
   /// Returns the file path where the XML is saved or `null` if the file could not be saved.
   Future<String?> generateAndSaveXml(String fileName) async {
-    if (supplier != null) {
-      return null;
-    }
+    // if (supplier != null) {
+    //   return null;
+    // }
     return await saveToFile(toXml(), fileName);
   }
 }
