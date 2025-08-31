@@ -132,7 +132,7 @@ class StandardInvoice {
       // Invoice Type Code
       invoiceTypeCode != null
           ? invoiceTypeCode?.toXml(builder)
-          : InvoiceTypeCode.standardTaxInvoice();
+          : InvoiceTypeCode.standardTaxInvoice().toXml(builder);
 
       builder.element('cbc:DocumentCurrencyCode', nest: currency);
       builder.element('cbc:TaxCurrencyCode', nest: currency);

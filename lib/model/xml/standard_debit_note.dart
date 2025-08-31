@@ -122,7 +122,7 @@ class StandardDebitNote {
       // Invoice Type Code
       invoiceTypeCode != null
           ? invoiceTypeCode?.toXml(builder)
-          : InvoiceTypeCode.standardDebitNote();
+          : InvoiceTypeCode.standardDebitNote().toXml(builder);
 
       builder.element('cbc:DocumentCurrencyCode', nest: currency);
       builder.element('cbc:TaxCurrencyCode', nest: currency);

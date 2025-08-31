@@ -1,4 +1,5 @@
 import 'package:xml/xml.dart';
+import 'package:zatca_flutter/service/util.dart';
 
 /// Represents the `<cbc:InvoiceTypeCode>` element in a ZATCA-compliant UBL invoice.
 ///
@@ -131,6 +132,8 @@ class InvoiceTypeCode {
   }) {
     // Business rule validation
     if (export && selfBilled) {
+      logError(
+          'Invalid InvoiceTypeCode: Export invoices cannot be self-billed (E=1, B=1).');
       throw ArgumentError(
           'Invalid InvoiceTypeCode: Export invoices cannot be self-billed (E=1, B=1).');
     }

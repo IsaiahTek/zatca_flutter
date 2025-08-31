@@ -122,7 +122,7 @@ class SimplifiedCreditNote {
       // InvoiceTypeCode
       invoiceTypeCode != null
           ? invoiceTypeCode?.toXml(builder)
-          : InvoiceTypeCode.simplifiedCreditNote();
+          : InvoiceTypeCode.simplifiedCreditNote().toXml(builder);
 
       builder.element('cbc:DocumentCurrencyCode', nest: currency);
       builder.element('cbc:TaxCurrencyCode', nest: currency);

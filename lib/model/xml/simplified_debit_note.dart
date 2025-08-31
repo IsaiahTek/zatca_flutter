@@ -119,7 +119,7 @@ class SimplifiedDebitNote {
       // Invoice Type Code
       invoiceTypeCode != null
           ? invoiceTypeCode?.toXml(builder)
-          : InvoiceTypeCode.simplifiedDebitNote();
+          : InvoiceTypeCode.simplifiedDebitNote().toXml(builder);
 
       builder.element('cbc:DocumentCurrencyCode', nest: currency);
       builder.element('cbc:TaxCurrencyCode', nest: currency);

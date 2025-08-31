@@ -1,3 +1,6 @@
+## 0.1.5
+FIXED: InvoiceTypeCode element build issue fixed.
+
 ## 0.1.4
 - Updated InvoiceTypeCode to match actual values for compliance.
 - Added InvoiceTypeCode class with factory methods for easily composing custom InvoiceTypeCode with arbitary values if needed.
