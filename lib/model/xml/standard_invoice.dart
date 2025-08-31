@@ -5,6 +5,7 @@ import 'package:zatca_flutter/local_store.dart';
 import 'package:zatca_flutter/model/my_business_info.dart';
 import 'package:zatca_flutter/model/xml/delivery.dart';
 import 'package:zatca_flutter/model/xml/invoice_line.dart';
+import 'package:zatca_flutter/model/xml/invoice_type_code.dart';
 import 'package:zatca_flutter/model/xml/legal_monetary_total.dart';
 import 'package:zatca_flutter/model/xml/tax_details.dart';
 import 'package:zatca_flutter/service/util.dart';
@@ -54,6 +55,9 @@ class StandardInvoice {
   /// The delivery information related to the invoice.
   final Delivery delivery;
 
+  /// Invoice Type Code
+  final InvoiceTypeCode? invoiceTypeCode;
+
   /// The supplier information, fetched from local storage.
   MyBusinessInfo? get supplier => LocalStore.instance.myBusinessInfo;
 
@@ -71,6 +75,7 @@ class StandardInvoice {
     required this.monetaryTotal,
     required this.pih,
     required this.delivery,
+    this.invoiceTypeCode,
   });
 
   /// Converts the invoice to a JSON map, suitable for serializing to JSON format.
@@ -123,8 +128,12 @@ class StandardInvoice {
           nest: issueDate.toIso8601String().split('T')[0]);
       builder.element('cbc:IssueTime',
           nest: issueTime.toIso8601String().split('T')[1].split('.')[0]);
-      builder.element('cbc:InvoiceTypeCode',
-          nest: '388', attributes: {'name': '0100000'});
+
+      // Invoice Type Code
+      invoiceTypeCode != null
+          ? invoiceTypeCode?.toXml(builder)
+          : InvoiceTypeCode.standardTaxInvoice();
+
       builder.element('cbc:DocumentCurrencyCode', nest: currency);
       builder.element('cbc:TaxCurrencyCode', nest: currency);
 

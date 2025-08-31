@@ -5,6 +5,7 @@ import 'package:zatca_flutter/model/xml/allowance_charge.dart';
 import 'package:zatca_flutter/model/xml/billing_reference.dart';
 import 'package:zatca_flutter/model/xml/delivery.dart';
 import 'package:zatca_flutter/model/xml/invoice_line.dart';
+import 'package:zatca_flutter/model/xml/invoice_type_code.dart';
 import 'package:zatca_flutter/model/xml/legal_monetary_total.dart';
 import 'package:zatca_flutter/model/xml/party.dart';
 import 'package:zatca_flutter/model/xml/payment_means.dart';
@@ -62,6 +63,9 @@ class SimplifiedDebitNote {
   /// Allowance or charge details, if applicable to the debit note.
   final AllowanceCharge? allowanceCharge;
 
+  /// Invoice Type Code
+  final InvoiceTypeCode? invoiceTypeCode;
+
   /// The supplier information, fetched from local storage.
   MyBusinessInfo? get supplier => LocalStore.instance.myBusinessInfo;
 
@@ -82,6 +86,7 @@ class SimplifiedDebitNote {
     required this.paymentMeans,
     this.delivery,
     this.allowanceCharge,
+    this.invoiceTypeCode,
   });
 
   /// Generates the XML representation of the debit note in a format required for reporting.
@@ -110,8 +115,12 @@ class SimplifiedDebitNote {
           nest: issueDate.toIso8601String().split('T')[0]);
       builder.element('cbc:IssueTime',
           nest: issueTime.toIso8601String().split('T')[1].split('.')[0]);
-      builder.element('cbc:InvoiceTypeCode',
-          nest: '381', attributes: {'name': '0211010'});
+
+      // Invoice Type Code
+      invoiceTypeCode != null
+          ? invoiceTypeCode?.toXml(builder)
+          : InvoiceTypeCode.simplifiedDebitNote();
+
       builder.element('cbc:DocumentCurrencyCode', nest: currency);
       builder.element('cbc:TaxCurrencyCode', nest: currency);
 

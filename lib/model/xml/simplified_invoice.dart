@@ -4,6 +4,7 @@ import 'package:xml/xml.dart';
 import 'package:zatca_flutter/local_store.dart';
 import 'package:zatca_flutter/model/my_business_info.dart';
 import 'package:zatca_flutter/model/xml/invoice_line.dart';
+import 'package:zatca_flutter/model/xml/invoice_type_code.dart';
 import 'package:zatca_flutter/model/xml/legal_monetary_total.dart';
 import 'package:zatca_flutter/model/xml/tax_details.dart';
 import 'package:zatca_flutter/service/util.dart';
@@ -50,6 +51,9 @@ class SimplifiedInvoice {
   /// PIH (Previous Invoice Hash): A hash (cryptographic value) of the previous invoice issued.
   final String pih;
 
+  /// Invoice Type Code
+  final InvoiceTypeCode? invoiceTypeCode;
+
   /// The supplier information, fetched from local storage.
   MyBusinessInfo? get supplier => LocalStore.instance.myBusinessInfo;
 
@@ -66,6 +70,7 @@ class SimplifiedInvoice {
     required this.tax,
     required this.monetaryTotal,
     required this.pih,
+    this.invoiceTypeCode,
   });
 
   /// Converts the [SimplifiedInvoice] object to a JSON format.
@@ -124,8 +129,12 @@ class SimplifiedInvoice {
           nest: issueDate.toIso8601String().split('T')[0]);
       builder.element('cbc:IssueTime',
           nest: issueTime.toIso8601String().split('T')[1].split('.')[0]);
-      builder.element('cbc:InvoiceTypeCode',
-          nest: '388', attributes: {'name': '0200000'});
+
+      // Invoice Type Code
+      invoiceTypeCode != null
+          ? invoiceTypeCode?.toXml(builder)
+          : InvoiceTypeCode.simplifiedTaxInvoice();
+
       builder.element('cbc:DocumentCurrencyCode', nest: currency);
       builder.element('cbc:TaxCurrencyCode', nest: currency);
 
