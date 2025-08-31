@@ -1,3 +1,6 @@
+## 0.1.6
+FIXED: RoundingAmount floating number appearing as a very long value is fixed to have only 2 decimal places.
+
 ## 0.1.5
 FIXED: InvoiceTypeCode element build issue fixed.
 

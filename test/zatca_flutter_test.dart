@@ -14,23 +14,23 @@ void main() {
     // print("INVOICE XML STRING: $invoiceRawXml");
 
     // SimplifiedInvoiceToXmlConverter.saveXmlToFile(invoiceRawXml, 'simple_invoice.xml');
-    String formatDateTimeForZatca(DateTime dateTime) {
-      return dateTime.toUtc().toIso8601String().split('T')[0]; // YYYY-MM-DD
-    }
+    // String formatDateTimeForZatca(DateTime dateTime) {
+    //   return dateTime.toUtc().toIso8601String().split('T')[0]; // YYYY-MM-DD
+    // }
 
-    String formatTimeForZatca(DateTime dateTime) {
-      return dateTime
-          .toUtc()
-          .toIso8601String()
-          .split('T')[1]
-          .split('.')[0]; // HH:mm:ss
-    }
+    // String formatTimeForZatca(DateTime dateTime) {
+    //   return dateTime
+    //       .toUtc()
+    //       .toIso8601String()
+    //       .split('T')[1]
+    //       .split('.')[0]; // HH:mm:ss
+    // }
 
-    logInfo(
-        "DATE: ${formatDateTimeForZatca(DateTime.now())} <=> TIME: ${formatTimeForZatca(DateTime.now())}");
+    // logInfo(
+    //     "DATE: ${formatDateTimeForZatca(DateTime.now())} <=> TIME: ${formatTimeForZatca(DateTime.now())}");
 
-    logInfo("UUID: ${generateUuid()}");
+    // logInfo("UUID: ${generateUuid()}");
 
-    expect(true, true);
+    expect((num.parse('0.12') + num.parse('0.02')).toStringAsFixed(2), 0.14);
   });
 }

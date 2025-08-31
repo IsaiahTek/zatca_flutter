@@ -60,7 +60,8 @@ class InvoiceLine {
           attributes: {'currencyID': 'SAR'}, nest: tax.amount);
       builder.element('cbc:RoundingAmount',
           attributes: {'currencyID': 'SAR'},
-          nest: num.parse(tax.taxableAmount) + num.parse(tax.amount));
+          nest: (num.parse(tax.taxableAmount) + num.parse(tax.amount))
+              .toStringAsFixed(2));
     });
 
     builder.element('cac:Item', nest: () {
