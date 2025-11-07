@@ -147,7 +147,7 @@ class FatooraService {
       String? outputCsrFile,
       bool getPem = false}) async {
     bool isForSimulation = ZatcaFlutter.mode == Mode.simulation;
-    bool isForNoneProduction = ZatcaFlutter.mode == Mode.production;
+    bool isForNoneProduction = ZatcaFlutter.mode != Mode.production;
 
     String csrFolder = await getStorageFolderPath();
     List<String> allPreviouslyExistingCsrFiles =
@@ -163,6 +163,9 @@ class FatooraService {
       if (isForSimulation) '-sim',
       if (isForNoneProduction) '-nonprod'
     ];
+
+    logInfo("Generatee CSR: $args");
+    
     final result = await _runCommand(args);
 
     List<String> allNewlyExistingCsrFiles =
