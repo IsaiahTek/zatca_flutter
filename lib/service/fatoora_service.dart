@@ -165,7 +165,7 @@ class FatooraService {
     ];
 
     logInfo("Generatee CSR: $args");
-    
+
     final result = await _runCommand(args);
 
     List<String> allNewlyExistingCsrFiles =
