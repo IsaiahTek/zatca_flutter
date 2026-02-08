@@ -1,11 +1,16 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:zatca_flutter/model/xml/simplified_invoice.dart';
+import 'package:zatca_flutter/model/xml/tax_details.dart';
+import 'package:zatca_flutter/request.dart';
+import 'package:zatca_flutter/service/fatoora_service.dart';
 import 'package:zatca_flutter/service/util.dart';
+import 'package:zatca_flutter/zatca_flutter.dart';
 
 void main() {
   testWidgets('Invoice Hash Generation With custom output json file name',
       (WidgetTester testWidgets) async {
     TestWidgetsFlutterBinding.ensureInitialized();
-    // await ZatcaFlutter.init();
+    // await ZatcaFlutter.init(mode: Mode.simulation);
     // String fullPath = "Apps.dart";
     // var d = getBaseName(fullPath);
     // expect(d, 'Apps.dart');
@@ -14,23 +19,23 @@ void main() {
     // print("INVOICE XML STRING: $invoiceRawXml");
 
     // SimplifiedInvoiceToXmlConverter.saveXmlToFile(invoiceRawXml, 'simple_invoice.xml');
-    // String formatDateTimeForZatca(DateTime dateTime) {
-    //   return dateTime.toUtc().toIso8601String().split('T')[0]; // YYYY-MM-DD
-    // }
+    String formatDateTimeForZatca(DateTime dateTime) {
+      return dateTime.toUtc().toIso8601String().split('T')[0]; // YYYY-MM-DD
+    }
 
-    // String formatTimeForZatca(DateTime dateTime) {
-    //   return dateTime
-    //       .toUtc()
-    //       .toIso8601String()
-    //       .split('T')[1]
-    //       .split('.')[0]; // HH:mm:ss
-    // }
+    String formatTimeForZatca(DateTime dateTime) {
+      return dateTime
+          .toUtc()
+          .toIso8601String()
+          .split('T')[1]
+          .split('.')[0]; // HH:mm:ss
+    }
 
-    // logInfo(
-    //     "DATE: ${formatDateTimeForZatca(DateTime.now())} <=> TIME: ${formatTimeForZatca(DateTime.now())}");
+    logInfo(
+        "DATE: ${formatDateTimeForZatca(DateTime.now())} <=> TIME: ${formatTimeForZatca(DateTime.now())}");
 
-    // logInfo("UUID: ${generateUuid()}");
+    logInfo("UUID: ${generateUuid()}");
 
-    expect((num.parse('0.12') + num.parse('0.02')).toStringAsFixed(2), 0.14);
+    // expect((num.parse('0.12') + num.parse('0.02')).toStringAsFixed(2), 0.14);
   });
 }

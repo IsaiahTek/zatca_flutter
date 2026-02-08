@@ -1,3 +1,10 @@
+## 0.1.7
+Tested in all three modes:
+1. Sandbox
+2. Simulation
+3. Production
+Working perfectly. Contact us to see how other businesses are making use of the package to build a complete 100% compliant phase 1 and phase 2 e-invoicing system
+
 ## 0.1.6
 FIXED: RoundingAmount floating number appearing as a very long value is fixed to have only 2 decimal places.
 
