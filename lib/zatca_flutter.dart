@@ -1,3 +1,4 @@
+import 'package:zatca_flutter/dart_java_bridge/zatca_java_singleton.dart';
 import 'package:zatca_flutter/request.dart';
 import 'package:zatca_flutter/service/fatoora_service_finder.dart';
 import 'local_store.dart';
@@ -23,6 +24,7 @@ class ZatcaFlutter {
   /// It sets the mode and initializes necessary services (FatooraServiceFinder and LocalStore).
   static Future<void> _init({required Mode mode}) async {
     _setMode(mode);
+    await ZatcaJavaSingleton.init();
     await FatooraServiceFinder.instance.init();
     await LocalStore.instance.init();
   }
