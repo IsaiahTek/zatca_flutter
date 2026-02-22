@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'package:zatca_flutter/dart_java_bridge/zatca_java_queue.dart';
 import 'package:zatca_flutter/model/fatoora_invoice_hash_response.dart';
 import 'package:zatca_flutter/model/fatoora_invoice_request_api_response.dart';
 import 'package:zatca_flutter/model/fatoora_qr_code_response.dart';
@@ -43,17 +44,35 @@ class FatooraService {
       if (_fatooraPath != null) {
         String workingDirectory = await getStorageFolderPath();
 
-        String command = Platform.isWindows ? 'cmd' : _fatooraPath!;
+        // String command = Platform.isWindows ? 'cmd' : _fatooraPath!;
         List<String> compositeArgs =
             Platform.isWindows ? ['/C', _fatooraPath!, ...args] : args;
 
-        ProcessResult result = await Process.run(command, compositeArgs,
-            runInShell: true,
-            workingDirectory: workingDirectory,
-            environment: {
-              'SDK_CONFIG': _finder.sdkConfig ?? "",
-              'FATOORA_HOME': _finder.fatooraHome ?? ""
-            });
+        // ProcessResult result = await Process.run(command, compositeArgs,
+        //     runInShell: true,
+        //     workingDirectory: workingDirectory,
+        //     environment: {
+        //       'SDK_CONFIG': _finder.sdkConfig ?? "",
+        //       'FATOORA_HOME': _finder.fatooraHome ?? ""
+        //     });
+
+        final rawJson = await ZatcaJavaQueue.send({
+          "args": compositeArgs,
+          "workingDirectory": workingDirectory,
+          "environment": {
+            "SDK_CONFIG": _finder.sdkConfig ?? "",
+            "FATOORA_HOME": _finder.fatooraHome ?? ""
+          }
+        });
+
+        final decoded = jsonDecode(rawJson);
+
+        final result = ProcessResult(
+          0,
+          decoded["exitCode"] ?? 0,
+          decoded["stdout"] ?? "",
+          decoded["stderr"] ?? "",
+        );
 
         FatooraServiceResponse response =
             FatooraServiceResponseParser.extractResponses(result.stdout);
