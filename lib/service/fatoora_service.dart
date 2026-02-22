@@ -44,7 +44,7 @@ class FatooraService {
       if (_fatooraPath != null) {
         String workingDirectory = await getStorageFolderPath();
 
-        // String command = Platform.isWindows ? 'cmd' : _fatooraPath!;
+        String command = Platform.isWindows ? 'cmd' : _fatooraPath!;
         List<String> compositeArgs =
             Platform.isWindows ? ['/C', _fatooraPath!, ...args] : args;
 
@@ -57,6 +57,7 @@ class FatooraService {
         //     });
 
         final rawJson = await ZatcaJavaQueue.send({
+          "fatooraPath": command,
           "args": compositeArgs,
           "workingDirectory": workingDirectory,
           "environment": {

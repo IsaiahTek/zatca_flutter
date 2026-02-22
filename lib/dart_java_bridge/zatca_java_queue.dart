@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:flutter/material.dart';
 import 'package:zatca_flutter/dart_java_bridge/zatca_java_singleton.dart';
 
 /// This class manages a queue of requests to the Java process, ensuring that they are processed one at a time in the order they were received. It uses the
@@ -24,6 +25,7 @@ class ZatcaJavaQueue {
 
     final req = _queue.removeFirst();
     try {
+      debugPrint("Processing request: ${req.data}");
       final result = await ZatcaJavaSingleton.send(req.data);
       req.completer.complete(result);
     } catch (e) {
